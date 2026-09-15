@@ -224,8 +224,10 @@
     //   return;
     // }
 
-    const buildingRooms = allRooms.filter(r => r.Building && r.Building.trim() === selectedBuilding);
-    
+   const buildingRooms = allRooms.filter(r => {
+  if (!r.Building) return false;
+  return selectedBuilding === 'ALL' || r.Building.trim() === selectedBuilding;
+});  
     // Filter rooms based on query, or show all rooms for the building if search bar is empty
     const matches = buildingRooms.filter(r => {
       if (!cleanQuery) return true;
