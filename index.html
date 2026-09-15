@@ -97,10 +97,12 @@
 <body>
 
 <div id="controls">
-  <select id="buildingFilter">
+  <select id="buildingFilter" onchange="handleBuildingChange()">
     <option value="ALL">All Buildings</option>
   </select>
-  <input type="text" id="search" placeholder="Enter Room No..." onkeydown="handleKeyPress(event)">
+  <!-- Added list="roomSuggestions" to bind the autocomplete dropdown -->
+  <input type="text" id="search" placeholder="Enter Room No..." list="roomSuggestions" oninput="handleSearchInput(event)" onkeydown="handleKeyPress(event)" onfocus="updateRoomDropdown()">
+  <datalist id="roomSuggestions"></datalist>
   <button class="search-btn" onclick="performSearch()">Search</button>
 </div>
 
@@ -156,15 +158,61 @@
     activeMarkers = [];
   }
 
+  // Normalizes text by stripping spaces, dashes, and special characters
+  function normalizeText(text) {
+    return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+  }
+
+  // Called when building selection changes
+  function handleBuildingChange() {
+    updateRoomDropdown();
+    document.getElementById('search').value = '';
+    clearMarkers();
+  }
+
+  // Populates the <datalist> with room numbers for the selected building
+  function updateRoomDropdown() {
+    const selectedBuilding = document.getElementById('buildingFilter').value;
+    const datalist = document.getElementById('roomSuggestions');
+    datalist.innerHTML = '';
+
+    // Only populate suggestions when a specific building is selected
+    if (selectedBuilding !== 'ALL') {
+      const buildingRooms = allRooms.filter(r => r.Building && r.Building.trim() === selectedBuilding);
+      
+      buildingRooms.forEach(room => {
+        if (room.Room_Number) {
+          const option = document.createElement('option');
+          option.value = room.Room_Number;
+          if (room.Room_Name && room.Room_Name !== room.Room_Number) {
+            option.label = room.Room_Name;
+          }
+          datalist.appendChild(option);
+        }
+      });
+    }
+  }
+
+  // Triggers immediate search if user selects a suggested item from the dropdown
+  function handleSearchInput(event) {
+    const selectedBuilding = document.getElementById('buildingFilter').value;
+    const rawQuery = event.target.value.trim();
+
+    if (selectedBuilding !== 'ALL' && rawQuery) {
+      const datalist = document.getElementById('roomSuggestions');
+      const options = Array.from(datalist.options).map(opt => opt.value);
+      
+      // If the typed/clicked value exactly matches an option in the dropdown list
+      if (options.includes(rawQuery)) {
+        performSearch();
+      }
+    }
+  }
+
   function handleKeyPress(event) {
     if (event.key === 'Enter') {
       performSearch();
     }
-  }
-
-  // Helper function: Removes spaces, hyphens, special chars, and converts to lowercase
-  function normalizeText(text) {
-    return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
   }
 
   function performSearch() {
@@ -185,8 +233,6 @@
       const building = room.Building ? room.Building.trim() : '';
 
       const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
-      
-      // Matches exact normalized room number or substring
       const matchQuery = cleanRoomNum.includes(cleanQuery) || cleanRoomName.includes(cleanQuery);
 
       return matchBuilding && matchQuery;
@@ -233,6 +279,5 @@
     }
   }
 </script>
-
 </body>
 </html>
