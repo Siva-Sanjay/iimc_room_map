@@ -16,7 +16,7 @@
     * { box-sizing: border-box; }
     body, html { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100%; width: 100%; overflow: hidden; }
     
-    /* Mobile-optimized Control Box */
+    /* Control Box */
     #controls {
       position: absolute;
       top: 12px;
@@ -33,6 +33,11 @@
       align-items: center;
     }
 
+    .search-wrapper {
+      position: relative;
+      flex: 2 1 140px;
+    }
+
     input, select, button {
       padding: 10px 12px;
       border-radius: 8px;
@@ -40,15 +45,12 @@
       font-size: 14px;
       outline: none;
       -webkit-appearance: none;
+      width: 100%;
     }
 
     select {
       flex: 1 1 120px;
       background: #fff;
-    }
-
-    input {
-      flex: 2 1 140px;
     }
 
     button.search-btn {
@@ -58,10 +60,59 @@
       cursor: pointer;
       font-weight: 600;
       flex: 0 0 auto;
+      width: auto;
     }
 
     button.search-btn:active {
       background: #0056b3;
+    }
+
+    /* Google-Style Suggestions Dropdown */
+    .suggestions-box {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      margin-top: 4px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1001;
+      border: 1px solid #e0e0e0;
+      border-top: none;
+    }
+
+    .suggestion-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: #202124;
+      border-bottom: 1px solid #f1f3f4;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover, .suggestion-item.active {
+      background-color: #f8f9fa;
+    }
+
+    .suggestion-icon {
+      color: #70757a;
+      font-size: 13px;
+    }
+
+    .room-subtext {
+      margin-left: auto;
+      font-size: 12px;
+      color: #70757a;
     }
 
     #map {
@@ -69,7 +120,6 @@
       width: 100vw;
     }
 
-    /* Popup & Directions Button Styling */
     .leaflet-popup-content-wrapper {
       border-radius: 10px;
       padding: 4px;
@@ -88,10 +138,6 @@
       font-size: 13px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-
-    .directions-btn:active {
-      background-color: #1e7e34;
-    }
   </style>
 </head>
 <body>
@@ -100,9 +146,12 @@
   <select id="buildingFilter" onchange="handleBuildingChange()">
     <option value="ALL">All Buildings</option>
   </select>
-  <!-- Added list="roomSuggestions" to bind the autocomplete dropdown -->
-  <input type="text" id="search" placeholder="Enter Room No..." list="roomSuggestions" oninput="handleSearchInput(event)" onkeydown="handleKeyPress(event)" onfocus="updateRoomDropdown()">
-  <datalist id="roomSuggestions"></datalist>
+  
+  <div class="search-wrapper">
+    <input type="text" id="search" placeholder="Enter Room No..." autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
+    <div id="suggestionsBox" class="suggestions-box"></div>
+  </div>
+
   <button class="search-btn" onclick="performSearch()">Search</button>
 </div>
 
@@ -110,10 +159,7 @@
 
 <script>
   // Google Hybrid View (Satellite + Road/Building Labels)
-  const map = L.map('map', {
-    zoomControl: false
-  }).setView([22.44645, 88.30245], 19);
-
+  const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
   L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
@@ -122,13 +168,11 @@
     attribution: '&copy; Google Maps'
   }).addTo(map);
 
-  // Published Google Sheet CSV URL
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
 
   let allRooms = [];
   let activeMarkers = [];
 
-  // Parse CSV Data
   Papa.parse(sheetCsvUrl, {
     download: true,
     header: true,
@@ -158,65 +202,88 @@
     activeMarkers = [];
   }
 
-  // Normalizes text by stripping spaces, dashes, and special characters
   function normalizeText(text) {
     return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
   }
 
-  // Called when building selection changes
   function handleBuildingChange() {
-    updateRoomDropdown();
     document.getElementById('search').value = '';
+    hideSuggestions();
     clearMarkers();
   }
 
-  // Populates the <datalist> with room numbers for the selected building
-  function updateRoomDropdown() {
+  function handleSearchInput() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
-    const datalist = document.getElementById('roomSuggestions');
-    datalist.innerHTML = '';
+    const rawQuery = document.getElementById('search').value.trim();
+    const cleanQuery = normalizeText(rawQuery);
+    const box = document.getElementById('suggestionsBox');
 
-    // Only populate suggestions when a specific building is selected
-    if (selectedBuilding !== 'ALL') {
-      const buildingRooms = allRooms.filter(r => r.Building && r.Building.trim() === selectedBuilding);
-      
-      buildingRooms.forEach(room => {
-        if (room.Room_Number) {
-          const option = document.createElement('option');
-          option.value = room.Room_Number;
-          if (room.Room_Name && room.Room_Name !== room.Room_Number) {
-            option.label = room.Room_Name;
-          }
-          datalist.appendChild(option);
-        }
-      });
+    // Only show suggestions when a specific building is selected
+    if (selectedBuilding === 'ALL') {
+      hideSuggestions();
+      return;
     }
-  }
 
-  // Triggers immediate search if user selects a suggested item from the dropdown
-  function handleSearchInput(event) {
-    const selectedBuilding = document.getElementById('buildingFilter').value;
-    const rawQuery = event.target.value.trim();
+    const buildingRooms = allRooms.filter(r => r.Building && r.Building.trim() === selectedBuilding);
+    
+    // Filter rooms based on query, or show all rooms if empty
+    const matches = buildingRooms.filter(r => {
+      if (!cleanQuery) return true;
+      const roomNum = normalizeText(r.Room_Number);
+      const roomName = normalizeText(r.Room_Name);
+      return roomNum.includes(cleanQuery) || roomName.includes(cleanQuery);
+    });
 
-    if (selectedBuilding !== 'ALL' && rawQuery) {
-      const datalist = document.getElementById('roomSuggestions');
-      const options = Array.from(datalist.options).map(opt => opt.value);
+    if (matches.length === 0) {
+      hideSuggestions();
+      return;
+    }
+
+    box.innerHTML = '';
+    matches.forEach(room => {
+      const item = document.createElement('div');
+      item.className = 'suggestion-item';
+      item.innerHTML = `
+        <span class="suggestion-icon">🔍</span>
+        <span><b>${room.Room_Number}</b></span>
+        ${room.Room_Name && room.Room_Name !== room.Room_Number ? `<span class="room-subtext">${room.Room_Name}</span>` : ''}
+      `;
       
-      // If the typed/clicked value exactly matches an option in the dropdown list
-      if (options.includes(rawQuery)) {
+      // Select option on click/tap
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        document.getElementById('search').value = room.Room_Number;
+        hideSuggestions();
         performSearch();
-      }
-    }
+      });
+
+      box.appendChild(item);
+    });
+
+    box.style.display = 'block';
   }
+
+  function hideSuggestions() {
+    document.getElementById('suggestionsBox').style.display = 'none';
+  }
+
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrapper')) {
+      hideSuggestions();
+    }
+  });
 
   function handleKeyPress(event) {
     if (event.key === 'Enter') {
+      hideSuggestions();
       performSearch();
     }
   }
 
   function performSearch() {
     clearMarkers();
+    hideSuggestions();
 
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
@@ -279,5 +346,6 @@
     }
   }
 </script>
+
 </body>
 </html>
