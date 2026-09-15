@@ -219,10 +219,10 @@
     const box = document.getElementById('suggestionsBox');
 
     // Only show suggestions when a specific building is selected
-    if (selectedBuilding === 'ALL') {
-      hideSuggestions();
-      return;
-    }
+    // if (selectedBuilding === 'ALL') {
+    //   hideSuggestions();
+    //   return;
+    // }
 
     const buildingRooms = allRooms.filter(r => r.Building && r.Building.trim() === selectedBuilding);
     
@@ -244,9 +244,9 @@
       const item = document.createElement('div');
       item.className = 'suggestion-item';
       item.innerHTML = `
-        <span class="suggestion-icon">🔍</span>
+        <span class="suggestion-icon"> </span>
         <span><b>${room.Room_Number}</b></span>
-        ${room.Room_Name && room.Room_Name !== room.Room_Number ? `<span class="room-subtext">${room.Room_Name}</span>` : ''}
+        ${ `<span class="room-subtext">${r.Building.trim()}</span>` }
       `;
       
       // Select option on click/tap
