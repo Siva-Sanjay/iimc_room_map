@@ -109,10 +109,9 @@
 <script>
   // Google Hybrid View (Satellite + Road/Building Labels)
   const map = L.map('map', {
-    zoomControl: false // Prevents zoom buttons from obstructing controls on small mobile screens
+    zoomControl: false
   }).setView([22.44645, 88.30245], 19);
 
-  // Position zoom controls in bottom-right for thumb accessibility on phones
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
   L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
@@ -163,24 +162,32 @@
     }
   }
 
+  // Helper function: Removes spaces, hyphens, special chars, and converts to lowercase
+  function normalizeText(text) {
+    return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+  }
+
   function performSearch() {
     clearMarkers();
 
-    const query = document.getElementById('search').value.trim().toLowerCase();
+    const rawQuery = document.getElementById('search').value.trim();
+    const cleanQuery = normalizeText(rawQuery);
     const selectedBuilding = document.getElementById('buildingFilter').value;
 
-    if (!query) {
+    if (!cleanQuery) {
       alert("Please enter a room number.");
       return;
     }
 
     const filtered = allRooms.filter(room => {
-      const roomNum = room.Room_Number ? room.Room_Number.toString().trim().toLowerCase() : '';
-      const roomName = room.Room_Name ? room.Room_Name.toString().trim().toLowerCase() : '';
+      const cleanRoomNum = normalizeText(room.Room_Number);
+      const cleanRoomName = normalizeText(room.Room_Name);
       const building = room.Building ? room.Building.trim() : '';
 
       const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
-      const matchQuery = roomNum === query || roomNum.includes(query) || roomName.includes(query);
+      
+      // Matches exact normalized room number or substring
+      const matchQuery = cleanRoomNum.includes(cleanQuery) || cleanRoomName.includes(cleanQuery);
 
       return matchBuilding && matchQuery;
     });
@@ -197,7 +204,6 @@
       const lng = parseFloat(room.Longitude);
 
       if (!isNaN(lat) && !isNaN(lng)) {
-        // Universal Google Maps navigation URL using destination coordinates
         const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
 
         const marker = L.marker([lat, lng])
@@ -219,7 +225,6 @@
       }
     });
 
-    // Auto-zoom map to searched room
     if (bounds.length === 1) {
       map.flyTo(bounds[0], 21);
       if (activeMarkers[0]) activeMarkers[0].openPopup();
