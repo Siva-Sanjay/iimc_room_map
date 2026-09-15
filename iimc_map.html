@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Room Map</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Leaflet JS & PapaParse -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body, html { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100%; }
+    
+    #controls {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 12px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      max-width: 90vw;
+    }
+
+    input, select {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+
+    #map {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="controls">
+  <select id="buildingFilter" onchange="filterMap()">
+    <option value="ALL">All Buildings</option>
+  </select>
+  <input type="text" id="search" placeholder="Search Room Number (e.g. 101)..." oninput="filterMap()">
+</div>
+
+<div id="map"></div>
+
+<script>
+  // Google Hybrid View (Satellite + Road/Building Labels)
+  const map = L.map('map').setView([22.44645, 88.30245], 19);
+
+  L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+    maxZoom: 21,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '&copy; Google Maps'
+  }).addTo(map);
+
+  // Your Published Google Sheet CSV URL
+  const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
+
+  let allRooms = [];
+  let markers = [];
+
+  // Parse CSV Data
+  Papa.parse(sheetCsvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      allRooms = results.data;
+      populateBuildingDropdown();
+      renderMarkers(allRooms);
+    }
+  });
+
+  function populateBuildingDropdown() {
+    const select = document.getElementById('buildingFilter');
+    select.innerHTML = '<option value="ALL">All Buildings</option>';
+
+    const buildings = [...new Set(allRooms.map(r => r.Building ? r.Building.trim() : '').filter(Boolean))];
+    buildings.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b;
+      opt.textContent = b;
+      select.appendChild(opt);
+    });
+  }
+
+  function renderMarkers(roomsToDisplay) {
+    // Clear previous markers
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+
+    const bounds = [];
+
+    roomsToDisplay.forEach(room => {
+      const lat = parseFloat(room.Latitude);
+      const lng = parseFloat(room.Longitude);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const marker = L.marker([lat, lng])
+          .bindPopup(`
+            <div style="line-height: 1.5;">
+              <h3 style="margin: 0 0 6px 0; color: #007bff;">${room.Room_Name || 'Room'}</h3>
+              <b>Building:</b> ${room.Building}<br>
+              <b>Floor:</b> Level ${room.Floor}<br>
+              <b>Room No:</b> ${room.Room_Number}
+            </div>
+          `);
+
+        marker.addTo(map);
+        markers.push(marker);
+        bounds.push([lat, lng]);
+      }
+    });
+
+    // Auto-zoom map based on filtered results
+    if (bounds.length === 1) {
+      map.flyTo(bounds[0], 21);
+      if (markers[0]) markers[0].openPopup();
+    } else if (bounds.length > 1) {
+      map.fitBounds(bounds, { padding: [80, 80] });
+    }
+  }
+
+  function filterMap() {
+    const query = document.getElementById('search').value.trim().toLowerCase();
+    const selectedBuilding = document.getElementById('buildingFilter').value;
+
+    const filtered = allRooms.filter(room => {
+      const roomNum = room.Room_Number ? room.Room_Number.toString().trim().toLowerCase() : '';
+      const roomName = room.Room_Name ? room.Room_Name.toString().trim().toLowerCase() : '';
+      const building = room.Building ? room.Building.trim() : '';
+
+      const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
+      const matchQuery = !query || roomNum.includes(query) || roomName.includes(query);
+
+      return matchBuilding && matchQuery;
+    });
+
+    renderMarkers(filtered);
+  }
+</script>
+
+</body>
+</html>
