@@ -246,8 +246,8 @@
       item.innerHTML = `
         <span class="suggestion-icon"> </span>
         <span><b>${room.Room_Number}</b></span>
-        ${ `<span class="room-subtext">${room.Building.trim()}</span>` }
-      `;
+       ${buildingName ? `<span class="room-subtext">${buildingName}</span>` : ''}     
+       `;
       
       // Select option on click/tap
       item.addEventListener('mousedown', (e) => {
