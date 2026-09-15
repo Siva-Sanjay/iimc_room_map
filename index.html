@@ -212,13 +212,13 @@
     clearMarkers();
   }
 
-  function handleSearchInput() {
+ function handleSearchInput() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
     const box = document.getElementById('suggestionsBox');
 
-    // Only show suggestions when a specific building is selected
+    // // Only show suggestions when a specific building is selected
     // if (selectedBuilding === 'ALL') {
     //   hideSuggestions();
     //   return;
@@ -226,7 +226,7 @@
 
     const buildingRooms = allRooms.filter(r => r.Building && r.Building.trim() === selectedBuilding);
     
-    // Filter rooms based on query, or show all rooms if empty
+    // Filter rooms based on query, or show all rooms for the building if search bar is empty
     const matches = buildingRooms.filter(r => {
       if (!cleanQuery) return true;
       const roomNum = normalizeText(r.Room_Number);
@@ -243,11 +243,14 @@
     matches.forEach(room => {
       const item = document.createElement('div');
       item.className = 'suggestion-item';
+      
+      const buildingName = room.Building ? room.Building.trim() : '';
+
       item.innerHTML = `
-        <span class="suggestion-icon"> </span>
+       
         <span><b>${room.Room_Number}</b></span>
-       ${buildingName ? `<span class="room-subtext">${buildingName}</span>` : ''}     
-       `;
+        ${buildingName ? `<span class="room-subtext">${buildingName}</span>` : ''}
+      `;
       
       // Select option on click/tap
       item.addEventListener('mousedown', (e) => {
@@ -262,7 +265,6 @@
 
     box.style.display = 'block';
   }
-
   function hideSuggestions() {
     document.getElementById('suggestionsBox').style.display = 'none';
   }
