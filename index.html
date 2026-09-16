@@ -38,15 +38,18 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       display: flex;
-      flex-direction: column;
-      gap: 8px; /* Compact gap prevents vertical stretching */
+      flex-direction: row; /* Horizontal alignment */
+      flex-wrap: wrap;    /* Wraps gracefully on mobile screens */
+      gap: 8px;
       width: calc(100% - 24px);
-      max-width: 420px;
+      max-width: 500px;
+      align-items: center;
       backdrop-filter: blur(4px);
     }
 
-    /* Header Branding Styles */
+    /* Header Branding Styles - spans full width above inputs */
     .header-branding {
+      flex: 1 1 100%;
       display: flex;
       flex-direction: column;
       align-items: flex-start;
@@ -71,7 +74,7 @@
 
     .author-tag {
       font-size: 11px;
-      color: #70757a; /* Clean muted grey */
+      color: #70757a;
       margin: 2px 0 0 0;
       font-weight: 400;
     }
@@ -86,44 +89,58 @@
       color: #1a73e8;
     }
 
-    /* Input & Select Box Dimensions */
+    /* Shared dimensions for form controls */
     input, select {
-      height: 38px; /* Fixed height stops dropdown expansion */
-      padding: 0 12px;
+      height: 38px;
+      padding: 0 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 14px;
       outline: none;
       -webkit-appearance: none;
       appearance: none;
-      width: 100%;
       background: #ffffff;
       box-sizing: border-box;
     }
 
-    select {
+    /* Dropdown Flex Sizing */
+    select#buildingFilter {
+      flex: 1 1 120px;
+      min-width: 110px;
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%3c70757a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat;
-      background-position: right 10px center;
+      background-position: right 8px center;
       background-size: 14px;
-      padding-right: 30px;
+      padding-right: 26px;
     }
 
+    /* Search Input Wrapper Flex Sizing */
     .search-wrapper {
       position: relative;
+      flex: 2 1 150px;
+      min-width: 130px;
+    }
+
+    .search-wrapper input {
       width: 100%;
     }
 
+    /* Compact Magnifying Glass Search Button */
     button.search-btn {
       height: 38px;
-      width: 100%;
+      width: 38px;
+      min-width: 38px;
+      flex: 0 0 38px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: #007bff;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
+      font-size: 16px;
       transition: background 0.2s ease;
     }
 
@@ -131,7 +148,7 @@
       background: #0056b3;
     }
 
-    /* Google-Style Suggestions Dropdown */
+    /* Suggestions Dropdown */
     .suggestions-box {
       position: absolute;
       top: 100%;
@@ -168,11 +185,6 @@
       background-color: #f8f9fa;
     }
 
-    .suggestion-icon {
-      color: #70757a;
-      font-size: 13px;
-    }
-
     .room-subtext {
       margin-left: auto;
       font-size: 12px;
@@ -185,7 +197,6 @@
       width: 100vw;
     }
 
-    /* Prevent Leaflet image tiles from dragging */
     .leaflet-container img {
       -webkit-user-drag: none !important;
       user-drag: none !important;
@@ -231,7 +242,7 @@
     <div id="suggestionsBox" class="suggestions-box"></div>
   </div>
 
-  <button class="search-btn" onclick="performSearch()">Search</button>
+ <button class="search-btn" onclick="performSearch()">🔍</button>
 </div>
 
 <div id="map"></div>
