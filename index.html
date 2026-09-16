@@ -238,14 +238,15 @@
       if (buildingPoints.length > 0) {
         const bounds = L.latLngBounds(buildingPoints);
 
-        if (selectedBuilding === "ALL") {
-          map.fitBounds(bounds, { padding: [40, 40] });
-        } else {
-          map.fitBounds(bounds, {
-            padding: [30, 30],
-            maxZoom: 19 // Comfort level max-zoom for single-point buildings
-          });
-        }
+      const flyOptions = {
+          padding: selectedBuilding === "ALL" ? [40, 40] : [30, 30],
+          maxZoom: 19,
+          duration: 1.5, // Animation duration in seconds (adjust to speed up/slow down)
+          easeLinearity: 0.25 // Smooth curve transition
+        };
+
+        // Smoothly slide/fly to the bounding box
+        map.flyToBounds(bounds, flyOptions);
       }
     }
   });
