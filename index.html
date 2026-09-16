@@ -207,9 +207,35 @@
   }
 
   function handleBuildingChange() {
-    document.getElementById('search').value = '';
-    hideSuggestions();
-    clearMarkers();
+    // document.getElementById('search').value = '';
+    // hideSuggestions();
+    // clearMarkers();
+
+    const selectedBuilding = document.getElementById('buildingFilter').value;
+
+  // Filter markers/rooms based on selection
+  const matchingRooms = allRoomsData.filter(room => {
+    return selectedBuilding === "ALL" || room.building === selectedBuilding;
+  });
+
+  // Extract coordinates [lat, lng] for matching rooms
+  const points = matchingRooms.map(room => [room.latitude, room.longitude]);
+
+  if (points.length > 0) {
+    if (selectedBuilding === "ALL") {
+      // If "ALL" is selected, fit bounds to encompass all rooms on campus
+      const allBounds = L.latLngBounds(points);
+      map.fitBounds(allBounds, { padding: [40, 40] });
+    } else {
+      // Fit bounds specifically around the selected building's room markers
+      const buildingBounds = L.latLngBounds(points);
+      map.fitBounds(buildingBounds, {
+        padding: [30, 30],
+        maxZoom: 19 // Keeps zoom level comfortable if a building has only 1 point
+      });
+    }
+  }
+    
   }
 
  function handleSearchInput() {
@@ -328,7 +354,7 @@
             <div style="line-height: 1.4; font-size: 14px;">
               <h3 style="margin: 0 0 6px 0; color: #007bff; font-size: 16px;">${room.Room_Name || 'Room'}</h3>
               <b>Building:</b> ${room.Building}<br>
-              <b>Floor:</b> Level ${room.Floor}<br>
+              <b>Floor:</b>  ${room.Floor}<br>
               <b>Room No:</b> ${room.Room_Number}<br>
               <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
                 🧭 Get Directions
