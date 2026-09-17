@@ -416,7 +416,8 @@
       // Select option on click/tap
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        document.getElementById('search').value = room.Room_Number;
+        const searchInput = document.getElementById('search'); // Fixed variable declaration
+      
         searchInput.blur();
         hideSuggestions();
         performSearch();
