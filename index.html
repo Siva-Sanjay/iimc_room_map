@@ -288,12 +288,13 @@
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
-    maxZoom: 21,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: '&copy; Google Maps'
-  }).addTo(map);
-
+ // Google Hybrid without POI markers/icons
+L.tileLayer('https://{s}.google.com/vt/lyrs=s,h&style=s.t:3|s.e:l|p.v:off&x={x}&y={y}&z={z}', {
+  maxZoom: 21,
+  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+  attribution: '&copy; Google Maps'
+}).addTo(map);
+  
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
 
   let allRooms = [];
