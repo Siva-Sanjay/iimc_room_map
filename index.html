@@ -503,6 +503,11 @@
             </div>
           `);
 
+        // FIX: Re-open popup whenever the marker icon is clicked/tapped
+        marker.on('click', () => {
+          marker.openPopup();
+        });
+
         marker.addTo(map);
         activeMarkers.push(marker);
         bounds.push([lat, lng]);
