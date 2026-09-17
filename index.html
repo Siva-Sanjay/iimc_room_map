@@ -446,7 +446,7 @@
     }
   }
 
-  function performSearch() {
+ function performSearch() {
     // Unfocus text field to dismiss mobile keyboard
     const searchInput = document.getElementById('search');
     if (searchInput) {
@@ -489,23 +489,30 @@
 
       if (!isNaN(lat) && !isNaN(lng)) {
         const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
+        
+        // Extract room number safely
+        const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
 
-        const marker = L.marker([lat, lng])
+        // Added { interactive: true } to force clickability on touch/desktop
+        const marker = L.marker([lat, lng], { interactive: true })
           .bindPopup(`
             <div style="line-height: 1.4; font-size: 14px;">
               <h3 style="margin: 0 0 6px 0; color: #007bff; font-size: 16px;">${room.Room_Name || 'Room'}</h3>
               <b>Building:</b> ${room.Building}<br>
               <b>Floor:</b>  ${room.Floor}<br>
-              <b>Room No:</b> ${room.Room_Number}<br>
+              <b>Room No:</b> ${roomNo}<br>
               <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
                 🧭 Get Directions
               </a>
             </div>
           `);
 
-        // FIX: Re-open popup whenever the marker icon is clicked/tapped
-        marker.on('click', () => {
-          marker.openPopup();
+        // Stops map tile tap events from swallowing marker click events
+        marker.on('click', function(e) {
+          if (L.DomEvent && L.DomEvent.stopPropagation) {
+            L.DomEvent.stopPropagation(e);
+          }
+          this.openPopup();
         });
 
         marker.addTo(map);
