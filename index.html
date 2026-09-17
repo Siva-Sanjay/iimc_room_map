@@ -246,6 +246,19 @@
       box-sizing: border-box;
       cursor: pointer;
     }
+
+    /* Allow clicks on map markers while preventing unwanted dragging */
+.leaflet-container img {
+  -webkit-user-drag: none !important;
+  user-drag: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+/* Explicitly enable pointer events for map marker pins */
+.leaflet-marker-icon {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
   </style>
 </head>
 <body>
@@ -452,7 +465,7 @@ function performSearch() {
     if (searchInput) {
       searchInput.blur();
     }
-    
+
     clearMarkers();
     hideSuggestions();
 
@@ -489,15 +502,10 @@ function performSearch() {
 
       if (!isNaN(lat) && !isNaN(lng)) {
         const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
-        
-        // Extract room number safely
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
 
-        // Added interactive options & autoPan false to keep focus
-        const marker = L.marker([lat, lng], { 
-          interactive: true,
-          riseOnHover: true 
-        });
+        // Initialize interactive marker
+        const marker = L.marker([lat, lng], { interactive: true });
 
         const popupContent = `
           <div style="line-height: 1.4; font-size: 14px;">
@@ -511,24 +519,10 @@ function performSearch() {
           </div>
         `;
 
-        marker.bindPopup(popupContent, { autoPan: false });
-
-        // Ensure marker click explicitly opens the popup if closed
-        marker.on('click', function(e) {
-          L.DomEvent.stopPropagation(e);
-          if (!this.isPopupOpen()) {
-            this.openPopup();
-          }
-        });
+        // Bind popup directly to Leaflet's built-in click listener
+        marker.bindPopup(popupContent, { autoPan: true });
 
         marker.addTo(map);
-
-        // Force CSS pointer events on the marker element once rendered on map
-        if (marker._icon) {
-          marker._icon.style.pointerEvents = 'auto';
-          marker._icon.style.cursor = 'pointer';
-        }
-
         activeMarkers.push(marker);
         bounds.push([lat, lng]);
       }
