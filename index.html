@@ -198,13 +198,18 @@
       -webkit-user-drag: none !important;
       user-drag: none !important;
       -webkit-touch-callout: none !important;
-      pointer-events: none !important;
     }
 
     .leaflet-popup-content-wrapper {
       border-radius: 10px;
       padding: 4px;
     }
+
+/* Explicitly enable pointer events for map marker pins */
+.leaflet-marker-icon {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
 
     .directions-btn {
       display: inline-block;
@@ -247,18 +252,7 @@
       cursor: pointer;
     }
 
-    /* Allow clicks on map markers while preventing unwanted dragging */
-.leaflet-container img {
-  -webkit-user-drag: none !important;
-  user-drag: none !important;
-  -webkit-touch-callout: none !important;
-}
 
-/* Explicitly enable pointer events for map marker pins */
-.leaflet-marker-icon {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
   </style>
 </head>
 <body>
