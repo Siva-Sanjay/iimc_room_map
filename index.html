@@ -446,7 +446,7 @@
     }
   }
 
- function performSearch() {
+function performSearch() {
     // Unfocus text field to dismiss mobile keyboard
     const searchInput = document.getElementById('search');
     if (searchInput) {
@@ -493,29 +493,42 @@
         // Extract room number safely
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
 
-        // Added { interactive: true } to force clickability on touch/desktop
-        const marker = L.marker([lat, lng], { interactive: true })
-          .bindPopup(`
-            <div style="line-height: 1.4; font-size: 14px;">
-              <h3 style="margin: 0 0 6px 0; color: #007bff; font-size: 16px;">${room.Room_Name || 'Room'}</h3>
-              <b>Building:</b> ${room.Building}<br>
-              <b>Floor:</b>  ${room.Floor}<br>
-              <b>Room No:</b> ${roomNo}<br>
-              <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
-                🧭 Get Directions
-              </a>
-            </div>
-          `);
+        // Added interactive options & autoPan false to keep focus
+        const marker = L.marker([lat, lng], { 
+          interactive: true,
+          riseOnHover: true 
+        });
 
-        // Stops map tile tap events from swallowing marker click events
+        const popupContent = `
+          <div style="line-height: 1.4; font-size: 14px;">
+            <h3 style="margin: 0 0 6px 0; color: #4d1a22; font-size: 16px;">${room.Room_Name || 'Room'}</h3>
+            <b>Building:</b> ${room.Building}<br>
+            <b>Floor:</b>  ${room.Floor}<br>
+            <b>Room No:</b> ${roomNo}<br>
+            <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
+              🧭 Get Directions
+            </a>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent, { autoPan: false });
+
+        // Ensure marker click explicitly opens the popup if closed
         marker.on('click', function(e) {
-          if (L.DomEvent && L.DomEvent.stopPropagation) {
-            L.DomEvent.stopPropagation(e);
+          L.DomEvent.stopPropagation(e);
+          if (!this.isPopupOpen()) {
+            this.openPopup();
           }
-          this.openPopup();
         });
 
         marker.addTo(map);
+
+        // Force CSS pointer events on the marker element once rendered on map
+        if (marker._icon) {
+          marker._icon.style.pointerEvents = 'auto';
+          marker._icon.style.cursor = 'pointer';
+        }
+
         activeMarkers.push(marker);
         bounds.push([lat, lng]);
       }
