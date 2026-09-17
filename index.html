@@ -417,7 +417,7 @@
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         const searchInput = document.getElementById('search'); // Fixed variable declaration
-      
+        searchInput.value = room.Room_Number;
         searchInput.blur();
         hideSuggestions();
         performSearch();
