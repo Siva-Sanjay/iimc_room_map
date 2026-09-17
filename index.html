@@ -285,33 +285,26 @@
 
 <script>
   // Google Hybrid View (Satellite + Road/Building Labels)
-  const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
 
- // Google Hybrid without POI markers/icons
-// Clean Satellite + Custom Roadmap without POI icons/labels
+// 1. Pure Satellite Base (No labels, no white overlay)
 const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
   maxZoom: 21,
   subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
   attribution: '&copy; Google Maps'
 });
 
-const googleLabelsNoPOI = L.tileLayer(
-  'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&style=' +
-  's.t:3|p.v:off,' +                 // Turn off ALL Point of Interest icons/text
-  's.t:1|s.e:l|p.v:on,' +             // Keep Administrative/Area labels
-  's.t:2|s.e:g|p.v:on',               // Keep Landscape/Road labels
-  {
-    maxZoom: 21,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: '&copy; Google Maps',
-    opacity: 0.8
-  }
-);
+// 2. Transparent Hybrid Overlay (Roads & Area Names only, POI icons hidden)
+const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
+  maxZoom: 21,
+  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+  attribution: '&copy; Google Maps'
+});
 
-// Add both layers as a grouped base to the map
+// Add both clean layers to the map
 googleSat.addTo(map);
-googleLabelsNoPOI.addTo(map);
+googleHybridNoPOI.addTo(map);
   
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
 
