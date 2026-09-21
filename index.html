@@ -3,14 +3,20 @@
 <head>
   <meta charset="utf-8" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  
   <!-- Open Graph / WhatsApp Link Preview -->
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://joka-compass.vercel.app/" />
-<meta property="og:title" content="Joka Compass" />
-<meta property="og:description" content="Campus Room Map & Navigation for IIM Calcutta" />
-<meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/9413/9413624.png" />
-<meta property="og:image:type" content="image/png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://joka-compass.vercel.app/" />
+  <meta property="og:title" content="Joka Compass" />
+  <meta property="og:description" content="Campus Room Map & Navigation for IIM Calcutta" />
+  <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/7/7e/Compass_rose_transparent.png" />
+  <meta property="og:image:type" content="image/png" />
 
+  <!-- Twitter / X Link Preview -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Joka Compass" />
+  <meta name="twitter:description" content="Campus Room Map & Navigation for IIM Calcutta" />
+  <meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/7/7e/Compass_rose_transparent.png" />
 
   <title>Joka Compass</title>
 
@@ -25,8 +31,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
   <!-- Vercel Web Analytics for Vanilla HTML -->
-<script defer src="/_vercel/insights/script.js"></script>
-
+  <script defer src="/_vercel/insights/script.js"></script>
 
   <style>
     * { 
@@ -75,7 +80,7 @@
     .header-branding h1 {
       font-size: 20px;
       font-weight: 700;
-      color: #4d1a22;;
+      color: #4d1a22;
       margin: 0;
       display: flex;
       align-items: center;
@@ -119,7 +124,6 @@
       box-sizing: border-box;
     }
 
-   
     /* Search Input Wrapper Flex Sizing */
     .search-wrapper {
       position: relative;
@@ -141,7 +145,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background:#4d1a22;;
+      background: #4d1a22;
       color: white;
       border: none;
       border-radius: 8px;
@@ -214,11 +218,11 @@
       padding: 4px;
     }
 
-/* Explicitly enable pointer events for map marker pins */
-.leaflet-marker-icon {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
+    /* Explicitly enable pointer events for map marker pins */
+    .leaflet-marker-icon {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
 
     .directions-btn {
       display: inline-block;
@@ -235,24 +239,19 @@
     }
 
     /* Dropdown Styling with Down Arrow Chevron */
-   /* Dropdown Styling with Down Arrow Chevron */
     select#buildingFilter {
       flex: 1 1 120px;
       min-width: 110px;
       height: 38px;
-      padding: 0 28px 0 10px; /* Extra right padding so text doesn't overlap arrow */
+      padding: 0 28px 0 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 14px;
       outline: none;
-      
-      /* Force browser to override native dropdown arrow */
       -webkit-appearance: none !important;
       -moz-appearance: none !important;
       appearance: none !important;
-      
       background-color: #ffffff;
-      /* Clean SVG Chevron Arrow */
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2370757a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
       background-repeat: no-repeat !important;
       background-position: right 8px center !important;
@@ -260,8 +259,6 @@
       box-sizing: border-box;
       cursor: pointer;
     }
-
-
   </style>
 </head>
 <body>
@@ -282,38 +279,38 @@
     <div id="suggestionsBox" class="suggestions-box"></div>
   </div>
 
-<button class="search-btn" onclick="performSearch()" aria-label="Search">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-</button>
+  <button class="search-btn" onclick="performSearch()" aria-label="Search">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+  </button>
 </div>
 
 <div id="map"></div>
 
 <script>
-  // Google Hybrid View (Satellite + Road/Building Labels)
-   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
-L.control.zoom({ position: 'bottomright' }).addTo(map);
+  // Initialize Leaflet Map
+  const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-// 1. Pure Satellite Base (No labels, no white overlay)
-const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-  maxZoom: 21,
-  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-  attribution: '&copy; Google Maps'
-});
+  // 1. Pure Satellite Base (No labels, no white overlay)
+  const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    maxZoom: 21,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '&copy; Google Maps'
+  });
 
-// 2. Transparent Hybrid Overlay (Roads & Area Names only, POI icons hidden)
-const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
-  maxZoom: 21,
-  subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-  attribution: '&copy; Google Maps'
-});
+  // 2. Transparent Hybrid Overlay (Roads & Area Names only, POI icons hidden)
+  const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
+    maxZoom: 21,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '&copy; Google Maps'
+  });
 
-// Add both clean layers to the map
-googleSat.addTo(map);
-googleHybridNoPOI.addTo(map);
+  // Add clean map layers
+  googleSat.addTo(map);
+  googleHybridNoPOI.addTo(map);
   
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
 
@@ -328,6 +325,7 @@ googleHybridNoPOI.addTo(map);
       allRooms = results.data;
       populateBuildingDropdown();
       clearMarkers();
+      checkUrlSearchParam(); // Process shared URL parameter on load
     }
   });
 
@@ -353,74 +351,79 @@ googleHybridNoPOI.addTo(map);
     return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
   }
 
- function handleBuildingChange() {
-  const selectedBuilding = document.getElementById('buildingFilter').value;
+  // Reset browser address bar back to clean homepage URL
+  function resetUrlToHome() {
+    const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+  }
 
-  // Don't do anything if no specific building or default option is selected
-  if (!selectedBuilding || selectedBuilding === "") return;
+  // Check and execute search if ?room= exists in URL on initial page load
+  function checkUrlSearchParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomParam = urlParams.get('room');
 
-  const freshCsvUrl = sheetCsvUrl + '&t=' + new Date().getTime();
-  const buildingPoints = [];
-
-  Papa.parse(freshCsvUrl, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    // Step executes row-by-row, keeping memory footprint minimal
-    step: function(row) {
-      const room = row.data;
-      
-      // Check if current row matches the selected building (or ALL)
-      if (selectedBuilding === "ALL" || room.Building === selectedBuilding) {
-        const lat = parseFloat(room.Latitude);
-        const lng = parseFloat(room.Longitude);
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-          buildingPoints.push([lat, lng]);
-        }
-      }
-    },
-    complete: function() {
-      // Once CSV reading finishes, calculate bounds directly from collected points
-      if (buildingPoints.length > 0) {
-        const bounds = L.latLngBounds(buildingPoints);
-
-      const flyOptions = {
-          padding: selectedBuilding === "ALL" ? [40, 40] : [30, 30],
-          maxZoom: 19,
-          duration: 1.5, // Animation duration in seconds (adjust to speed up/slow down)
-          easeLinearity: 0.25 // Smooth curve transition
-        };
-
-        // Smoothly slide/fly to the bounding box
-        map.flyToBounds(bounds, flyOptions);
+    if (roomParam) {
+      const searchInput = document.getElementById('search');
+      if (searchInput) {
+        searchInput.value = roomParam;
+        performSearch(true);
       }
     }
-  });
-}
+  }
 
- function handleSearchInput() {
+  function handleBuildingChange() {
+    const selectedBuilding = document.getElementById('buildingFilter').value;
+    if (!selectedBuilding || selectedBuilding === "") return;
+
+    const freshCsvUrl = sheetCsvUrl + '&t=' + new Date().getTime();
+    const buildingPoints = [];
+
+    Papa.parse(freshCsvUrl, {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      step: function(row) {
+        const room = row.data;
+        if (selectedBuilding === "ALL" || room.Building === selectedBuilding) {
+          const lat = parseFloat(room.Latitude);
+          const lng = parseFloat(room.Longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            buildingPoints.push([lat, lng]);
+          }
+        }
+      },
+      complete: function() {
+        if (buildingPoints.length > 0) {
+          const bounds = L.latLngBounds(buildingPoints);
+          const flyOptions = {
+            padding: selectedBuilding === "ALL" ? [40, 40] : [30, 30],
+            maxZoom: 19,
+            duration: 1.5,
+            easeLinearity: 0.25
+          };
+          map.flyToBounds(bounds, flyOptions);
+        }
+      }
+    });
+  }
+
+  function handleSearchInput() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
     const box = document.getElementById('suggestionsBox');
 
-    // // Only show suggestions when a specific building is selected
-    // if (selectedBuilding === 'ALL') {
-    //   hideSuggestions();
-    //   return;
-    // }
+    const buildingRooms = allRooms.filter(r => {
+      if (!r.Building) return false;
+      return selectedBuilding === 'ALL' || r.Building.trim() === selectedBuilding;
+    });  
 
-   const buildingRooms = allRooms.filter(r => {
-  if (!r.Building) return false;
-  return selectedBuilding === 'ALL' || r.Building.trim() === selectedBuilding;
-});  
-    // Filter rooms based on query, or show all rooms for the building if search bar is empty
     const matches = buildingRooms.filter(r => {
       if (!cleanQuery) return true;
-      const roomNum = normalizeText(r.Room_Number);
+      const roomNum = normalizeText(r.Room_Number || r['Room Number']);
       const roomName = normalizeText(r.Room_Name);
-      return roomNum.includes(cleanQuery) || roomName.includes(cleanQuery);
+      const roomId = normalizeText(r.Room_ID);
+      return roomNum.includes(cleanQuery) || roomName.includes(cleanQuery) || roomId.includes(cleanQuery);
     });
 
     if (matches.length === 0) {
@@ -434,18 +437,17 @@ googleHybridNoPOI.addTo(map);
       item.className = 'suggestion-item';
       
       const buildingName = room.Building ? room.Building.trim() : '';
+      const displayRoomNum = room.Room_Number || room['Room Number'] || room.Room_ID || '';
 
       item.innerHTML = `
-       
-        <span><b>${room.Room_Number}</b></span>
+        <span><b>${displayRoomNum}</b></span>
         ${buildingName ? `<span class="room-subtext">${buildingName}</span>` : ''}
       `;
       
-      // Select option on click/tap
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
-        const searchInput = document.getElementById('search'); // Fixed variable declaration
-        searchInput.value = room.Room_Number;
+        const searchInput = document.getElementById('search');
+        searchInput.value = room.Room_ID || displayRoomNum;
         searchInput.blur();
         hideSuggestions();
         performSearch();
@@ -456,11 +458,11 @@ googleHybridNoPOI.addTo(map);
 
     box.style.display = 'block';
   }
+
   function hideSuggestions() {
     document.getElementById('suggestionsBox').style.display = 'none';
   }
 
-  // Hide suggestions when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrapper')) {
       hideSuggestions();
@@ -474,8 +476,7 @@ googleHybridNoPOI.addTo(map);
     }
   }
 
-function performSearch() {
-    // Unfocus text field to dismiss mobile keyboard
+  function performSearch(fromUrl = false) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
       searchInput.blur();
@@ -490,22 +491,25 @@ function performSearch() {
 
     if (!cleanQuery) {
       alert("Please enter a room number.");
+      resetUrlToHome();
       return;
     }
 
     const filtered = allRooms.filter(room => {
-      const cleanRoomNum = normalizeText(room.Room_Number);
+      const cleanRoomNum = normalizeText(room.Room_Number || room['Room Number']);
       const cleanRoomName = normalizeText(room.Room_Name);
+      const cleanRoomId = normalizeText(room.Room_ID);
       const building = room.Building ? room.Building.trim() : '';
 
       const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
-      const matchQuery = cleanRoomNum.includes(cleanQuery) || cleanRoomName.includes(cleanQuery);
+      const matchQuery = cleanRoomNum.includes(cleanQuery) || cleanRoomName.includes(cleanQuery) || cleanRoomId === cleanQuery;
 
       return matchBuilding && matchQuery;
     });
 
     if (filtered.length === 0) {
       alert("No matching room found.");
+      resetUrlToHome();
       return;
     }
 
@@ -519,14 +523,13 @@ function performSearch() {
         const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
 
-        // Initialize interactive marker
         const marker = L.marker([lat, lng], { interactive: true });
 
         const popupContent = `
           <div style="line-height: 1.4; font-size: 14px;">
             <h3 style="margin: 0 0 6px 0; color: #4d1a22; font-size: 16px;">${room.Room_Name || 'Room'}</h3>
             <b>Building:</b> ${room.Building}<br>
-            <b>Floor:</b>  ${room.Floor}<br>
+            <b>Floor:</b> ${room.Floor}<br>
             <b>Room No:</b> ${roomNo}<br>
             <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
               🧭 Get Directions
@@ -534,9 +537,7 @@ function performSearch() {
           </div>
         `;
 
-        // Bind popup directly to Leaflet's built-in click listener
         marker.bindPopup(popupContent, { autoPan: true });
-
         marker.addTo(map);
         activeMarkers.push(marker);
         bounds.push([lat, lng]);
@@ -549,6 +550,11 @@ function performSearch() {
     } else if (bounds.length > 1) {
       map.fitBounds(bounds, { padding: [60, 60] });
     }
+
+    // Sync URL address bar using Room_ID column value from CSV
+    const targetRoomId = filtered[0].Room_ID || rawQuery;
+    const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
+    window.history.replaceState({ path: newUrl }, '', newUrl);
   }
 </script>
 
