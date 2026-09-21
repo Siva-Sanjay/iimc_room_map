@@ -321,21 +321,20 @@
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  // 1. Pure Satellite Base (No labels, no white overlay)
+  // 1. Pure Satellite Base
   const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
   });
 
-  // 2. Transparent Hybrid Overlay (Roads & Area Names only, POI icons hidden)
+  // 2. Transparent Hybrid Overlay
   const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
   });
 
-  // Add clean map layers
   googleSat.addTo(map);
   googleHybridNoPOI.addTo(map);
   
@@ -352,7 +351,7 @@
       allRooms = results.data;
       populateBuildingDropdown();
       clearMarkers();
-      checkUrlSearchParam(); // Process shared URL parameter on load
+      checkUrlSearchParam();
     }
   });
 
@@ -378,13 +377,11 @@
     return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
   }
 
-  // Reset browser address bar back to clean homepage URL
   function resetUrlToHome() {
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
     window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
   }
 
-  // Copy room link to clipboard with fallback
   function copyRoomUrl(btn, roomId) {
     const shareUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
     
@@ -426,7 +423,6 @@
     }, 2000);
   }
 
-  // Check and execute search if ?room= exists in URL on initial page load
   function checkUrlSearchParam() {
     const urlParams = new URLSearchParams(window.location.search);
     const roomParam = urlParams.get('room');
@@ -436,20 +432,18 @@
       if (searchInput) {
         const cleanParam = normalizeText(roomParam);
         
-        // Match room by Room_ID or Room_Number
         const matchedRoom = allRooms.find(r => 
           normalizeText(r.Room_ID) === cleanParam || 
           normalizeText(r.Room_Number || r['Room Number']) === cleanParam
         );
 
-        // Populate search input strictly with Room_Number
         if (matchedRoom) {
           searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || roomParam;
+          performSearch(false, matchedRoom);
         } else {
           searchInput.value = roomParam;
+          performSearch();
         }
-
-        performSearch(true);
       }
     }
   }
@@ -530,11 +524,11 @@
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         const searchInput = document.getElementById('search');
-        // Set search input display value purely to Room Number
         searchInput.value = displayRoomNum;
         searchInput.blur();
         hideSuggestions();
-        performSearch();
+        // Pass targeted room object directly to performSearch
+        performSearch(false, room);
       });
 
       box.appendChild(item);
@@ -560,7 +554,8 @@
     }
   }
 
-  function performSearch(fromUrl = false) {
+  // Accepts explicit targetRoom parameter to pinpoint specific room selections
+  function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
       searchInput.blur();
@@ -573,29 +568,36 @@
     const cleanQuery = normalizeText(rawQuery);
     const selectedBuilding = document.getElementById('buildingFilter').value;
 
-    if (!cleanQuery) {
-      alert("Please enter a room number.");
-      resetUrlToHome();
-      return;
+    let filtered = [];
+
+    if (targetRoom) {
+      filtered = [targetRoom];
+    } else {
+      if (!cleanQuery) {
+        alert("Please enter a room number.");
+        resetUrlToHome();
+        return;
+      }
+
+      filtered = allRooms.filter(room => {
+        const cleanRoomNum = normalizeText(room.Room_Number || room['Room Number']);
+        const cleanRoomName = normalizeText(room.Room_Name);
+        const cleanRoomId = normalizeText(room.Room_ID);
+        const building = room.Building ? room.Building.trim() : '';
+
+        const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
+        const matchQuery = cleanRoomNum === cleanQuery || cleanRoomName.includes(cleanQuery) || cleanRoomId === cleanQuery;
+
+        return matchBuilding && matchQuery;
+      });
     }
-
-    const filtered = allRooms.filter(room => {
-      const cleanRoomNum = normalizeText(room.Room_Number || room['Room Number']);
-      const cleanRoomName = normalizeText(room.Room_Name);
-      const cleanRoomId = normalizeText(room.Room_ID);
-      const building = room.Building ? room.Building.trim() : '';
-
-      const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
-      const matchQuery = cleanRoomNum.includes(cleanQuery) || cleanRoomName.includes(cleanQuery) || cleanRoomId === cleanQuery;
-
-      return matchBuilding && matchQuery;
-    });
 
     if (filtered.length === 0) {
       alert("No matching room found.");
       resetUrlToHome();
       return;
     }
+
     const bounds = [];
 
     filtered.forEach(room => {
@@ -617,10 +619,10 @@
             <b>Room No:</b> ${roomNo}<br>
             <div class="popup-actions">
               <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
-                📍 Open in GMaps
+                📍 Open Gmaps
               </a>
               <button class="copy-url-btn" onclick="copyRoomUrl(this, '${roomId}')">
-                🔗 Copy Link
+                🔗 Share Link
               </button>
             </div>
           </div>
@@ -640,7 +642,7 @@
       map.fitBounds(bounds, { padding: [60, 60] });
     }
 
-    // Sync URL address bar using Room_ID column value from CSV
+    // Update URL parameter specifically for the targeted room's Room_ID
     const targetRoomId = filtered[0].Room_ID || rawQuery;
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
     window.history.replaceState({ path: newUrl }, '', newUrl);
