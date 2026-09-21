@@ -59,8 +59,8 @@
       border-radius: 12px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.2);
       display: flex;
-      flex-direction: row; /* Horizontal alignment */
-      flex-wrap: wrap;    /* Wraps gracefully on mobile screens */
+      flex-direction: row;
+      flex-wrap: wrap;
       gap: 8px;
       width: calc(100% - 24px);
       max-width: 500px;
@@ -68,7 +68,6 @@
       backdrop-filter: blur(4px);
     }
 
-    /* Header Branding Styles - spans full width above inputs */
     .header-branding {
       flex: 1 1 100%;
       display: flex;
@@ -110,7 +109,6 @@
       color: #1a73e8;
     }
 
-    /* Shared dimensions for form controls */
     input, select {
       height: 38px;
       padding: 0 10px;
@@ -124,7 +122,6 @@
       box-sizing: border-box;
     }
 
-    /* Search Input Wrapper Flex Sizing */
     .search-wrapper {
       position: relative;
       flex: 2 1 150px;
@@ -135,7 +132,6 @@
       width: 100%;
     }
 
-    /* Compact Magnifying Glass Search Button */
     button.search-btn {
       height: 38px;
       width: 38px;
@@ -158,7 +154,6 @@
       background: #0056b3;
     }
 
-    /* Suggestions Dropdown */
     .suggestions-box {
       position: absolute;
       top: 100%;
@@ -201,7 +196,6 @@
       color: #70757a;
     }
 
-    /* Map view adjustments */
     #map {
       height: 100vh;
       width: 100vw;
@@ -218,7 +212,6 @@
       padding: 4px;
     }
 
-    /* Explicitly enable pointer events for map marker pins */
     .leaflet-marker-icon {
       pointer-events: auto !important;
       cursor: pointer !important;
@@ -265,7 +258,6 @@
       background-color: #0056b3;
     }
 
-    /* Dropdown Styling with Down Arrow Chevron */
     select#buildingFilter {
       flex: 1 1 120px;
       min-width: 110px;
@@ -291,7 +283,6 @@
 <body>
 
 <div id="controls">
-  <!-- Page Header Title & Subtitle -->
   <div class="header-branding">
     <h1><span class="compass-icon">🧭</span> Joka Compass</h1>
     <p class="author-tag">By <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer">Siva Sanjay</a></p>
@@ -321,14 +312,12 @@
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  // 1. Pure Satellite Base
   const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
   });
 
-  // 2. Transparent Hybrid Overlay
   const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -424,6 +413,13 @@
   }
 
   function checkUrlSearchParam() {
+    // Reset back to home view if user explicitly REFRESHES the page
+    const navEntries = performance.getEntriesByType('navigation');
+    if (navEntries.length > 0 && navEntries[0].type === 'reload') {
+      resetUrlToHome();
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     const roomParam = urlParams.get('room');
 
@@ -527,7 +523,6 @@
         searchInput.value = displayRoomNum;
         searchInput.blur();
         hideSuggestions();
-        // Pass targeted room object directly to performSearch
         performSearch(false, room);
       });
 
@@ -554,7 +549,6 @@
     }
   }
 
-  // Accepts explicit targetRoom parameter to pinpoint specific room selections
   function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
@@ -619,7 +613,7 @@
             <b>Room No:</b> ${roomNo}<br>
             <div class="popup-actions">
               <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
-                📍 Open Gmaps
+                📍 Open GMaps
               </a>
               <button class="copy-url-btn" onclick="copyRoomUrl(this, '${roomId}')">
                 🔗 Share Link
@@ -642,7 +636,6 @@
       map.fitBounds(bounds, { padding: [60, 60] });
     }
 
-    // Update URL parameter specifically for the targeted room's Room_ID
     const targetRoomId = filtered[0].Room_ID || rawQuery;
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
     window.history.replaceState({ path: newUrl }, '', newUrl);
