@@ -224,9 +224,15 @@
       cursor: pointer !important;
     }
 
+    .popup-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center;
+    }
+
     .directions-btn {
       display: inline-block;
-      margin-top: 10px;
       padding: 8px 12px;
       background-color: #28a745;
       color: #ffffff !important;
@@ -236,6 +242,27 @@
       text-align: center;
       font-size: 13px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      white-space: nowrap;
+    }
+
+    .copy-url-btn {
+      display: inline-block;
+      padding: 8px 12px;
+      background-color: #007bff;
+      color: #ffffff;
+      border: none;
+      font-weight: 600;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.2s ease;
+    }
+
+    .copy-url-btn:active {
+      background-color: #0056b3;
     }
 
     /* Dropdown Styling with Down Arrow Chevron */
@@ -357,6 +384,48 @@
     window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
   }
 
+  // Copy room link to clipboard with fallback
+  function copyRoomUrl(btn, roomId) {
+    const shareUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showCopyFeedback(btn);
+      }).catch(() => {
+        fallbackCopyText(shareUrl, btn);
+      });
+    } else {
+      fallbackCopyText(shareUrl, btn);
+    }
+  }
+
+  function fallbackCopyText(text, btn) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showCopyFeedback(btn);
+    } catch (err) {
+      prompt("Copy this link:", text);
+    }
+    document.body.removeChild(textArea);
+  }
+
+  function showCopyFeedback(btn) {
+    const originalText = btn.innerText;
+    btn.innerText = "✓ Copied!";
+    btn.style.backgroundColor = "#155724";
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.style.backgroundColor = "#007bff";
+    }, 2000);
+  }
+
   // Check and execute search if ?room= exists in URL on initial page load
   function checkUrlSearchParam() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -365,7 +434,21 @@
     if (roomParam) {
       const searchInput = document.getElementById('search');
       if (searchInput) {
-        searchInput.value = roomParam;
+        const cleanParam = normalizeText(roomParam);
+        
+        // Match room by Room_ID or Room_Number
+        const matchedRoom = allRooms.find(r => 
+          normalizeText(r.Room_ID) === cleanParam || 
+          normalizeText(r.Room_Number || r['Room Number']) === cleanParam
+        );
+
+        // Populate search input strictly with Room_Number
+        if (matchedRoom) {
+          searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || roomParam;
+        } else {
+          searchInput.value = roomParam;
+        }
+
         performSearch(true);
       }
     }
@@ -437,7 +520,7 @@
       item.className = 'suggestion-item';
       
       const buildingName = room.Building ? room.Building.trim() : '';
-      const displayRoomNum = room.Room_Number || room['Room Number'] || room.Room_ID || '';
+      const displayRoomNum = room.Room_Number || room['Room Number'] || '';
 
       item.innerHTML = `
         <span><b>${displayRoomNum}</b></span>
@@ -447,7 +530,8 @@
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         const searchInput = document.getElementById('search');
-        searchInput.value = room.Room_ID || displayRoomNum;
+        // Set search input display value purely to Room Number
+        searchInput.value = displayRoomNum;
         searchInput.blur();
         hideSuggestions();
         performSearch();
@@ -522,6 +606,7 @@
       if (!isNaN(lat) && !isNaN(lng)) {
         const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
+        const roomId = room.Room_ID || roomNo;
 
         const marker = L.marker([lat, lng], { interactive: true });
 
@@ -531,9 +616,14 @@
             <b>Building:</b> ${room.Building}<br>
             <b>Floor:</b> ${room.Floor}<br>
             <b>Room No:</b> ${roomNo}<br>
-            <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
-              🧭 Get Directions
-            </a>
+            <div class="popup-actions">
+              <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
+                📍 Open in GMaps
+              </a>
+              <button class="copy-url-btn" onclick="copyRoomUrl(this, '${roomId}')">
+                🔗 Copy Link
+              </button>
+            </div>
           </div>
         `;
 
