@@ -41,33 +41,33 @@
     body, html { 
       margin: 0; 
       padding: 0; 
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
       height: 100%; 
       width: 100%; 
       overflow: hidden; 
       background-color: #f2f2f7;
     }
 
-    /* Fixed Floating Control Card - Apple Modern Minimalist Style */
+    /* Fixed Floating Control Card */
     #controls {
       position: absolute;
       top: 16px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       padding: 14px 16px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 24px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.8);
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       gap: 10px;
       width: calc(100% - 32px);
-      max-width: 500px;
+      max-width: 480px;
       align-items: center;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -77,14 +77,14 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
 
     .header-branding h1 {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.4px;
-      color: #1c1c1e;
+      color: #0f172a;
       margin: 0;
       display: flex;
       align-items: center;
@@ -93,56 +93,72 @@
     }
 
     .compass-icon {
-      font-size: 22px;
+      font-size: 20px;
       display: inline-block;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
     }
 
     .author-tag {
       font-size: 12px;
-      color: #8e8e93;
+      color: #64748b;
       margin: 2px 0 0 0;
       font-weight: 400;
-      letter-spacing: -0.1px;
     }
 
     .author-tag a {
-      color: #007aff;
+      color: #2563eb;
       text-decoration: none;
       font-weight: 500;
-      transition: color 0.2s ease;
     }
 
     .author-tag a:hover {
       text-decoration: underline;
     }
 
-    input, select {
-      height: 40px;
+    /* High-contrast Search & Dropdown Fields */
+    input, select#buildingFilter {
+      height: 42px;
       padding: 0 12px;
       border-radius: 12px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border: 1.5px solid #d1d5db;
       font-size: 14px;
       outline: none;
       -webkit-appearance: none;
       appearance: none;
-      background: rgba(239, 239, 244, 0.7);
-      color: #1c1c1e;
+      background: #ffffff;
+      color: #0f172a;
       box-sizing: border-box;
       transition: all 0.2s ease;
+      font-weight: 500;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    input::placeholder {
+      color: #9ca3af;
       font-weight: 400;
     }
 
-    input:focus, select:focus {
+    input:focus, select#buildingFilter:focus {
       background: #ffffff;
-      border-color: #007aff;
-      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+      border-color: #0f172a;
+      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+    }
+
+    select#buildingFilter {
+      flex: 1 1 130px;
+      min-width: 120px;
+      padding: 0 28px 0 12px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 10px center !important;
+      background-size: 14px 14px !important;
+      cursor: pointer;
     }
 
     .search-wrapper {
       position: relative;
-      flex: 2 1 150px;
-      min-width: 130px;
+      flex: 2 1 140px;
+      min-width: 120px;
     }
 
     .search-wrapper input {
@@ -150,26 +166,25 @@
     }
 
     button.search-btn {
-      height: 40px;
-      width: 40px;
-      min-width: 40px;
-      flex: 0 0 40px;
+      height: 42px;
+      width: 42px;
+      min-width: 42px;
+      flex: 0 0 42px;
       padding: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #1c1c1e;
+      background: #0f172a;
       color: white;
       border: none;
       border-radius: 12px;
       cursor: pointer;
-      font-size: 16px;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
     }
 
     button.search-btn:hover {
-      background: #2c2c2e;
+      background: #1e293b;
       transform: translateY(-1px);
     }
 
@@ -183,7 +198,7 @@
       top: calc(100% + 6px);
       left: 0;
       right: 0;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-radius: 14px;
@@ -209,14 +224,14 @@
     }
 
     .suggestion-item:hover, .suggestion-item.active {
-      background-color: rgba(0, 122, 255, 0.08);
-      color: #007aff;
+      background-color: #f1f5f9;
+      color: #0f172a;
     }
 
     .room-subtext {
       margin-left: auto;
       font-size: 12px;
-      color: #8e8e93;
+      color: #64748b;
     }
 
     #map {
@@ -235,162 +250,172 @@
       cursor: pointer !important;
     }
 
-    /* Leaflet Popup Apple-Style Overrides */
+    /* Leaflet Popup Layout Customization */
     .leaflet-popup-content-wrapper {
-      background: rgba(255, 255, 255, 0.88) !important;
-      backdrop-filter: blur(20px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-      border-radius: 20px !important;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0,0,0,0.06) !important;
-      border: 1px solid rgba(255, 255, 255, 0.8) !important;
+      background: #ffffff !important;
+      border-radius: 24px !important;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16) !important;
+      border: 1px solid rgba(0, 0, 0, 0.04) !important;
       padding: 0 !important;
       overflow: hidden;
+      width: 290px !important;
     }
 
     .leaflet-popup-content {
-      margin: 16px 18px !important;
+      margin: 18px 20px !important;
       line-height: 1.4 !important;
     }
 
+    .leaflet-popup-tip-container {
+      margin-top: -1px;
+    }
+
     .leaflet-popup-tip {
-      background: rgba(255, 255, 255, 0.88) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
+      background: #ffffff !important;
       box-shadow: none !important;
     }
 
     .leaflet-container a.leaflet-popup-close-button {
-      top: 12px !important;
-      right: 12px !important;
-      color: #8e8e93 !important;
-      padding: 4px !important;
-      width: 22px !important;
-      height: 22px !important;
+      top: 16px !important;
+      right: 16px !important;
+      color: #94a3b8 !important;
+      padding: 0 !important;
+      width: 24px !important;
+      height: 24px !important;
       border-radius: 50% !important;
-      background: rgba(0, 0, 0, 0.05) !important;
+      background: transparent !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
-      font-size: 14px !important;
+      font-size: 16px !important;
+      font-weight: 300 !important;
       transition: all 0.2s ease !important;
     }
 
     .leaflet-container a.leaflet-popup-close-button:hover {
-      background: rgba(0, 0, 0, 0.1) !important;
-      color: #1c1c1e !important;
+      color: #0f172a !important;
+      background: #f1f5f9 !important;
     }
 
-    /* Apple Minimalist Card Content */
-    .apple-card-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1c1c1e;
-      margin: 0 0 12px 0;
-      letter-spacing: -0.4px;
+    /* Popup Layout Matching Target Reference */
+    .badge-location {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0fdf4;
+      color: #166534;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
     }
 
-    .apple-details-list {
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      background-color: #22c55e;
+      border-radius: 50%;
+    }
+
+    .popup-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 2px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .popup-subtitle {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0 0 16px 0;
+      font-weight: 500;
+    }
+
+    .popup-details-table {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
-    .apple-detail-row {
+    .popup-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
       font-size: 13px;
     }
 
-    .apple-detail-label {
-      color: #8e8e93;
-      font-weight: 400;
+    .popup-row:last-child {
+      border-bottom: none;
     }
 
-    .apple-detail-value {
-      color: #1c1c1e;
+    .popup-label {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .popup-value {
+      color: #0f172a;
       font-weight: 600;
-      background: rgba(0, 0, 0, 0.04);
-      padding: 3px 8px;
-      border-radius: 6px;
+      text-align: right;
     }
 
     .popup-actions {
       display: flex;
-      gap: 8px;
-      margin-top: 14px;
+      gap: 10px;
       align-items: center;
     }
 
-    .directions-btn {
-      flex: 1;
+    .btn-open-maps {
+      flex: 1.2;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 9px 12px;
-      background-color: #007aff;
+      padding: 11px 14px;
+      background-color: #0f172a;
       color: #ffffff !important;
       text-decoration: none;
       font-weight: 600;
-      border-radius: 12px;
+      border-radius: 20px;
       text-align: center;
       font-size: 13px;
-      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
-      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
       transition: all 0.2s ease;
     }
 
-    .directions-btn:hover {
-      background-color: #0062cc;
+    .btn-open-maps:hover {
+      background-color: #1e293b;
       transform: translateY(-1px);
     }
 
-    .copy-url-btn {
+    .btn-share {
       flex: 1;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 9px 12px;
-      background-color: rgba(116, 116, 128, 0.12);
-      color: #007aff;
+      padding: 11px 14px;
+      background-color: #f1f5f9;
+      color: #0f172a;
       border: none;
       font-weight: 600;
-      border-radius: 12px;
+      border-radius: 20px;
       text-align: center;
       font-size: 13px;
       cursor: pointer;
-      white-space: nowrap;
       transition: all 0.2s ease;
     }
 
-    .copy-url-btn:hover {
-      background-color: rgba(116, 116, 128, 0.2);
+    .btn-share:hover {
+      background-color: #e2e8f0;
     }
 
-    .copy-url-btn:active {
+    .btn-share:active {
       transform: scale(0.97);
-    }
-
-    select#buildingFilter {
-      flex: 1 1 120px;
-      min-width: 110px;
-      height: 40px;
-      padding: 0 28px 0 12px;
-      border-radius: 12px;
-      font-size: 14px;
-      outline: none;
-      -webkit-appearance: none !important;
-      -moz-appearance: none !important;
-      appearance: none !important;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
-      background-repeat: no-repeat !important;
-      background-position: right 10px center !important;
-      background-size: 14px 14px !important;
-      box-sizing: border-box;
-      cursor: pointer;
     }
   </style>
 </head>
@@ -519,17 +544,16 @@
   function showCopyFeedback(btn) {
     const originalText = btn.innerHTML;
     btn.innerHTML = "✓ Copied";
-    btn.style.backgroundColor = "rgba(52, 199, 89, 0.15)";
-    btn.style.color = "#34c759";
+    btn.style.backgroundColor = "#e2e8f0";
+    btn.style.color = "#166534";
     setTimeout(() => {
       btn.innerHTML = originalText;
-      btn.style.backgroundColor = "rgba(116, 116, 128, 0.12)";
-      btn.style.color = "#007aff";
+      btn.style.backgroundColor = "#f1f5f9";
+      btn.style.color = "#0f172a";
     }, 2000);
   }
 
   function checkUrlSearchParam() {
-    // Reset back to home view if user explicitly REFRESHES the page
     const navEntries = performance.getEntriesByType('navigation');
     if (navEntries.length > 0 && navEntries[0].type === 'reload') {
       resetUrlToHome();
@@ -718,32 +742,45 @@
         const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
         const roomId = room.Room_ID || roomNo;
+        const buildingName = room.Building || 'N/A';
+        const floorName = room.Floor || 'N/A';
 
         const marker = L.marker([lat, lng], { interactive: true });
 
         const popupContent = `
           <div>
-            <h3 class="apple-card-title">${room.Room_Name || 'Room Details'}</h3>
-            <div class="apple-details-list">
-              <div class="apple-detail-row">
-                <span class="apple-detail-label">Building</span>
-                <span class="apple-detail-value">${room.Building || 'N/A'}</span>
+            <div class="badge-location">
+              <span class="badge-dot"></span> Room Location
+            </div>
+            
+            <h2 class="popup-title">${roomId}</h2>
+            <div class="popup-subtitle">${room.Room_Name || buildingName} • ${floorName}</div>
+
+            <div class="popup-details-table">
+              <div class="popup-row">
+                <span class="popup-label">Building</span>
+                <span class="popup-value">${buildingName}</span>
               </div>
-              <div class="apple-detail-row">
-                <span class="apple-detail-label">Floor</span>
-                <span class="apple-detail-value">${room.Floor || 'N/A'}</span>
-              </div>
-              <div class="apple-detail-row">
-                <span class="apple-detail-label">Room No</span>
-                <span class="apple-detail-value">${roomNo}</span>
+              <div class="popup-row">
+                <span class="popup-label">Room No</span>
+                <span class="popup-value">${roomNo}</span>
               </div>
             </div>
+
             <div class="popup-actions">
-              <a href="${gmapsDirectionsUrl}" target="_blank" class="directions-btn">
-                📍 Open GMaps
+              <a href="${gmapsDirectionsUrl}" target="_blank" class="btn-open-maps">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                Open Maps
               </a>
-              <button class="copy-url-btn" onclick="copyRoomUrl(this, '${roomId}')">
-                🔗 Share Link
+              <button class="btn-share" onclick="copyRoomUrl(this, '${roomId}')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                Share
               </button>
             </div>
           </div>
