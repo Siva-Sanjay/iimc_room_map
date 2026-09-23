@@ -174,7 +174,6 @@
       background: #1e293b;
     }
 
-    /* Phone view layout setup */
     @media (max-width: 480px) {
       .controls-inputs-row {
         flex-wrap: wrap;
@@ -242,7 +241,6 @@
       width: 100vw;
     }
 
-    /* Optimized Popup Styling (Compact & Clean) */
     .leaflet-popup-content-wrapper {
       background: #ffffff !important;
       border-radius: 16px !important;
@@ -673,7 +671,6 @@
 
         const marker = L.marker([lat, lng], { interactive: true });
 
-        // Compact Popup HTML
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -681,14 +678,14 @@
             </div>
             
             <h2 class="popup-title">${room.Room_Name}</h2>
-            <div class="popup-subtitle">${buildingName} • Floor ${floorName}</div>
+            <div class="popup-subtitle">${buildingName} •  ${floorName}</div>
 
             <div class="popup-actions">
               <a href="${gmapsDirectionsUrl}" target="_blank" class="btn-open-maps">
-                📍GMaps
+                Maps
               </a>
               <button class="btn-share" onclick="copyRoomUrl(this, '${roomId}')">
-                🔗Share
+                Share
               </button>
             </div>
           </div>
@@ -703,14 +700,29 @@
 
     if (bounds.length === 1) {
       const targetLatLng = bounds[0];
-      map.flyTo(targetLatLng, 20, { animate: true, duration: 1.0 });
-      map.once('moveend', () => {
-        if (activeMarkers[0]) {
-          activeMarkers[0].openPopup();
-          // Subtle pan to center card neatly below top search bar
-          map.panBy([0, -100], { animate: true });
-        }
+      const zoomLevel = 20;
+
+      // 1. Open popup immediately without auto-pan trigger
+      if (activeMarkers[0]) {
+        activeMarkers[0].openPopup();
+      }
+
+      // 2. Project target point to screen pixel coordinates
+      const targetPoint = map.project(targetLatLng, zoomLevel);
+
+      // 3. Offset target pixel point downward (100px shift) to accommodate popup height cleanly
+      const offsetPoint = L.point(targetPoint.x, targetPoint.y - 100);
+
+      // 4. Convert back to LatLng coordinate space
+      const offsetLatLng = map.unproject(offsetPoint, zoomLevel);
+
+      // 5. Perform a single smooth camera transition directly to offset coordinate
+      map.flyTo(offsetLatLng, zoomLevel, {
+        animate: true,
+        duration: 1.2,
+        easeLinearity: 0.25
       });
+
     } else if (bounds.length > 1) {
       map.fitBounds(bounds, { padding: [60, 60] });
     }
