@@ -58,48 +58,39 @@
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      padding: 14px 16px;
-      border-radius: 24px;
+      padding: 12px 14px;
+      border-radius: 20px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.8);
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      gap: 10px;
-      width: calc(100% - 32px);
-      max-width: 480px;
-      align-items: center;
+      width: calc(100% - 24px);
+      max-width: 460px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .header-branding {
-      flex: 1 1 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      margin-bottom: 2px;
+      margin-bottom: 8px;
     }
 
     .header-branding h1 {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       letter-spacing: -0.4px;
       color: #0f172a;
       margin: 0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       line-height: 1.2;
     }
 
     .compass-icon {
-      font-size: 20px;
+      font-size: 19px;
       display: inline-block;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
     }
 
     .author-tag {
-      font-size: 12px;
+      font-size: 11px;
       color: #64748b;
       margin: 2px 0 0 0;
       font-weight: 400;
@@ -111,17 +102,21 @@
       font-weight: 500;
     }
 
-    .author-tag a:hover {
-      text-decoration: underline;
+    .controls-inputs-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
     }
 
     /* High-contrast Search & Dropdown Fields */
     input, select#buildingFilter {
-      height: 42px;
-      padding: 0 12px;
+      height: 40px;
+      padding: 0 10px;
       border-radius: 12px;
       border: 1.5px solid #d1d5db;
-      font-size: 14px;
+      font-size: 13.5px;
       outline: none;
       -webkit-appearance: none;
       appearance: none;
@@ -145,20 +140,20 @@
     }
 
     select#buildingFilter {
-      flex: 1 1 130px;
-      min-width: 120px;
-      padding: 0 28px 0 12px;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
+      flex: 1 1 120px;
+      min-width: 100px;
+      padding: 0 24px 0 10px;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>") !important;
       background-repeat: no-repeat !important;
-      background-position: right 10px center !important;
-      background-size: 14px 14px !important;
+      background-position: right 8px center !important;
+      background-size: 12px 12px !important;
       cursor: pointer;
     }
 
     .search-wrapper {
       position: relative;
-      flex: 2 1 140px;
-      min-width: 120px;
+      flex: 2 1 130px;
+      min-width: 100px;
     }
 
     .search-wrapper input {
@@ -166,10 +161,10 @@
     }
 
     button.search-btn {
-      height: 42px;
-      width: 42px;
-      min-width: 42px;
-      flex: 0 0 42px;
+      height: 40px;
+      width: 40px;
+      min-width: 40px;
+      flex: 0 0 40px;
       padding: 0;
       display: flex;
       align-items: center;
@@ -191,6 +186,30 @@
     button.search-btn:active {
       transform: scale(0.96);
       background: #000000;
+    }
+
+    /* Mobile Responsive Layout Rule */
+    @media (max-width: 480px) {
+      .controls-inputs-row {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      select#buildingFilter {
+        flex: 1 1 100%;
+        width: 100%;
+      }
+
+      .search-wrapper {
+        flex: 1 1 calc(80% - 4px);
+        min-width: 0;
+      }
+
+      button.search-btn {
+        flex: 0 0 calc(20% - 4px);
+        width: auto;
+        min-width: 0;
+      }
     }
 
     .suggestions-box {
@@ -258,7 +277,7 @@
       border: 1px solid rgba(0, 0, 0, 0.04) !important;
       padding: 0 !important;
       overflow: hidden;
-      width: 290px !important;
+      width: 280px !important;
     }
 
     .leaflet-popup-content {
@@ -297,7 +316,7 @@
       background: #f1f5f9 !important;
     }
 
-    /* Popup Layout Matching Target Reference */
+    /* Popup Styling */
     .badge-location {
       display: inline-flex;
       align-items: center;
@@ -375,7 +394,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 11px 14px;
+      padding: 11px 12px;
       background-color: #0f172a;
       color: #ffffff !important;
       text-decoration: none;
@@ -398,7 +417,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 11px 14px;
+      padding: 11px 12px;
       background-color: #f1f5f9;
       color: #0f172a;
       border: none;
@@ -427,21 +446,23 @@
     <p class="author-tag">By <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer">Siva Sanjay</a></p>
   </div>
 
-  <select id="buildingFilter" onchange="handleBuildingChange()">
-    <option value="ALL">All Buildings</option>
-  </select>
-  
-  <div class="search-wrapper">
-    <input type="text" id="search" placeholder="Enter Room No..." autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
-    <div id="suggestionsBox" class="suggestions-box"></div>
-  </div>
+  <div class="controls-inputs-row">
+    <select id="buildingFilter" onchange="handleBuildingChange()">
+      <option value="ALL">All Buildings</option>
+    </select>
+    
+    <div class="search-wrapper">
+      <input type="text" id="search" placeholder="Enter Room No..." autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
+      <div id="suggestionsBox" class="suggestions-box"></div>
+    </div>
 
-  <button class="search-btn" onclick="performSearch()" aria-label="Search">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-  </button>
+    <button class="search-btn" onclick="performSearch()" aria-label="Search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  </div>
 </div>
 
 <div id="map"></div>
@@ -753,8 +774,8 @@
               <span class="badge-dot"></span> Room Location
             </div>
             
-            <h2 class="popup-title">${room.Room_Name}</h2>
-            <div class="popup-subtitle">${buildingName} • ${floorName}</div>
+            <h2 class="popup-title">${roomId}</h2>
+            <div class="popup-subtitle">${room.Room_Name || buildingName} • ${floorName}</div>
 
             <div class="popup-details-table">
               <div class="popup-row">
@@ -762,7 +783,7 @@
                 <span class="popup-value">${buildingName}</span>
               </div>
               <div class="popup-row">
-                <span class="popup-label">Room </span>
+                <span class="popup-label">Room No</span>
                 <span class="popup-value">${roomNo}</span>
               </div>
             </div>
@@ -786,7 +807,7 @@
           </div>
         `;
 
-        marker.bindPopup(popupContent, { autoPan: true });
+        marker.bindPopup(popupContent, { autoPan: false });
         marker.addTo(map);
         activeMarkers.push(marker);
         bounds.push([lat, lng]);
@@ -794,10 +815,17 @@
     });
 
     if (bounds.length === 1) {
-      map.flyTo(bounds[0], 21);
-      if (activeMarkers[0]) activeMarkers[0].openPopup();
+      const targetLatLng = bounds[0];
+      map.flyTo(targetLatLng, 21, { animate: true, duration: 1.2 });
+      map.once('moveend', () => {
+        if (activeMarkers[0]) {
+          activeMarkers[0].openPopup();
+          // Pan map down by 140px so the popup is completely visible below top island
+          map.panBy([0, -140], { animate: true });
+        }
+      });
     } else if (bounds.length > 1) {
-      map.fitBounds(bounds, { padding: [60, 60] });
+      map.fitBounds(bounds, { padding: [80, 80] });
     }
 
     const targetRoomId = filtered[0].Room_ID || rawQuery;
