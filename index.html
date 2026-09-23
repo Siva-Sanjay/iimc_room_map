@@ -4,7 +4,6 @@
   <meta charset="utf-8" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   
-  <!-- Open Graph / WhatsApp Link Preview -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://joka-compass.vercel.app/" />
   <meta property="og:title" content="Joka Compass" />
@@ -12,7 +11,6 @@
   <meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/7/7e/Compass_rose_transparent.png" />
   <meta property="og:image:type" content="image/png" />
 
-  <!-- Twitter / X Link Preview -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Joka Compass" />
   <meta name="twitter:description" content="Campus Room Map & Navigation for IIM Calcutta" />
@@ -20,17 +18,13 @@
 
   <title>Joka Compass</title>
 
-  <!-- Compass Emoji Favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
   
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
-  <!-- Leaflet JS & PapaParse -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
-  <!-- Vercel Web Analytics for Vanilla HTML -->
   <script defer src="/_vercel/insights/script.js"></script>
 
   <style>
@@ -48,31 +42,30 @@
       background-color: #f2f2f7;
     }
 
-    /* Fixed Floating Control Card */
     #controls {
       position: absolute;
-      top: 16px;
+      top: 12px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 1000;
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
-      padding: 12px 14px;
-      border-radius: 20px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+      padding: 10px 12px;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.8);
       width: calc(100% - 24px);
-      max-width: 460px;
+      max-width: 440px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .header-branding {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .header-branding h1 {
-      font-size: 19px;
+      font-size: 17px;
       font-weight: 700;
       letter-spacing: -0.4px;
       color: #0f172a;
@@ -84,7 +77,7 @@
     }
 
     .compass-icon {
-      font-size: 19px;
+      font-size: 17px;
       display: inline-block;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
     }
@@ -92,7 +85,7 @@
     .author-tag {
       font-size: 11px;
       color: #64748b;
-      margin: 2px 0 0 0;
+      margin: 1px 0 0 0;
       font-weight: 400;
     }
 
@@ -110,13 +103,12 @@
       width: 100%;
     }
 
-    /* High-contrast Search & Dropdown Fields */
     input, select#buildingFilter {
-      height: 40px;
+      height: 38px;
       padding: 0 10px;
-      border-radius: 12px;
+      border-radius: 10px;
       border: 1.5px solid #d1d5db;
-      font-size: 13.5px;
+      font-size: 13px;
       outline: none;
       -webkit-appearance: none;
       appearance: none;
@@ -161,10 +153,10 @@
     }
 
     button.search-btn {
-      height: 40px;
-      width: 40px;
-      min-width: 40px;
-      flex: 0 0 40px;
+      height: 38px;
+      width: 38px;
+      min-width: 38px;
+      flex: 0 0 38px;
       padding: 0;
       display: flex;
       align-items: center;
@@ -172,7 +164,7 @@
       background: #0f172a;
       color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
@@ -180,19 +172,13 @@
 
     button.search-btn:hover {
       background: #1e293b;
-      transform: translateY(-1px);
     }
 
-    button.search-btn:active {
-      transform: scale(0.96);
-      background: #000000;
-    }
-
-    /* Mobile Responsive Layout Rule */
+    /* Phone view layout setup */
     @media (max-width: 480px) {
       .controls-inputs-row {
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
       }
 
       select#buildingFilter {
@@ -201,12 +187,12 @@
       }
 
       .search-wrapper {
-        flex: 1 1 calc(80% - 4px);
+        flex: 1 1 calc(80% - 3px);
         min-width: 0;
       }
 
       button.search-btn {
-        flex: 0 0 calc(20% - 4px);
+        flex: 0 0 calc(20% - 3px);
         width: auto;
         min-width: 0;
       }
@@ -220,9 +206,9 @@
       background: rgba(255, 255, 255, 0.98);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-radius: 14px;
+      border-radius: 12px;
       box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-      max-height: 220px;
+      max-height: 200px;
       overflow-y: auto;
       display: none;
       z-index: 1001;
@@ -231,25 +217,23 @@
     }
 
     .suggestion-item {
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 8px 10px;
+      border-radius: 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 14px;
+      gap: 8px;
+      font-size: 13px;
       color: #1c1c1e;
-      transition: background 0.15s ease;
     }
 
-    .suggestion-item:hover, .suggestion-item.active {
+    .suggestion-item:hover {
       background-color: #f1f5f9;
-      color: #0f172a;
     }
 
     .room-subtext {
       margin-left: auto;
-      font-size: 12px;
+      font-size: 11px;
       color: #64748b;
     }
 
@@ -258,157 +242,91 @@
       width: 100vw;
     }
 
-    .leaflet-container img {
-      -webkit-user-drag: none !important;
-      user-drag: none !important;
-      -webkit-touch-callout: none !important;
-    }
-
-    .leaflet-marker-icon {
-      pointer-events: auto !important;
-      cursor: pointer !important;
-    }
-
-    /* Leaflet Popup Layout Customization */
+    /* Optimized Popup Styling (Compact & Clean) */
     .leaflet-popup-content-wrapper {
       background: #ffffff !important;
-      border-radius: 24px !important;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16) !important;
-      border: 1px solid rgba(0, 0, 0, 0.04) !important;
+      border-radius: 16px !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18) !important;
       padding: 0 !important;
       overflow: hidden;
-      width: 280px !important;
+      width: 250px !important;
     }
 
     .leaflet-popup-content {
-      margin: 18px 20px !important;
-      line-height: 1.4 !important;
-    }
-
-    .leaflet-popup-tip-container {
-      margin-top: -1px;
-    }
-
-    .leaflet-popup-tip {
-      background: #ffffff !important;
-      box-shadow: none !important;
+      margin: 12px 14px !important;
+      line-height: 1.3 !important;
     }
 
     .leaflet-container a.leaflet-popup-close-button {
-      top: 16px !important;
-      right: 16px !important;
+      top: 10px !important;
+      right: 10px !important;
       color: #94a3b8 !important;
-      padding: 0 !important;
-      width: 24px !important;
-      height: 24px !important;
-      border-radius: 50% !important;
-      background: transparent !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      font-size: 16px !important;
-      font-weight: 300 !important;
-      transition: all 0.2s ease !important;
+      width: 20px !important;
+      height: 20px !important;
+      font-size: 14px !important;
     }
 
-    .leaflet-container a.leaflet-popup-close-button:hover {
-      color: #0f172a !important;
-      background: #f1f5f9 !important;
+    .popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
     }
 
-    /* Popup Styling */
     .badge-location {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       background: #f0fdf4;
       color: #166534;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
     }
 
     .badge-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       background-color: #22c55e;
       border-radius: 50%;
     }
 
     .popup-title {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
       color: #0f172a;
       margin: 0 0 2px 0;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
     }
 
     .popup-subtitle {
-      font-size: 13px;
+      font-size: 12px;
       color: #64748b;
-      margin: 0 0 16px 0;
+      margin: 0 0 10px 0;
       font-weight: 500;
-    }
-
-    .popup-details-table {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 20px;
-    }
-
-    .popup-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f1f5f9;
-      font-size: 13px;
-    }
-
-    .popup-row:last-child {
-      border-bottom: none;
-    }
-
-    .popup-label {
-      color: #94a3b8;
-      font-weight: 500;
-    }
-
-    .popup-value {
-      color: #0f172a;
-      font-weight: 600;
-      text-align: right;
     }
 
     .popup-actions {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
+      margin-top: 10px;
     }
 
     .btn-open-maps {
-      flex: 1.2;
+      flex: 1;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 11px 12px;
+      gap: 4px;
+      padding: 8px 10px;
       background-color: #0f172a;
       color: #ffffff !important;
       text-decoration: none;
       font-weight: 600;
-      border-radius: 20px;
-      text-align: center;
-      font-size: 13px;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
-      transition: all 0.2s ease;
-    }
-
-    .btn-open-maps:hover {
-      background-color: #1e293b;
-      transform: translateY(-1px);
+      border-radius: 12px;
+      font-size: 12px;
     }
 
     .btn-share {
@@ -416,25 +334,15 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 11px 12px;
+      gap: 4px;
+      padding: 8px 10px;
       background-color: #f1f5f9;
       color: #0f172a;
       border: none;
       font-weight: 600;
-      border-radius: 20px;
-      text-align: center;
-      font-size: 13px;
+      border-radius: 12px;
+      font-size: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-share:hover {
-      background-color: #e2e8f0;
-    }
-
-    .btn-share:active {
-      transform: scale(0.97);
     }
   </style>
 </head>
@@ -457,7 +365,7 @@
     </div>
 
     <button class="search-btn" onclick="performSearch()" aria-label="Search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
@@ -468,7 +376,6 @@
 <div id="map"></div>
 
 <script>
-  // Initialize Leaflet Map
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -629,13 +536,11 @@
       complete: function() {
         if (buildingPoints.length > 0) {
           const bounds = L.latLngBounds(buildingPoints);
-          const flyOptions = {
-            padding: selectedBuilding === "ALL" ? [40, 40] : [30, 30],
+          map.flyToBounds(bounds, {
+            padding: [30, 30],
             maxZoom: 19,
-            duration: 1.5,
-            easeLinearity: 0.25
-          };
-          map.flyToBounds(bounds, flyOptions);
+            duration: 1.2
+          });
         }
       }
     });
@@ -768,40 +673,22 @@
 
         const marker = L.marker([lat, lng], { interactive: true });
 
+        // Compact Popup HTML
         const popupContent = `
           <div>
-            <div class="badge-location">
-              <span class="badge-dot"></span> Room Location
+            <div class="popup-header">
+              <span class="badge-location"><span class="badge-dot"></span> Room</span>
             </div>
             
-            <h2 class="popup-title">${roomId}</h2>
-            <div class="popup-subtitle">${room.Room_Name || buildingName} • ${floorName}</div>
-
-            <div class="popup-details-table">
-              <div class="popup-row">
-                <span class="popup-label">Building</span>
-                <span class="popup-value">${buildingName}</span>
-              </div>
-              <div class="popup-row">
-                <span class="popup-label">Room No</span>
-                <span class="popup-value">${roomNo}</span>
-              </div>
-            </div>
+            <h2 class="popup-title">${room.Room_Name}</h2>
+            <div class="popup-subtitle">${buildingName} • Floor ${floorName}</div>
 
             <div class="popup-actions">
               <a href="${gmapsDirectionsUrl}" target="_blank" class="btn-open-maps">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                Open Maps
+                📍Open GMaps
               </a>
               <button class="btn-share" onclick="copyRoomUrl(this, '${roomId}')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
-                Share
+                🔗Share
               </button>
             </div>
           </div>
@@ -816,16 +703,16 @@
 
     if (bounds.length === 1) {
       const targetLatLng = bounds[0];
-      map.flyTo(targetLatLng, 21, { animate: true, duration: 1.2 });
+      map.flyTo(targetLatLng, 20, { animate: true, duration: 1.0 });
       map.once('moveend', () => {
         if (activeMarkers[0]) {
           activeMarkers[0].openPopup();
-          // Pan map down by 140px so the popup is completely visible below top island
-          map.panBy([0, -140], { animate: true });
+          // Subtle pan to center card neatly below top search bar
+          map.panBy([0, -100], { animate: true });
         }
       });
     } else if (bounds.length > 1) {
-      map.fitBounds(bounds, { padding: [80, 80] });
+      map.fitBounds(bounds, { padding: [60, 60] });
     }
 
     const targetRoomId = filtered[0].Room_ID || rawQuery;
