@@ -396,6 +396,10 @@
 
   let allRooms = [];
   let activeMarkers = [];
+  
+  // ADDED: Track active route layers so we can clear them on a new search
+  let currentRouteLayer = null;
+  let userLocationMarker = null;
 
   Papa.parse(sheetCsvUrl, {
     download: true,
@@ -425,6 +429,10 @@
   function clearMarkers() {
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
+    
+    // ADDED: Clear routes when a new search happens
+    if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+    if (userLocationMarker) map.removeLayer(userLocationMarker);
   }
 
   function normalizeText(text) {
@@ -663,7 +671,6 @@
       const lng = parseFloat(room.Longitude);
 
       if (!isNaN(lat) && !isNaN(lng)) {
-        const gmapsDirectionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking`;
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
         const roomId = room.Room_ID || roomNo;
         const buildingName = room.Building || 'N/A';
@@ -671,6 +678,7 @@
 
         const marker = L.marker([lat, lng], { interactive: true });
 
+        // MODIFIED: Changed the Maps anchor tag to trigger getDirections()
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -681,8 +689,8 @@
             <div class="popup-subtitle">${buildingName} •  ${floorName}</div>
 
             <div class="popup-actions">
-              <a href="${gmapsDirectionsUrl}" target="_blank" class="btn-open-maps">
-                Maps
+              <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
+                Directions
               </a>
               <button class="btn-share" onclick="copyRoomUrl(this, '${roomId}')">
                 Share
@@ -702,21 +710,14 @@
       const targetLatLng = bounds[0];
       const zoomLevel = 20;
 
-      // 1. Open popup immediately without auto-pan trigger
       if (activeMarkers[0]) {
         activeMarkers[0].openPopup();
       }
 
-      // 2. Project target point to screen pixel coordinates
       const targetPoint = map.project(targetLatLng, zoomLevel);
-
-      // 3. Offset target pixel point downward (100px shift) to accommodate popup height cleanly
       const offsetPoint = L.point(targetPoint.x, targetPoint.y - 100);
-
-      // 4. Convert back to LatLng coordinate space
       const offsetLatLng = map.unproject(offsetPoint, zoomLevel);
 
-      // 5. Perform a single smooth camera transition directly to offset coordinate
       map.flyTo(offsetLatLng, zoomLevel, {
         animate: true,
         duration: 1.2,
@@ -730,6 +731,81 @@
     const targetRoomId = filtered[0].Room_ID || rawQuery;
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
     window.history.replaceState({ path: newUrl }, '', newUrl);
+  }
+
+  // ADDED: The Directions function that handles geolocation and routing
+  function getDirections(destLat, destLng) {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition((position) => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      // Clear existing route layers if they exist
+      if (currentRouteLayer) {
+        map.removeLayer(currentRouteLayer);
+      }
+      if (userLocationMarker) {
+        map.removeLayer(userLocationMarker);
+      }
+
+      // Add a distinct marker for the user's current location
+      userLocationMarker = L.circleMarker([userLat, userLng], {
+        radius: 6,
+        fillColor: "#3b82f6", // Blue color distinct from default Leaflet marker
+        color: "#ffffff",
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 1
+      }).addTo(map);
+
+      // Fetch walking route from Open Source Routing Machine
+      const routingUrl = `https://router.project-osrm.org/route/v1/foot/${userLng},${userLat};${destLng},${destLat}?overview=full&geometries=geojson`;
+
+      fetch(routingUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.routes && data.routes.length > 0) {
+            const routeGeoJSON = data.routes[0].geometry;
+            
+            // Draw the path on the map
+            currentRouteLayer = L.geoJSON(routeGeoJSON, {
+              style: {
+                color: '#3b82f6', 
+                weight: 5,
+                opacity: 0.8,
+                dashArray: '1, 10', // Creates a dotted line typical for walking paths
+                lineCap: 'round'
+              }
+            }).addTo(map);
+
+            // Adjust the camera bounds to ensure both start and end are visible
+            const bounds = currentRouteLayer.getBounds();
+            bounds.extend([userLat, userLng]); 
+            bounds.extend([destLat, destLng]); 
+            map.fitBounds(bounds, { padding: [50, 50] });
+            
+            // Close the popup so they can clearly see the route
+            map.closePopup();
+          } else {
+            alert("Could not find a valid walking route.");
+          }
+        })
+        .catch(err => {
+          console.error("Routing error:", err);
+          alert("An error occurred while fetching directions.");
+        });
+        
+    }, (error) => {
+      alert("Could not get your location. Please ensure location permissions are granted.");
+    }, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    });
   }
 </script>
 
