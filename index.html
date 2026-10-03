@@ -325,26 +325,81 @@
       font-weight: 600;
       border-radius: 12px;
       font-size: 12px;
+      height: 36px;
     }
 
-    .btn-share {
-      flex: 1;
+    /* --- NEW CSS FOR SQUARE BUTTONS --- */
+    .btn-square {
+      flex: 0 0 36px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
-      padding: 8px 10px;
+      width: 36px;
+      height: 36px;
       background-color: #f1f5f9;
       color: #0f172a;
       border: none;
-      font-weight: 600;
       border-radius: 12px;
-      font-size: 12px;
       cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-square:hover {
+      background-color: #e2e8f0;
+    }
+    /* ---------------------------------- */
+
+    #routeLoader {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2000;
+      background: rgba(255, 255, 255, 0.4); /* 40% transparent white */
+      backdrop-filter: blur(6px); /* Blurs the map in the background */
+      -webkit-backdrop-filter: blur(6px);
+      display: none; /* Hidden by default, toggled to flex */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center; /* Centers the content vertically */
+      gap: 16px;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .loader-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(15, 23, 42, 0.15); /* Light gray rim */
+      border-top: 4px solid #0f172a; /* Dark solid top */
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #routeLoader span {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.4;
+      max-width: 80%;
+      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
     }
   </style>
 </head>
 <body>
+
+<!-- FULL SCREEN LOADER HTML -->
+<div id="routeLoader">
+  <div class="loader-spinner"></div>
+  <span id="loaderText">Loading...</span> 
+</div>
 
 <div id="controls">
   <div class="header-branding">
@@ -374,6 +429,16 @@
 <div id="map"></div>
 
 <script>
+  // ==========================================
+  // 📝 ADD YOUR NEW QUOTES HERE!
+  // ==========================================
+  const loadingQuotes = [
+    "Sip your mocha, while we walk through Joka ☕",
+    "Hope you find Monty, on your way 🐕",
+    "We leave no one behind, so wait while the path is aligned 🧭"
+  ];
+  // ==========================================
+
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -393,14 +458,18 @@
   googleHybridNoPOI.addTo(map);
   
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
-
+  const pathsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1640199293&single=true&output=csv';
+  
   let allRooms = [];
   let activeMarkers = [];
   
-  // ADDED: Track active route layers so we can clear them on a new search
+  // Custom Routing Engine Variables
+  let routeGraph = {}; 
+  let allPathSegments = []; 
   let currentRouteLayer = null;
   let userLocationMarker = null;
 
+  // 1. Load Rooms
   Papa.parse(sheetCsvUrl, {
     download: true,
     header: true,
@@ -410,6 +479,145 @@
       populateBuildingDropdown();
       clearMarkers();
       checkUrlSearchParam();
+    }
+  });
+
+  // 2. Load Paths & Build Custom Navigation Graph
+  Papa.parse(pathsCsvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      results.data.forEach(row => {
+        if (row.Coordinates_JSON) {
+          try {
+            const coords = JSON.parse(row.Coordinates_JSON);
+            for (let i = 0; i < coords.length - 1; i++) {
+              const p1 = coords[i];
+              const p2 = coords[i+1];
+              
+              const key1 = p1[0] + "," + p1[1];
+              const key2 = p2[0] + "," + p2[1];
+              const dist = getHaversineDistance(p1[0], p1[1], p2[0], p2[1]);
+              
+              if(!routeGraph[key1]) routeGraph[key1] = [];
+              if(!routeGraph[key2]) routeGraph[key2] = [];
+              
+              // Add bidirectional edges
+              routeGraph[key1].push({ node: key2, dist: dist });
+              routeGraph[key2].push({ node: key1, dist: dist });
+              
+              // Save segments for snapping algorithm
+              allPathSegments.push({ A: p1, B: p2, keyA: key1, keyB: key2 });
+            }
+          } catch(e) { console.error("Error parsing path JSON", e); }
+        }
+      });
+    }
+  });
+
+  /* MATH UTILITIES FOR ROUTING */
+  function getHaversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // meters
+    const φ1 = lat1 * Math.PI/180;
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  // Projects an off-path coordinate onto the nearest path line
+  function snapPointToSegment(P, A, B) {
+    const lat0 = A[0] * Math.PI / 180;
+    const kx = Math.cos(lat0) * 111320; 
+    const ky = 111000;
+
+    const px = (P[1] - A[1]) * kx;
+    const py = (P[0] - A[0]) * ky;
+    const bx = (B[1] - A[1]) * kx;
+    const by = (B[0] - A[0]) * ky;
+
+    const magAB2 = bx*bx + by*by;
+    let u = magAB2 === 0 ? 0 : (px*bx + py*by) / magAB2;
+    
+    if (u < 0) u = 0;
+    if (u > 1) u = 1;
+
+    const projX = A[1] + (u * (B[1] - A[1]));
+    const projY = A[0] + (u * (B[0] - A[0]));
+    
+    const dist = getHaversineDistance(P[0], P[1], projY, projX);
+    return { point: [projY, projX], dist: dist, u: u };
+  }
+
+  // Dijkstra's Shortest Path Algorithm
+  function runDijkstra(startKey, endKey, graph) {
+    const distances = {};
+    const prev = {};
+    const queue = [];
+
+    for (let v in graph) {
+      distances[v] = Infinity;
+      prev[v] = null;
+    }
+    distances[startKey] = 0;
+    queue.push({ id: startKey, dist: 0 });
+
+    while (queue.length > 0) {
+      queue.sort((a, b) => a.dist - b.dist);
+      const current = queue.shift();
+      const u = current.id;
+
+      if (u === endKey) break;
+      if (current.dist > distances[u]) continue;
+
+      if(graph[u]) {
+        for (let neighbor of graph[u]) {
+          const alt = distances[u] + neighbor.dist;
+          if (alt < distances[neighbor.node]) {
+            distances[neighbor.node] = alt;
+            prev[neighbor.node] = u;
+            queue.push({ id: neighbor.node, dist: alt });
+          }
+        }
+      }
+    }
+
+    const path = [];
+    let curr = endKey;
+    while (curr) {
+      path.unshift(curr);
+      curr = prev[curr];
+    }
+    return (path.length > 1 || startKey === endKey) ? path : null;
+  }
+  /* END MATH UTILITIES */
+
+  // --- Handle Back Button ---
+  window.addEventListener('popstate', (event) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    if (!urlParams.has('room')) {
+      // If back brings us to a URL with no room, clear markers/routes and go home
+      clearMarkers();
+      const searchInput = document.getElementById('search');
+      if (searchInput) searchInput.value = '';
+      hideSuggestions();
+      map.flyTo([22.44645, 88.30245], 19, { animate: true, duration: 1.2 });
+    } else {
+      // If there's a room parameter, load it
+      const roomParam = urlParams.get('room');
+      const searchInput = document.getElementById('search');
+      if (searchInput) searchInput.value = roomParam;
+      
+      const cleanParam = normalizeText(roomParam);
+      const matchedRoom = allRooms.find(r => 
+        normalizeText(r.Room_ID) === cleanParam || 
+        normalizeText(r.Room_Number || r['Room Number']) === cleanParam
+      );
+      performSearch(true, matchedRoom);
     }
   });
 
@@ -430,7 +638,6 @@
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
     
-    // ADDED: Clear routes when a new search happens
     if (currentRouteLayer) map.removeLayer(currentRouteLayer);
     if (userLocationMarker) map.removeLayer(userLocationMarker);
   }
@@ -475,15 +682,13 @@
     document.body.removeChild(textArea);
   }
 
+  // Updated to elegantly show a checkmark on the square button
   function showCopyFeedback(btn) {
-    const originalText = btn.innerHTML;
-    btn.innerHTML = "✓ Copied";
-    btn.style.backgroundColor = "#e2e8f0";
-    btn.style.color = "#166534";
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+    
     setTimeout(() => {
-      btn.innerHTML = originalText;
-      btn.style.backgroundColor = "#f1f5f9";
-      btn.style.color = "#0f172a";
+      btn.innerHTML = originalHTML;
     }, 2000);
   }
 
@@ -678,7 +883,7 @@
 
         const marker = L.marker([lat, lng], { interactive: true });
 
-        // MODIFIED: Changed the Maps anchor tag to trigger getDirections()
+        // --- UPDATED POPUP BUTTONS ---
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -692,9 +897,23 @@
               <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
                 Directions
               </a>
-              <button class="btn-share" onclick="copyRoomUrl(this, '${roomId}')">
-                Share
+              
+              <button class="btn-square" onclick="copyRoomUrl(this, '${roomId}')" title="Share Link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
               </button>
+              
+              <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" class="btn-square" title="Open in Google Maps">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </a>
             </div>
           </div>
         `;
@@ -730,76 +949,140 @@
 
     const targetRoomId = filtered[0].Room_ID || rawQuery;
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
-    window.history.replaceState({ path: newUrl }, '', newUrl);
+    // window.history.replaceState({ path: newUrl }, '', newUrl);
+    // Push state so back button returns to clean home URL
+     if (!fromUrl) {
+      window.history.pushState({ path: newUrl }, '', newUrl);
+    }
+
+
+ 
+   
+    
   }
 
-  // ADDED: The Directions function that handles geolocation and routing
+  // The custom graphing function that executes when user clicks "Directions"
   function getDirections(destLat, destLng) {
+    if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
+      alert("Campus paths are still loading. Please try again in a few seconds.");
+      return;
+    }
+
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
     }
 
+    // --- SHOW LOADER & PICK RANDOM QUOTE ---
+    const loader = document.getElementById('routeLoader');
+    const loaderText = document.getElementById('loaderText');
+    if (loader && loaderText) {
+      const randomQuote = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
+      loaderText.innerText = randomQuote;
+      loader.style.display = 'flex';
+    }
+
     navigator.geolocation.getCurrentPosition((position) => {
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
+      
+      const userP = [userLat, userLng];
+      const destP = [destLat, destLng];
 
-      // Clear existing route layers if they exist
-      if (currentRouteLayer) {
-        map.removeLayer(currentRouteLayer);
-      }
-      if (userLocationMarker) {
-        map.removeLayer(userLocationMarker);
-      }
+      if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+      if (userLocationMarker) map.removeLayer(userLocationMarker);
 
-      // Add a distinct marker for the user's current location
-      userLocationMarker = L.circleMarker([userLat, userLng], {
+      userLocationMarker = L.circleMarker(userP, {
         radius: 6,
-        fillColor: "#3b82f6", // Blue color distinct from default Leaflet marker
+        fillColor: "#3b82f6",
         color: "#ffffff",
         weight: 2,
         opacity: 1,
         fillOpacity: 1
       }).addTo(map);
 
-      // Fetch walking route from Open Source Routing Machine
-      const routingUrl = `https://router.project-osrm.org/route/v1/foot/${userLng},${userLat};${destLng},${destLat}?overview=full&geometries=geojson`;
+      // Snap Both Start and End Points to the Nearest Path Segment
+      let bestS = null, bestE = null;
+      let minDistS = Infinity, minDistE = Infinity;
 
-      fetch(routingUrl)
-        .then(response => response.json())
-        .then(data => {
-          if (data.routes && data.routes.length > 0) {
-            const routeGeoJSON = data.routes[0].geometry;
-            
-            // Draw the path on the map
-            currentRouteLayer = L.geoJSON(routeGeoJSON, {
-              style: {
-                color: '#3b82f6', 
-                weight: 5,
-                opacity: 0.8,
-                dashArray: '1, 10', // Creates a dotted line typical for walking paths
-                lineCap: 'round'
-              }
-            }).addTo(map);
-
-            // Adjust the camera bounds to ensure both start and end are visible
-            const bounds = currentRouteLayer.getBounds();
-            bounds.extend([userLat, userLng]); 
-            bounds.extend([destLat, destLng]); 
-            map.fitBounds(bounds, { padding: [50, 50] });
-            
-            // Close the popup so they can clearly see the route
-            map.closePopup();
-          } else {
-            alert("Could not find a valid walking route.");
-          }
-        })
-        .catch(err => {
-          console.error("Routing error:", err);
-          alert("An error occurred while fetching directions.");
-        });
+      allPathSegments.forEach(seg => {
+        const resS = snapPointToSegment(userP, seg.A, seg.B);
+        if (resS.dist < minDistS) { minDistS = resS.dist; bestS = { ...resS, seg: seg }; }
         
+        const resE = snapPointToSegment(destP, seg.A, seg.B);
+        if (resE.dist < minDistE) { minDistE = resE.dist; bestE = { ...resE, seg: seg }; }
+      });
+
+      // Clone Graph for temporary projection nodes
+      const tg = {};
+      for(let k in routeGraph) { tg[k] = [...routeGraph[k]]; }
+
+      const kS = bestS.point[0]+","+bestS.point[1];
+      const kE = bestE.point[0]+","+bestE.point[1];
+
+      tg[kS] = [];
+      tg[kE] = [];
+
+      // Link User snapped point to its surrounding segment points
+      const dSA = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.A[0], bestS.seg.A[1]);
+      const dSB = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.B[0], bestS.seg.B[1]);
+      tg[kS].push({node: bestS.seg.keyA, dist: dSA}, {node: bestS.seg.keyB, dist: dSB});
+      tg[bestS.seg.keyA].push({node: kS, dist: dSA});
+      tg[bestS.seg.keyB].push({node: kS, dist: dSB});
+
+      // Link Dest snapped point to its surrounding segment points
+      const dEA = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.A[0], bestE.seg.A[1]);
+      const dEB = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.B[0], bestE.seg.B[1]);
+      tg[kE].push({node: bestE.seg.keyA, dist: dEA}, {node: bestE.seg.keyB, dist: dEB});
+      tg[bestE.seg.keyA].push({node: kE, dist: dEA});
+      tg[bestE.seg.keyB].push({node: kE, dist: dEB});
+
+      // Edge case: if they snapped to the exact same segment
+      if (bestS.seg.keyA === bestE.seg.keyA && bestS.seg.keyB === bestE.seg.keyB) {
+        const dSE = getHaversineDistance(bestS.point[0], bestS.point[1], bestE.point[0], bestE.point[1]);
+        tg[kS].push({node: kE, dist: dSE});
+        tg[kE].push({node: kS, dist: dSE});
+      }
+
+      // Calculate path
+      const pathKeys = runDijkstra(kS, kE, tg);
+
+      if(!pathKeys) {
+        // --- HIDE LOADER ON ERROR ---
+        if (loader) loader.style.display = 'none';
+        alert("Could not calculate a path. Make sure your paths network is fully connected.");
+        return;
+      }
+
+      // Reconstruct final path (Start -> Snapped Network -> End)
+      const latlngs = [userP];
+      pathKeys.forEach(k => {
+        const pts = k.split(',');
+        latlngs.push([parseFloat(pts[0]), parseFloat(pts[1])]);
+      });
+      latlngs.push(destP);
+
+      // Draw the path
+      currentRouteLayer = L.polyline(latlngs, {
+        color: '#3b82f6', 
+        weight: 5,
+        opacity: 0.8,
+        dashArray: '1, 10', // Dotted walking path
+        lineCap: 'round'
+      }).addTo(map);
+
+      // Adjust camera
+      const routeBounds = L.latLngBounds(latlngs);
+      map.fitBounds(routeBounds, { padding: [50, 50] });
+      
+      // Popup closing logic REMOVED here so it stays open!
+
+      // --- HIDE LOADER WHEN DONE ---
+      if (loader) loader.style.display = 'none';
+
     }, (error) => {
+      // --- HIDE LOADER ON GPS ERROR ---
+      if (loader) loader.style.display = 'none';
       alert("Could not get your location. Please ensure location permissions are granted.");
     }, {
       enableHighAccuracy: true,
