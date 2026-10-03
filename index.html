@@ -398,39 +398,73 @@
       text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
     }
 
-    /* --- START LOCATION MODIFIER CARD (ON POPUP) --- */
-    .start-location-row {
+    /* --- RAPIDO STYLE SOURCE FLOATING CARD --- */
+    #sourceCard {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      z-index: 3000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: #0f172a;
+      padding: 10px 14px;
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(0, 0, 0, 0.08);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      background: #f8fafc;
-      padding: 8px 10px;
-      border-radius: 10px;
-      margin-top: 8px;
-      margin-bottom: 2px;
-      border: 1px solid #e2e8f0;
+      gap: 12px;
+      width: calc(100% - 24px);
+      max-width: 400px;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
-    .start-location-label {
+    #sourceCard.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .source-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 2px;
+    }
+
+    .source-title {
       font-size: 11px;
       font-weight: 600;
       color: #64748b;
     }
 
-    .btn-pencil {
-      background: none;
+    .source-location-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .btn-edit-source {
+      background: #f1f5f9;
+      color: #2563eb;
       border: none;
-      cursor: pointer;
-      padding: 4px;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #2563eb;
-      border-radius: 6px;
+      cursor: pointer;
       transition: background 0.2s;
     }
 
-    .btn-pencil:hover {
+    .btn-edit-source:hover {
       background: #e2e8f0;
     }
 
@@ -512,7 +546,7 @@
     /* --- PWA INSTALL TOAST STYLES --- */
     #installToast {
       position: absolute;
-      top: 180px;
+      top: 100px;
       left: 50%;
       transform: translateX(-50%) translateY(-20px);
       z-index: 3000;
@@ -535,6 +569,7 @@
     }
 
     #installToast.show {
+      transform: translateX(-50%) translateY(0);
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
@@ -583,10 +618,21 @@
   <span id="loaderText">Loading...</span> 
 </div>
 
+<!-- RAPIDO STYLE SOURCE CARD -->
+<div id="sourceCard">
+  <div class="source-info">
+    <span class="source-title">Starting point</span>
+    <span class="source-location-name" id="sourceNameText">Live GPS Location</span>
+  </div>
+  <button class="btn-edit-source" onclick="openManualSourcePicker()" title="Change start location">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+  </button>
+</div>
+
 <!-- MANUAL PICKER UI -->
 <div id="manualPickerUI">
   <p>Move the map to set your start position</p>
-  <button class="btn-confirm-location" onclick="confirmManualLocation()">Confirm Start Location</button>
+  <button class="btn-confirm-location" onclick="confirmManualLocation()">Confirm Location</button>
 </div>
 
 <!-- CENTER CROSSHAIR PIN -->
@@ -839,6 +885,7 @@
       const searchInput = document.getElementById('search');
       if (searchInput) searchInput.value = '';
       hideSuggestions();
+      document.getElementById('sourceCard').classList.remove('show');
       map.flyTo([22.44645, 88.30245], 19, { animate: true, duration: 1.2 });
     } else {
       const roomParam = urlParams.get('room');
@@ -873,6 +920,7 @@
     
     if (currentRouteLayer) map.removeLayer(currentRouteLayer);
     if (userLocationMarker) map.removeLayer(userLocationMarker);
+    document.getElementById('sourceCard').classList.remove('show');
   }
 
   function normalizeText(text) {
@@ -1124,13 +1172,6 @@
             <h2 class="popup-title">${room.Room_Name}</h2>
             <div class="popup-subtitle">${buildingName} •  ${floorName}</div>
 
-            <div class="start-location-row">
-              <span class="start-location-label">📍 Start from Live GPS</span>
-              <button class="btn-pencil" onclick="enableManualStartLocation(${lat}, ${lng})" title="Change start location">
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-              </button>
-            </div>
-
             <div class="popup-actions">
               <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
                 Directions
@@ -1193,25 +1234,25 @@
     }
   }
 
-  // --- MANUAL START LOCATION PICKER ---
-  function enableManualStartLocation(destLat, destLng) {
-    activeDestination = { lat: destLat, lng: destLng };
-    map.closePopup();
-
+  // --- RAPIDO STYLE MANUAL SOURCE PICKER ---
+  function openManualSourcePicker() {
+    // Hide the source card while picking
+    document.getElementById('sourceCard').classList.remove('show');
     // Show center crosshair and confirmation UI
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
   }
 
   function confirmManualLocation() {
-    // Hide picker UI and crosshair
     document.getElementById('centerCrosshair').style.display = 'none';
     document.getElementById('manualPickerUI').style.display = 'none';
 
-    // Get center coordinates of the map
     const centerLatLng = map.getCenter();
     
-    // Calculate path using manual start position
+    // Update source card text to show manual override
+    document.getElementById('sourceNameText').innerText = `Custom Location (${centerLatLng.lat.toFixed(4)}, ${centerLatLng.lng.toFixed(4)})`;
+
+    // Recalculate route from manual point
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
 
@@ -1239,6 +1280,7 @@
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
       
+      document.getElementById('sourceNameText').innerText = "Live GPS Location";
       calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
 
     }, (error) => {
@@ -1253,6 +1295,8 @@
 
   // Core routing execution logic
   function calculateAndDrawRoute(userP, destP) {
+    activeDestination = { lat: destP[0], lng: destP[1] };
+
     const loader = document.getElementById('routeLoader');
     if (loader && loader.style.display !== 'flex') {
       loader.style.display = 'flex';
@@ -1337,6 +1381,9 @@
 
     const routeBounds = L.latLngBounds(latlngs);
     map.fitBounds(routeBounds, { padding: [50, 50] });
+
+    // Show the Rapido-style source card under the search bar
+    document.getElementById('sourceCard').classList.add('show');
 
     if (loader) loader.style.display = 'none';
   }
