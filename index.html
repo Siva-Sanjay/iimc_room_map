@@ -678,6 +678,10 @@
   // Stored active navigation destination for manual overrides
   let activeDestination = null;
 
+  //Centre and Gate Coordinates
+  const IIM_MAIN_GATE = [22.444902, 88.297164]; 
+  const IIM_CENTRE = [22.444948, 88.302142]; 
+
   // 1. Load Rooms
   Papa.parse(sheetCsvUrl, {
     download: true,
@@ -1194,8 +1198,21 @@
     }
 
     navigator.geolocation.getCurrentPosition((position) => {
+      let userLat = position.coords.latitude;
       const userLat = position.coords.latitude;
+      let userLng = position.coords.longitude;
       const userLng = position.coords.longitude;
+      
+      
+      // --- 2 KM CAMPUS RESTRICTION CHECK ---
+      const distanceToCentre = getHaversineDistance(userLat, userLng, IIM_CENTRE[0], IIM_CENTRE[1]);
+      
+      if (distanceToCentre > 600) {
+        alert("You are outside the IIM Calcutta campus. Starting navigation from the Main Gate.");
+        userLat = IIM_MAIN_GATE[0];
+        userLng = IIM_MAIN_GATE[1];
+      }
+      // -------------------------------------
       
       calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
 
