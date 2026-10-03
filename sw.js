@@ -1,4 +1,4 @@
-const CACHE_NAME = 'joka-compass-v2'; // Bump this version (v2, v3, etc.) whenever you make updates!
+const CACHE_NAME = 'joka-compass-v1.0.1'; // Bump this version (v2, v3, etc.) whenever you make updates!
 const urlsToCache = [
   '/',
   '/index.html'
