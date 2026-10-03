@@ -398,76 +398,6 @@
       text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
     }
 
-    /* --- RAPIDO STYLE SOURCE FLOATING CARD --- */
-    #sourceCard {
-      position: absolute;
-      top: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      z-index: 3000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      color: #0f172a;
-      padding: 10px 14px;
-      border-radius: 14px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: calc(100% - 24px);
-      max-width: 400px;
-      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    }
-
-    #sourceCard.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    .source-info {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      gap: 2px;
-    }
-
-    .source-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: #64748b;
-    }
-
-    .source-location-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0f172a;
-    }
-
-    .btn-edit-source {
-      background: #f1f5f9;
-      color: #2563eb;
-      border: none;
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-edit-source:hover {
-      background: #e2e8f0;
-    }
-
     /* --- MANUAL PICKER OVERLAY UI --- */
     #manualPickerUI {
       position: absolute;
@@ -546,7 +476,7 @@
     /* --- PWA INSTALL TOAST STYLES --- */
     #installToast {
       position: absolute;
-      top: 100px;
+      top: 180px;
       left: 50%;
       transform: translateX(-50%) translateY(-20px);
       z-index: 3000;
@@ -569,7 +499,6 @@
     }
 
     #installToast.show {
-      transform: translateX(-50%) translateY(0);
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
@@ -616,17 +545,6 @@
     <iframe src="https://lottie.host/embed/bc5743aa-4228-4655-bd70-ed7c3f6ab3c6/R57Jnixy6i.lottie"></iframe>
   </div>
   <span id="loaderText">Loading...</span> 
-</div>
-
-<!-- RAPIDO STYLE SOURCE CARD -->
-<div id="sourceCard">
-  <div class="source-info">
-    <span class="source-title">Starting point</span>
-    <span class="source-location-name" id="sourceNameText">Live GPS Location</span>
-  </div>
-  <button class="btn-edit-source" onclick="openManualSourcePicker()" title="Change start location">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
-  </button>
 </div>
 
 <!-- MANUAL PICKER UI -->
@@ -885,7 +803,6 @@
       const searchInput = document.getElementById('search');
       if (searchInput) searchInput.value = '';
       hideSuggestions();
-      document.getElementById('sourceCard').classList.remove('show');
       map.flyTo([22.44645, 88.30245], 19, { animate: true, duration: 1.2 });
     } else {
       const roomParam = urlParams.get('room');
@@ -920,7 +837,6 @@
     
     if (currentRouteLayer) map.removeLayer(currentRouteLayer);
     if (userLocationMarker) map.removeLayer(userLocationMarker);
-    document.getElementById('sourceCard').classList.remove('show');
   }
 
   function normalizeText(text) {
@@ -1234,10 +1150,8 @@
     }
   }
 
-  // --- RAPIDO STYLE MANUAL SOURCE PICKER ---
+  // --- MANUAL SOURCE PICKER (RAPIDO STYLE) ---
   function openManualSourcePicker() {
-    // Hide the source card while picking
-    document.getElementById('sourceCard').classList.remove('show');
     // Show center crosshair and confirmation UI
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
@@ -1249,9 +1163,6 @@
 
     const centerLatLng = map.getCenter();
     
-    // Update source card text to show manual override
-    document.getElementById('sourceNameText').innerText = `Custom Location (${centerLatLng.lat.toFixed(4)}, ${centerLatLng.lng.toFixed(4)})`;
-
     // Recalculate route from manual point
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
@@ -1280,7 +1191,6 @@
       const userLat = position.coords.latitude;
       const userLng = position.coords.longitude;
       
-      document.getElementById('sourceNameText').innerText = "Live GPS Location";
       calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
 
     }, (error) => {
@@ -1309,14 +1219,22 @@
     if (currentRouteLayer) map.removeLayer(currentRouteLayer);
     if (userLocationMarker) map.removeLayer(userLocationMarker);
 
-    userLocationMarker = L.circleMarker(userP, {
-      radius: 6,
-      fillColor: "#3b82f6",
-      color: "#ffffff",
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 1
-    }).addTo(map);
+    // Custom Source Marker with a Pencil Badge attached to the blue dot
+    const sourceIcon = L.divIcon({
+      className: 'custom-source-marker',
+      html: `
+        <div style="position: relative; width: 32px; height: 32px;">
+          <div style="width: 14px; height: 14px; background: #3b82f6; border: 2.5px solid white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); position: absolute; top: 9px; left: 9px;"></div>
+          <button onclick="openManualSourcePicker()" style="position: absolute; top: 0; left: 16px; background: white; border: 1.5px solid #cbd5e1; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #2563eb;" title="Change start location">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+          </button>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+
+    userLocationMarker = L.marker(userP, { icon: sourceIcon }).addTo(map);
 
     let bestS = null, bestE = null;
     let minDistS = Infinity, minDistE = Infinity;
@@ -1381,9 +1299,6 @@
 
     const routeBounds = L.latLngBounds(latlngs);
     map.fitBounds(routeBounds, { padding: [50, 50] });
-
-    // Show the Rapido-style source card under the search bar
-    document.getElementById('sourceCard').classList.add('show');
 
     if (loader) loader.style.display = 'none';
   }
