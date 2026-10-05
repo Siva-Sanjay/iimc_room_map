@@ -469,7 +469,7 @@
       50% { transform: translateY(-6px); }
     }
 
-    /* --- ROUTE ETA BADGE STYLES (MATCHING PATH COLOR WITH 3px SOLID WHITE BORDER) --- */
+    /* --- ROUTE ETA BADGE STYLES (MATCHING PATH COLOR WITH 1.5px SOLID WHITE BORDER) --- */
     .route-eta-badge {
       background: #3b82f6;
       color: #ffffff;
@@ -478,7 +478,7 @@
       font-size: 12px;
       font-weight: 700;
       white-space: nowrap;
-      border: 3px solid #ffffff;
+      border: 1.5px solid #ffffff;
       box-shadow: none;
       transform: translate(-50%, -50%);
       display: inline-block;
@@ -1331,21 +1331,25 @@
     });
     latlngs.push(destP);
 
-    // --- 1. DUAL-LAYER DOTS WITH 3px SOLID WHITE BORDER & EQUAL GAP/DOT WIDTH ---
+    // --- 1. CIRCULAR ROUND DOTS WITH 1.5px SOLID WHITE BORDER & EVEN SPACING ---
+    const dotWeight = 5;
+    const borderThickness = 1.5;
+    const whiteWeight = dotWeight + (borderThickness * 2);
+
     const whiteBorderLayer = L.polyline(latlngs, {
       color: '#ffffff',
-      weight: 11, // 5px core + 3px solid border on each side
+      weight: whiteWeight,
       opacity: 1,
-      dashArray: '5, 5', // Dot width and gap width are equal
+      dashArray: '2, 12', // Creates circular round dots with even spacing gaps
       lineCap: 'round',
       lineJoin: 'round'
     });
 
     const blueDotLayer = L.polyline(latlngs, {
       color: '#3b82f6',
-      weight: 5,
+      weight: dotWeight,
       opacity: 1,
-      dashArray: '5, 5', // Dot width and gap width are equal
+      dashArray: '2, 12', // Creates circular round dots with even spacing gaps
       lineCap: 'round',
       lineJoin: 'round'
     });
@@ -1353,7 +1357,7 @@
     currentRouteLayer = [whiteBorderLayer, blueDotLayer];
     whiteBorderLayer.addTo(map);
     blueDotLayer.addTo(map);
-    // -------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     // --- 2. CALCULATE DISTANCE & ETA WITH +2 MIN BUFFER ---
     let totalDistanceMeters = 0;
