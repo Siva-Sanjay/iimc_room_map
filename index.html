@@ -469,7 +469,7 @@
       50% { transform: translateY(-6px); }
     }
 
-    /* --- ROUTE ETA BADGE STYLES (MATCHING PATH COLOR WITH 1.5px SOLID WHITE BORDER) --- */
+    /* --- ROUTE ETA BADGE STYLES (SCALED TO 70%) --- */
     .route-eta-badge {
       background: #3b82f6;
       color: #ffffff;
@@ -480,7 +480,8 @@
       white-space: nowrap;
       border: 1.5px solid #ffffff;
       box-shadow: none;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) scale(0.7);
+      transform-origin: center center;
       display: inline-block;
     }
 
@@ -1331,7 +1332,7 @@
     });
     latlngs.push(destP);
 
-    // --- 1. CIRCULAR ROUND DOTS WITH 1.5px SOLID WHITE BORDER & EVEN SPACING ---
+    // --- 1. TRUE CIRCULAR DOTS WITH 1.5px SOLID WHITE BORDER & EQUAL SPACING ---
     const dotWeight = 5;
     const borderThickness = 1.5;
     const whiteWeight = dotWeight + (borderThickness * 2);
@@ -1340,8 +1341,8 @@
       color: '#ffffff',
       weight: whiteWeight,
       opacity: 1,
-      dashArray: '2, 12', // Creates circular round dots with even spacing gaps
-      lineCap: 'round',
+      dashArray: '1, 10', // 1px dot with 10px equal spacing gaps
+      lineCap: 'round',    // Makes the dashes true circular dots
       lineJoin: 'round'
     });
 
@@ -1349,8 +1350,8 @@
       color: '#3b82f6',
       weight: dotWeight,
       opacity: 1,
-      dashArray: '2, 12', // Creates circular round dots with even spacing gaps
-      lineCap: 'round',
+      dashArray: '1, 10', // 1px dot with 10px equal spacing gaps
+      lineCap: 'round',    // Makes the dashes true circular dots
       lineJoin: 'round'
     });
 
