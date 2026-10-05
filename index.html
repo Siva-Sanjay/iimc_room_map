@@ -469,6 +469,22 @@
       50% { transform: translateY(-6px); }
     }
 
+    /* --- ROUTE ETA BADGE STYLES --- */
+    .route-eta-badge {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.25);
+      transform: translate(-50%, -50%);
+    }
+
     /* --- PWA INSTALL TOAST STYLES --- */
     #installToast {
       position: absolute;
@@ -551,7 +567,6 @@
 
 <!-- CENTER CROSSHAIR PIN -->
 <div id="centerCrosshair">
-  <!-- <div class="crosshair-pin"></div> -->
   <img class="crosshair-pin" src="/loc_pointer.png" alt="" />
 </div>
 
@@ -1162,7 +1177,6 @@
 
   // --- MANUAL SOURCE PICKER (RAPIDO STYLE) ---
   function openManualSourcePicker() {
-    // Show center crosshair and confirmation UI
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
   }
@@ -1173,7 +1187,6 @@
 
     const centerLatLng = map.getCenter();
     
-    // Recalculate route from manual point
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
 
@@ -1201,8 +1214,6 @@
       let userLat = position.coords.latitude;
       let userLng = position.coords.longitude;
       
-      
-      // --- 2 KM CAMPUS RESTRICTION CHECK ---
       const distanceToCentre = getHaversineDistance(userLat, userLng, IIM_CENTRE[0], IIM_CENTRE[1]);
       
       if (distanceToCentre > 600) {
@@ -1210,7 +1221,6 @@
         userLat = IIM_MAIN_GATE[0];
         userLng = IIM_MAIN_GATE[1];
       }
-      // -------------------------------------
       
       calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
 
@@ -1246,7 +1256,7 @@
       html: `
         <div style="position: relative; width: 32px; height: 32px;">
           <div style="width: 14px; height: 14px; background: #3b82f6; border: 2.5px solid white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); position: absolute; top: 9px; left: 9px;"></div>
-          <button onclick="openManualSourcePicker()" style="position: absolute;  background: white; border: 1.5px solid #cbd5e1; border-radius: 50%; width: 2.5em; height: 2.5em; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #2563eb;" title="Change start location">
+          <button onclick="openManualSourcePicker()" style="position: absolute; background: white; border: 1.5px solid #cbd5e1; border-radius: 50%; width: 2.5em; height: 2.5em; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #2563eb;" title="Change start location">
             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
           </button>
         </div>
@@ -1310,13 +1320,50 @@
     });
     latlngs.push(destP);
 
+    // --- 1. HIGH VISIBILITY DASHED PATH WITH 2px WHITE BORDER ---
     currentRouteLayer = L.polyline(latlngs, {
       color: '#3b82f6', 
       weight: 5,
-      opacity: 0.8,
-      dashArray: '1, 10', 
-      lineCap: 'round'
+      opacity: 1,
+      dashArray: '12, 4, 12, 4, 12, 4', // 3-dot dash pattern with gaps
+      lineCap: 'round',
+      className: 'stroked-dashed-path'
     }).addTo(map);
+
+    // Add inline style rule dynamically to give each dash a 2px white outline
+    if (!document.getElementById('pathOutlineStyle')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'pathOutlineStyle';
+      styleEl.innerHTML = `.stroked-dashed-path { stroke: #3b82f6; stroke-width: 5px; filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 1px #ffffff); }`;
+      document.head.appendChild(styleEl);
+    }
+    // -------------------------------------------------------------
+
+    // --- 2. CALCULATE DISTANCE & ETA WITH +2 MIN BUFFER ---
+    let totalDistanceMeters = 0;
+    for (let i = 0; i < latlngs.length - 1; i++) {
+      totalDistanceMeters += getHaversineDistance(
+        latlngs[i][0], latlngs[i][1], 
+        latlngs[i+1][0], latlngs[i+1][1]
+      );
+    }
+
+    // Walking speed ~83 meters per minute + 2 min buffer
+    const walkingMinutes = Math.max(1, Math.round(totalDistanceMeters / 83)) + 2;
+    
+    const midIndex = Math.floor(latlngs.length / 2);
+    const midPointCoord = latlngs[midIndex];
+
+    const etaIcon = L.divIcon({
+      className: 'eta-icon-wrapper',
+      html: `<div class="route-eta-badge">🚶‍♂️ ~${walkingMinutes} min (${Math.round(totalDistanceMeters)}m)</div>`,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    });
+
+    const etaMarker = L.marker(midPointCoord, { icon: etaIcon }).addTo(map);
+    activeMarkers.push(etaMarker);
+    // -----------------------------------------------------
 
     const routeBounds = L.latLngBounds(latlngs);
     map.fitBounds(routeBounds, { padding: [50, 50] });
