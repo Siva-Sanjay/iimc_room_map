@@ -469,19 +469,17 @@
       50% { transform: translateY(-6px); }
     }
 
-    /* --- ROUTE ETA BADGE STYLES --- */
+    /* --- ROUTE ETA BADGE STYLES (MATCHING PATH COLOR WITH 3px SOLID WHITE BORDER) --- */
     .route-eta-badge {
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: white;
+      background: #3b82f6;
+      color: #ffffff;
       padding: 6px 12px;
       border-radius: 10px;
       font-size: 12px;
       font-weight: 700;
       white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-      border: 1px solid rgba(255,255,255,0.25);
+      border: 3px solid #ffffff;
+      box-shadow: none;
       transform: translate(-50%, -50%);
       display: inline-block;
     }
@@ -861,7 +859,13 @@
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
     
-    if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+    if (currentRouteLayer) {
+      if (Array.isArray(currentRouteLayer)) {
+        currentRouteLayer.forEach(l => map.removeLayer(l));
+      } else {
+        map.removeLayer(currentRouteLayer);
+      }
+    }
     if (userLocationMarker) map.removeLayer(userLocationMarker);
   }
 
@@ -1248,7 +1252,13 @@
       }
     }
 
-    if (currentRouteLayer) map.removeLayer(currentRouteLayer);
+    if (currentRouteLayer) {
+      if (Array.isArray(currentRouteLayer)) {
+        currentRouteLayer.forEach(l => map.removeLayer(l));
+      } else {
+        map.removeLayer(currentRouteLayer);
+      }
+    }
     if (userLocationMarker) map.removeLayer(userLocationMarker);
 
     // Custom Source Marker with a Pencil Badge attached to the blue dot
@@ -1321,25 +1331,31 @@
     });
     latlngs.push(destP);
 
-    // --- 1. WIDER SPACED DASHED PATH WITH 2px WHITE BORDER ---
-    currentRouteLayer = L.polyline(latlngs, {
-      color: '#3b82f6', 
+    // --- 1. DUAL-LAYER DOTS WITH 3px SOLID WHITE BORDER & EQUAL GAP/DOT WIDTH ---
+    const whiteBorderLayer = L.polyline(latlngs, {
+      color: '#ffffff',
+      weight: 11, // 5px core + 3px solid border on each side
+      opacity: 1,
+      dashArray: '5, 5', // Dot width and gap width are equal
+      lineCap: 'round',
+      lineJoin: 'round'
+    });
+
+    const blueDotLayer = L.polyline(latlngs, {
+      color: '#3b82f6',
       weight: 5,
       opacity: 1,
-      dashArray: '8, 16, 8, 16', // Increased spacing gaps between dots/dashes
+      dashArray: '5, 5', // Dot width and gap width are equal
       lineCap: 'round',
-      className: 'stroked-dashed-path'
-    }).addTo(map);
+      lineJoin: 'round'
+    });
 
-    if (!document.getElementById('pathOutlineStyle')) {
-      const styleEl = document.createElement('style');
-      styleEl.id = 'pathOutlineStyle';
-      styleEl.innerHTML = `.stroked-dashed-path { stroke: #3b82f6; stroke-width: 5px; filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 1px #ffffff); }`;
-      document.head.appendChild(styleEl);
-    }
+    currentRouteLayer = [whiteBorderLayer, blueDotLayer];
+    whiteBorderLayer.addTo(map);
+    blueDotLayer.addTo(map);
     // -------------------------------------------------------------
 
-    // --- 2. ETA CALCULATION FORMATTED CLEANLY WITHOUT ~ ---
+    // --- 2. CALCULATE DISTANCE & ETA WITH +2 MIN BUFFER ---
     let totalDistanceMeters = 0;
     for (let i = 0; i < latlngs.length - 1; i++) {
       totalDistanceMeters += getHaversineDistance(
