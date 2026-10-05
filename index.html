@@ -475,14 +475,15 @@
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       color: white;
-      padding: 5px 10px;
+      padding: 6px 12px;
       border-radius: 10px;
-      font-size: 11.5px;
+      font-size: 12px;
       font-weight: 700;
       white-space: nowrap;
       box-shadow: 0 4px 14px rgba(0,0,0,0.25);
       border: 1px solid rgba(255,255,255,0.25);
       transform: translate(-50%, -50%);
+      display: inline-block;
     }
 
     /* --- PWA INSTALL TOAST STYLES --- */
@@ -1320,17 +1321,16 @@
     });
     latlngs.push(destP);
 
-    // --- 1. HIGH VISIBILITY DASHED PATH WITH 2px WHITE BORDER ---
+    // --- 1. WIDER SPACED DASHED PATH WITH 2px WHITE BORDER ---
     currentRouteLayer = L.polyline(latlngs, {
       color: '#3b82f6', 
       weight: 5,
       opacity: 1,
-      dashArray: '12, 4, 12, 4, 12, 4', // 3-dot dash pattern with gaps
+      dashArray: '8, 16, 8, 16', // Increased spacing gaps between dots/dashes
       lineCap: 'round',
       className: 'stroked-dashed-path'
     }).addTo(map);
 
-    // Add inline style rule dynamically to give each dash a 2px white outline
     if (!document.getElementById('pathOutlineStyle')) {
       const styleEl = document.createElement('style');
       styleEl.id = 'pathOutlineStyle';
@@ -1339,7 +1339,7 @@
     }
     // -------------------------------------------------------------
 
-    // --- 2. CALCULATE DISTANCE & ETA WITH +2 MIN BUFFER ---
+    // --- 2. ETA CALCULATION FORMATTED CLEANLY WITHOUT ~ ---
     let totalDistanceMeters = 0;
     for (let i = 0; i < latlngs.length - 1; i++) {
       totalDistanceMeters += getHaversineDistance(
@@ -1348,15 +1348,13 @@
       );
     }
 
-    // Walking speed ~83 meters per minute + 2 min buffer
     const walkingMinutes = Math.max(1, Math.round(totalDistanceMeters / 83)) + 2;
-    
     const midIndex = Math.floor(latlngs.length / 2);
     const midPointCoord = latlngs[midIndex];
 
     const etaIcon = L.divIcon({
       className: 'eta-icon-wrapper',
-      html: `<div class="route-eta-badge">🚶‍♂️ ~${walkingMinutes} min (${Math.round(totalDistanceMeters)}m)</div>`,
+      html: `<div class="route-eta-badge">🚶‍♂️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0]
     });
