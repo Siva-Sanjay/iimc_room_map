@@ -25,7 +25,18 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
-  <script defer src="/_vercel/insights/script.js"></script>
+  <!-- ========================================== -->
+  <!-- 📊 GOOGLE ANALYTICS 4 (GA4) INTEGRATION    -->
+  <!-- ========================================== -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-V9JMV0JCBS');
+  </script>
+  <!-- ========================================== -->
 
   <!-- PWA Manifest & Theme Color -->
   <link rel="manifest" href="manifest.json">
@@ -605,10 +616,10 @@
 <div id="map"></div>
 
 <script>
-  // Helper for tracking with Vercel Analytics safely
-  function trackEvent(name) {
-    if (typeof window.va === 'function') {
-      window.va('event', { name: name });
+  // Helper for tracking with Google Analytics 4 safely
+  function trackEvent(eventName) {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName);
     }
   }
 
@@ -631,7 +642,7 @@
   ];
   // ==========================================
 
-  // --- PWA INSTALL PROMPT & VERCEL ANALYTICS LOGIC ---
+  // --- PWA INSTALL PROMPT & GOOGLE ANALYTICS LOGIC ---
   let deferredPrompt;
   const installToast = document.getElementById('installToast');
   const installBtn = document.getElementById('installBtn');
@@ -648,7 +659,7 @@
 
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
-      // 1. Track install button clicked
+      // 1. Track install button clicked in GA4
       trackEvent('install_button_clicked');
 
       if (deferredPrompt) {
@@ -669,13 +680,13 @@
     });
   }
 
-  // 2. Track actual PWA installation event
+  // 2. Track actual PWA installation event in GA4
   window.addEventListener('appinstalled', () => {
     console.log('🎉 PWA App successfully installed!');
     trackEvent('pwa_installed');
   });
 
-  // 3. Track when the app is opened in standalone/installed mode
+  // 3. Track when the app is opened in standalone/installed mode in GA4
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     trackEvent('app_opened_as_pwa');
   }
@@ -1414,7 +1425,7 @@
 
     const etaIcon = L.divIcon({
       className: 'eta-icon-wrapper',
-      html: `<div class="route-eta-badge">🚶‍♂️️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
+      html: `<div class="route-eta-badge">🚶‍♂️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0]
     });
