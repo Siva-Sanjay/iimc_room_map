@@ -866,8 +866,12 @@
       } else {
         map.removeLayer(currentRouteLayer);
       }
+      currentRouteLayer = null;
     }
-    if (userLocationMarker) map.removeLayer(userLocationMarker);
+    if (userLocationMarker) {
+      map.removeLayer(userLocationMarker);
+      userLocationMarker = null;
+    }
   }
 
   function normalizeText(text) {
@@ -1253,13 +1257,20 @@
       }
     }
 
+    // Clean up old route layers and old ETA markers before drawing new ones
     if (currentRouteLayer) {
       if (Array.isArray(currentRouteLayer)) {
         currentRouteLayer.forEach(l => map.removeLayer(l));
       } else {
         map.removeLayer(currentRouteLayer);
       }
+      currentRouteLayer = null;
     }
+    
+    // Clear previously added route-specific markers (like ETA badges)
+    activeMarkers.forEach(m => map.removeLayer(m));
+    activeMarkers = [];
+
     if (userLocationMarker) map.removeLayer(userLocationMarker);
 
     // Custom Source Marker with a Pencil Badge attached to the blue dot
@@ -1341,8 +1352,8 @@
       color: '#ffffff',
       weight: whiteWeight,
       opacity: 1,
-      dashArray: '1, 10', // 1px dot with 10px equal spacing gaps
-      lineCap: 'round',    // Makes the dashes true circular dots
+      dashArray: '1, 10', 
+      lineCap: 'round',    
       lineJoin: 'round'
     });
 
@@ -1350,8 +1361,8 @@
       color: '#3b82f6',
       weight: dotWeight,
       opacity: 1,
-      dashArray: '1, 10', // 1px dot with 10px equal spacing gaps
-      lineCap: 'round',    // Makes the dashes true circular dots
+      dashArray: '1, 10', 
+      lineCap: 'round',    
       lineJoin: 'round'
     });
 
@@ -1402,3 +1413,4 @@
 
 </body>
 </html>
+
