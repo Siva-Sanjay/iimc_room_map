@@ -605,6 +605,13 @@
 <div id="map"></div>
 
 <script>
+  // Helper for tracking with Vercel Analytics safely
+  function trackEvent(name) {
+    if (typeof window.va === 'function') {
+      window.va('event', { name: name });
+    }
+  }
+
   // ==========================================
   // 📝 ADD YOUR NEW QUOTES HERE!
   // ==========================================
@@ -624,7 +631,7 @@
   ];
   // ==========================================
 
-  // --- PWA INSTALL PROMPT LOGIC ---
+  // --- PWA INSTALL PROMPT & VERCEL ANALYTICS LOGIC ---
   let deferredPrompt;
   const installToast = document.getElementById('installToast');
   const installBtn = document.getElementById('installBtn');
@@ -641,6 +648,9 @@
 
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
+      // 1. Track install button clicked
+      trackEvent('install_button_clicked');
+
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -658,7 +668,18 @@
       installToast.classList.remove('show');
     });
   }
-  // ---------------------------------
+
+  // 2. Track actual PWA installation event
+  window.addEventListener('appinstalled', () => {
+    console.log('🎉 PWA App successfully installed!');
+    trackEvent('pwa_installed');
+  });
+
+  // 3. Track when the app is opened in standalone/installed mode
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+    trackEvent('app_opened_as_pwa');
+  }
+  // --------------------------------------------------
 
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -683,6 +704,7 @@
   
   let allRooms = [];
   let activeMarkers = [];
+  let etaMarker = null; // Separate reference for ETA badge
   
   // Custom Routing Engine Variables
   let routeGraph = {}; 
@@ -860,6 +882,11 @@
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
     
+    if (etaMarker) {
+      map.removeLayer(etaMarker);
+      etaMarker = null;
+    }
+
     if (currentRouteLayer) {
       if (Array.isArray(currentRouteLayer)) {
         currentRouteLayer.forEach(l => map.removeLayer(l));
@@ -1257,7 +1284,7 @@
       }
     }
 
-    // Clean up old route layers and old ETA markers before drawing new ones
+    // Clean up previous route lines and old ETA badge ONLY (keeps destination marker & popup intact)
     if (currentRouteLayer) {
       if (Array.isArray(currentRouteLayer)) {
         currentRouteLayer.forEach(l => map.removeLayer(l));
@@ -1266,10 +1293,11 @@
       }
       currentRouteLayer = null;
     }
-    
-    // Clear previously added route-specific markers (like ETA badges)
-    activeMarkers.forEach(m => map.removeLayer(m));
-    activeMarkers = [];
+
+    if (etaMarker) {
+      map.removeLayer(etaMarker);
+      etaMarker = null;
+    }
 
     if (userLocationMarker) map.removeLayer(userLocationMarker);
 
@@ -1386,13 +1414,12 @@
 
     const etaIcon = L.divIcon({
       className: 'eta-icon-wrapper',
-      html: `<div class="route-eta-badge">🚶‍♂️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
+      html: `<div class="route-eta-badge">🚶‍♂️️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0]
     });
 
-    const etaMarker = L.marker(midPointCoord, { icon: etaIcon }).addTo(map);
-    activeMarkers.push(etaMarker);
+    etaMarker = L.marker(midPointCoord, { icon: etaIcon }).addTo(map);
     // -----------------------------------------------------
 
     const routeBounds = L.latLngBounds(latlngs);
@@ -1413,4 +1440,3 @@
 
 </body>
 </html>
-
