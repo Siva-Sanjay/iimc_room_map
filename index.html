@@ -243,6 +243,7 @@
     #map {
       height: 100vh;
       width: 100vw;
+      background: #0f172a;
     }
     .leaflet-popup-content-wrapper {
       background: #ffffff !important;
@@ -566,7 +567,6 @@
       bottom: 75px !important;
     }
 
-    /* --- DARKISH GREY PANEL OVERLAY STYLES --- */
     .tab-panel-overlay {
       position: absolute;
       top: 0;
@@ -625,9 +625,10 @@
       max-width: 500px;
       margin: 0 auto;
     }
+    /* WHITE CARDS FOR TOUR SELECT PANEL */
     .tour-select-card {
-      background: #1e293b;
-      border: 1.5px solid #334155;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
       border-radius: 16px;
       padding: 16px;
       display: flex;
@@ -635,29 +636,29 @@
       justify-content: space-between;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
     .tour-select-card:hover {
-      border-color: #3b82f6;
-      background: #334155;
+      border-color: #2563eb;
+      background: #f8fafc;
     }
     .tour-card-title {
       font-size: 16px;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
       margin: 0 0 4px 0;
     }
     .tour-card-sub {
       font-size: 12px;
-      color: #94a3b8;
+      color: #64748b;
       margin: 0;
     }
     .tour-card-icon {
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: rgba(37, 99, 235, 0.2);
-      color: #60a5fa;
+      background: #eff6ff;
+      color: #2563eb;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -761,9 +762,10 @@
       max-width: 500px;
       margin: 0 auto;
     }
+    /* WHITE CARDS FOR SAVED LOCATIONS PANEL */
     .saved-card {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
       border-radius: 14px;
       padding: 12px 14px;
       display: flex;
@@ -771,22 +773,22 @@
       gap: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
     }
     .saved-card:active {
       scale: 0.98;
-      background: #334155;
+      background: #f1f5f9;
     }
     .saved-card-icon {
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      background: rgba(37, 99, 235, 0.15);
+      background: #f1f5f9;
       display: flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 40px;
-      color: #60a5fa;
+      color: #2563eb;
     }
     .saved-card-info {
       flex: 1;
@@ -795,7 +797,7 @@
     .saved-card-title {
       font-size: 15px;
       font-weight: 700;
-      color: #ffffff;
+      color: #0f172a;
       margin: 0 0 2px 0;
       white-space: nowrap;
       overflow: hidden;
@@ -803,7 +805,7 @@
     }
     .saved-card-subtitle {
       font-size: 12px;
-      color: #94a3b8;
+      color: #64748b;
       margin: 0;
       font-weight: 500;
     }
@@ -811,11 +813,11 @@
       width: 32px;
       height: 32px;
       border-radius: 10px;
-      background: #334155;
+      background: #f8fafc;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #ffffff;
+      color: #0f172a;
       flex: 0 0 32px;
     }
     .saved-empty-msg {
@@ -826,6 +828,7 @@
       font-weight: 500;
     }
 
+    /* NEAR ME CONTAINER WITH BRANDING HEADER */
     #nearMeBar {
       position: absolute;
       top: 12px;
@@ -833,17 +836,24 @@
       transform: translateX(-50%);
       z-index: 3000;
       display: none;
+      flex-direction: column;
       width: calc(100% - 24px);
       max-width: 440px;
-      padding: 8px;
+      padding: 10px 12px;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-radius: 18px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.8);
+      gap: 8px;
+    }
+
+    .nearme-pills-grid {
+      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
+      width: 100%;
     }
 
     .nearme-pill {
@@ -871,12 +881,8 @@
     }
 
     @media (min-width: 600px) {
-      #nearMeBar {
-        width: auto;
-      }
       .nearme-pill {
         padding: 8px 14px;
-        width: auto;
       }
     }
 
@@ -954,12 +960,18 @@
   </div>
 </div>
 
-<!-- NEAR ME TOP FILTER BAR -->
+<!-- NEAR ME TOP FILTER BAR WITH JOKA COMPASS BRANDING -->
 <div id="nearMeBar">
-  <button class="nearme-pill active" id="pillEateries" onclick="filterNearMe('Eateries')">🍔 Eateries</button>
-  <button class="nearme-pill" id="pillWashrooms" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
-  <button class="nearme-pill" id="pillClickable" onclick="filterNearMe('Clickable Locations')">📸 Iconic Spots</button>
-  <button class="nearme-pill" id="pillStores" onclick="filterNearMe('Stores')">🛒 Convenience</button>
+  <div class="header-branding">
+    <h1><span class="compass-icon">🧭</span> Joka Compass</h1>
+    <p class="author-tag">By <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer">Siva Sanjay</a></p>
+  </div>
+  <div class="nearme-pills-grid">
+    <button class="nearme-pill active" id="pillEateries" onclick="filterNearMe('Eateries')">🍔 Eateries</button>
+    <button class="nearme-pill" id="pillWashrooms" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
+    <button class="nearme-pill" id="pillClickable" onclick="filterNearMe('Clickable Locations')">📸 Iconic Spots</button>
+    <button class="nearme-pill" id="pillStores" onclick="filterNearMe('Stores')">🛒 Convenience</button>
+  </div>
 </div>
 
 <!-- PWA INSTALL TOAST HTML -->
@@ -1368,7 +1380,7 @@
     if (controls) controls.style.display = (tabName === 'home') ? 'block' : 'none';
     if (nearMeBar) {
       if (tabName === 'nearme') {
-        nearMeBar.style.display = window.innerWidth >= 600 ? 'flex' : 'grid';
+        nearMeBar.style.display = 'flex';
       } else {
         nearMeBar.style.display = 'none';
       }
@@ -1466,20 +1478,60 @@
     trackEvent('app_opened_as_pwa');
   }
 
-  const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
+  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
-  const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+
+  // PRE-LOADING MAP IMAGERY SETUP
+  const tileOptions = {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: '&copy; Google Maps'
-  });
-  const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
-    maxZoom: 21,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-    attribution: '&copy; Google Maps'
-  });
+    attribution: '&copy; Google Maps',
+    keepBuffer: 10,
+    updateWhenIdle: false,
+    updateWhenZooming: true
+  };
+
+  const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', tileOptions);
+  const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', tileOptions);
   googleSat.addTo(map);
   googleHybridNoPOI.addTo(map);
+
+  // PRE-CACHE IMAGERY TILES WITHIN 600m RADIUS
+  function preloadCampusTiles() {
+    const centerLat = 22.444948;
+    const centerLng = 88.302142;
+    const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
+
+    const latDelta = 600 / 111000;
+    const lngDelta = 600 / (111000 * Math.cos(centerLat * Math.PI / 180));
+
+    const minLat = centerLat - latDelta;
+    const maxLat = centerLat + latDelta;
+    const minLng = centerLng - lngDelta;
+    const maxLng = centerLng + lngDelta;
+
+    const zooms = [17, 18, 19, 20];
+
+    zooms.forEach(z => {
+      const minX = Math.floor((minLng + 180) / 360 * Math.pow(2, z));
+      const maxX = Math.floor((maxLng + 180) / 360 * Math.pow(2, z));
+      
+      const minTileY = Math.floor((1 - Math.log(Math.tan(maxLat * Math.PI / 180) + 1 / Math.cos(maxLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z));
+      const maxTileY = Math.floor((1 - Math.log(Math.tan(minLat * Math.PI / 180) + 1 / Math.cos(minLat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, z));
+
+      for (let x = minX; x <= maxX; x++) {
+        for (let y = minTileY; y <= maxTileY; y++) {
+          const sub = subdomains[(x + y) % subdomains.length];
+          const img1 = new Image();
+          img1.src = `https://${sub}.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${z}`;
+          const img2 = new Image();
+          img2.src = `https://${sub}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x=${x}&y=${y}&z=${z}`;
+        }
+      }
+    });
+  }
+
+  preloadCampusTiles();
 
   let allRooms = [];
   let allNearMeItems = [];
