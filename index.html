@@ -50,7 +50,7 @@
       height: 100%; 
       width: 100%; 
       overflow: hidden; 
-      background-color: #f2f2f7;
+      background-color: #0f172a;
     }
     #controls {
       position: absolute;
@@ -71,7 +71,6 @@
       display: none;
     }
 
-    /* TOUR MODE CONTROL BAR COMPACT STATE */
     #controls.tour-minimized .controls-inputs-row {
       display: none !important;
     }
@@ -567,6 +566,7 @@
       bottom: 75px !important;
     }
 
+    /* --- DARKISH GREY PANEL OVERLAY STYLES --- */
     .tab-panel-overlay {
       position: absolute;
       top: 0;
@@ -574,24 +574,45 @@
       width: 100%;
       height: calc(100% - 65px);
       z-index: 3500;
-      background: #f8fafc;
+      background: #0f172a;
       display: none;
       flex-direction: column;
       padding: 20px;
       overflow-y: auto;
+      color: #ffffff;
     }
     .tab-panel-overlay.active {
       display: flex;
     }
+
+    .tab-panel-top-banner {
+      width: 100%;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .tab-panel-branding {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .tab-panel-title {
       font-size: 22px;
       font-weight: 800;
-      color: #0f172a;
+      color: #ffffff;
       margin-bottom: 4px;
     }
     .tab-panel-desc {
       font-size: 13px;
-      color: #64748b;
+      color: #94a3b8;
       line-height: 1.4;
       margin-bottom: 16px;
     }
@@ -605,8 +626,8 @@
       margin: 0 auto;
     }
     .tour-select-card {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
+      background: #1e293b;
+      border: 1.5px solid #334155;
       border-radius: 16px;
       padding: 16px;
       display: flex;
@@ -614,35 +635,34 @@
       justify-content: space-between;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .tour-select-card:hover {
-      border-color: #2563eb;
-      background: #f8fafc;
+      border-color: #3b82f6;
+      background: #334155;
     }
     .tour-card-title {
       font-size: 16px;
       font-weight: 700;
-      color: #0f172a;
+      color: #ffffff;
       margin: 0 0 4px 0;
     }
     .tour-card-sub {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       margin: 0;
     }
     .tour-card-icon {
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      background: #eff6ff;
-      color: #2563eb;
+      background: rgba(37, 99, 235, 0.2);
+      color: #60a5fa;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* COMPACT 70% BLACK OPACITY FLOATING TOUR DIALOG */
     #tourFloatingModal {
       position: absolute;
       bottom: 24px;
@@ -742,8 +762,8 @@
       margin: 0 auto;
     }
     .saved-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+      background: #1e293b;
+      border: 1px solid #334155;
       border-radius: 14px;
       padding: 12px 14px;
       display: flex;
@@ -751,22 +771,22 @@
       gap: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
     .saved-card:active {
       scale: 0.98;
-      background: #f1f5f9;
+      background: #334155;
     }
     .saved-card-icon {
       width: 40px;
       height: 40px;
       border-radius: 12px;
-      background: #f1f5f9;
+      background: rgba(37, 99, 235, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       flex: 0 0 40px;
-      color: #2563eb;
+      color: #60a5fa;
     }
     .saved-card-info {
       flex: 1;
@@ -775,7 +795,7 @@
     .saved-card-title {
       font-size: 15px;
       font-weight: 700;
-      color: #0f172a;
+      color: #ffffff;
       margin: 0 0 2px 0;
       white-space: nowrap;
       overflow: hidden;
@@ -783,7 +803,7 @@
     }
     .saved-card-subtitle {
       font-size: 12px;
-      color: #64748b;
+      color: #94a3b8;
       margin: 0;
       font-weight: 500;
     }
@@ -791,17 +811,17 @@
       width: 32px;
       height: 32px;
       border-radius: 10px;
-      background: #f8fafc;
+      background: #334155;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #0f172a;
+      color: #ffffff;
       flex: 0 0 32px;
     }
     .saved-empty-msg {
       text-align: center;
       padding: 40px 20px;
-      color: #64748b;
+      color: #94a3b8;
       font-size: 14px;
       font-weight: 500;
     }
@@ -865,7 +885,6 @@
       border: none;
     }
 
-    /* RED POINTER WITH BUILDING NAME TEXT BADGE */
     .tour-red-marker {
       display: flex;
       align-items: center;
@@ -952,6 +971,9 @@
 
 <!-- TAB 3: CAMPUS TOUR PANEL -->
 <div id="panelTour" class="tab-panel-overlay">
+  <div class="tab-panel-top-banner">
+    <div class="tab-panel-branding"><span class="compass-icon">🧭</span> Joka Compass</div>
+  </div>
   <h2 class="tab-panel-title">🚶 Guided Campus Tours</h2>
   <p class="tab-panel-desc">Select a guided tour below to explore IIM Calcutta step-by-step.</p>
   <div id="tourCategoryGrid" class="tour-buttons-grid"></div>
@@ -972,6 +994,9 @@
 
 <!-- TAB 4: SAVED LOCATIONS PANEL -->
 <div id="panelSaved" class="tab-panel-overlay">
+  <div class="tab-panel-top-banner">
+    <div class="tab-panel-branding"><span class="compass-icon">🧭</span> Joka Compass</div>
+  </div>
   <h2 class="tab-panel-title">❤️ Saved Locations</h2>
   <p class="tab-panel-desc">Your favorited rooms, spots, and bookmarked campus locations appear below.</p>
   <div id="savedList" class="saved-list-container"></div>
@@ -1264,7 +1289,6 @@
 
   function renderCurrentTourStop() {
     if (currentTourIndex >= currentTourStops.length) {
-      // Completed Thank You Screen State
       document.getElementById('tourStepBadge').innerText = "🎉 TOUR COMPLETED";
       document.getElementById('tourModalTitle').innerText = "Thank You!";
       document.getElementById('tourModalDesc').innerHTML = `
@@ -1292,7 +1316,7 @@
     document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
 
     if (prevBtn) prevBtn.disabled = (currentTourIndex === 0);
-    if (nextBtn) nextBtn.disabled = false; // Always enabled to proceed to next stop or thank you screen
+    if (nextBtn) nextBtn.disabled = false;
 
     clearMarkers();
     const lat = parseFloat(stop.Latitude);
