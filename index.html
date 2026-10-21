@@ -68,6 +68,7 @@
       width: calc(100% - 24px);
       max-width: 440px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: none; /* Hidden by default to prevent load flashes */
     }
     .header-branding {
       margin-bottom: 6px;
@@ -579,14 +580,14 @@
       line-height: 1.5;
     }
 
-    /* --- NEAR ME TOP CATEGORY BAR (MOBILE 2x2 GRID, DESKTOP FLEX ROW) --- */
+    /* --- NEAR ME TOP CATEGORY BAR (HIDDEN BY DEFAULT TO PREVENT LOAD FLASHES) --- */
     #nearMeBar {
       position: absolute;
       top: 12px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3000;
-      display: none;
+      display: none; /* Hidden by default */
       width: calc(100% - 24px);
       max-width: 440px;
       padding: 8px;
@@ -598,7 +599,6 @@
       border: 1px solid rgba(255, 255, 255, 0.8);
       
       /* Mobile 2x2 Grid */
-      display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
@@ -629,8 +629,6 @@
 
     @media (min-width: 600px) {
       #nearMeBar {
-        display: flex;
-        flex-direction: row;
         width: auto;
       }
       .nearme-pill {
@@ -639,7 +637,6 @@
       }
     }
 
-    /* Custom Google Maps-Style POI Pin Wrapper */
     .custom-poi-icon {
       background: transparent;
       border: none;
@@ -774,7 +771,13 @@
     const nearMeBar = document.getElementById('nearMeBar');
 
     if (controls) controls.style.display = (tabName === 'home') ? 'block' : 'none';
-    if (nearMeBar) nearMeBar.style.display = (tabName === 'nearme') ? 'grid' : 'none';
+    if (nearMeBar) {
+      if (tabName === 'nearme') {
+        nearMeBar.style.display = window.innerWidth >= 600 ? 'flex' : 'grid';
+      } else {
+        nearMeBar.style.display = 'none';
+      }
+    }
 
     if (tabName !== 'home' && tabName !== 'nearme') {
       clearMarkers();
@@ -808,6 +811,11 @@
       switchTab('home', false);
     }
   }
+
+  // Run tab view routing immediately on DOM load to prevent top bar flashes
+  document.addEventListener('DOMContentLoaded', () => {
+    initTabFromUrl();
+  });
 
   const loadingQuotes = [
     `Sip your mocha, 
@@ -904,7 +912,6 @@
       populateBuildingDropdown();
       clearMarkers();
       checkUrlSearchParam();
-      initTabFromUrl();
     }
   });
 
