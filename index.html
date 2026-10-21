@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />  
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   
   <meta property="og:type" content="website" />
@@ -552,7 +551,7 @@
       bottom: 75px !important;
     }
 
-    /* Overlay Panel for Tabs 2, 3, 4 */
+    /* Overlay Panel for Tabs */
     .tab-panel-overlay {
       position: absolute;
       top: 0;
@@ -579,6 +578,45 @@
       font-size: 14px;
       color: #64748b;
       line-height: 1.5;
+    }
+
+    /* --- NEAR ME TOP FILTER PILLS BAR --- */
+    #nearMeBar {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3000;
+      display: none;
+      gap: 8px;
+      overflow-x: auto;
+      max-width: calc(100% - 24px);
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      white-space: nowrap;
+    }
+    .nearme-pill {
+      border: none;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nearme-pill.active {
+      background: #2563eb;
+      color: #ffffff;
     }
   </style>
 </head>
@@ -625,17 +663,19 @@
   </div>
 </div>
 
+<!-- NEAR ME TOP FILTER BAR -->
+<div id="nearMeBar">
+  <button class="nearme-pill" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
+  <button class="nearme-pill" onclick="filterNearMe('Eateries')">🍽️ Eateries</button>
+  <button class="nearme-pill" onclick="filterNearMe('Clickable Locations')">📸 Iconic Spots</button>
+  <button class="nearme-pill" onclick="filterNearMe('Stores')">🛒 Convenience</button>
+</div>
+
 <!-- PWA INSTALL TOAST HTML -->
 <div id="installToast">
   <p class="install-toast-text">Wanna experience this like an App?</p>
   <button class="btn-install-action" id="installBtn">Install</button>
   <button class="btn-install-close" id="closeInstallToast">×</button>
-</div>
-
-<!-- TAB 2: NEAR ME PANEL -->
-<div id="panelNearme" class="tab-panel-overlay">
-  <h2 class="tab-panel-title">📍 Near Me</h2>
-  <p class="tab-panel-desc">Quickly find washrooms, eateries, convenience stores, and iconic campus spots near your location.</p>
 </div>
 
 <!-- TAB 3: CAMPUS TOUR PANEL -->
@@ -706,18 +746,22 @@
       if (tabBtn) tabBtn.classList.toggle('active', t === tabName);
     });
 
-    // Control search header visibility
+    // Control search header visibility vs Near Me pill bar
     const controls = document.getElementById('controls');
-    if (controls) {
-      controls.style.display = (tabName === 'home') ? 'block' : 'none';
+    const nearMeBar = document.getElementById('nearMeBar');
+
+    if (controls) controls.style.display = (tabName === 'home') ? 'block' : 'none';
+    if (nearMeBar) nearMeBar.style.display = (tabName === 'nearme') ? 'flex' : 'none';
+
+    // Clear markers when navigating away from tabs
+    if (tabName !== 'home' && tabName !== 'nearme') {
+      clearMarkers();
     }
 
     // Toggle Tab Overlays
-    const panelNearme = document.getElementById('panelNearme');
     const panelTour = document.getElementById('panelTour');
     const panelSaved = document.getElementById('panelSaved');
 
-    if (panelNearme) panelNearme.classList.toggle('active', tabName === 'nearme');
     if (panelTour) panelTour.classList.toggle('active', tabName === 'tour');
     if (panelSaved) panelSaved.classList.toggle('active', tabName === 'saved');
 
@@ -727,6 +771,10 @@
       if (window.location.pathname !== targetPath) {
         window.history.pushState({ tab: tabName }, '', targetPath);
       }
+    }
+
+    if (tabName === 'nearme' && activeNearMeCategory) {
+      filterNearMe(activeNearMeCategory);
     }
 
     trackEvent(`tab_switched_${tabName}`);
@@ -774,7 +822,6 @@
   });
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
-      // 1. Track install button clicked in GA4
       trackEvent('install_button_clicked');
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -792,12 +839,10 @@
       installToast.classList.remove('show');
     });
   }
-  // 2. Track actual PWA installation event in GA4
   window.addEventListener('appinstalled', () => {
     console.log('🎉 PWA App successfully installed!');
     trackEvent('pwa_installed');
   });
-  // 3. Track when the app is opened in standalone/installed mode in GA4
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     trackEvent('app_opened_as_pwa');
   }
@@ -819,21 +864,23 @@
   
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
   const pathsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1640199293&single=true&output=csv';
+  const nearMeCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1988597004&single=true&output=csv';
   
   let allRooms = [];
+  let allNearMeItems = [];
+  let activeNearMeCategory = 'Eateries';
   let activeMarkers = [];
-  let etaMarker = null; // Separate reference for ETA badge
+  let etaMarker = null;
   
-  // Custom Routing Engine Variables
   let routeGraph = {}; 
   let allPathSegments = []; 
   let currentRouteLayer = null;
   let userLocationMarker = null;
-  // Stored active navigation destination for manual overrides
   let activeDestination = null;
-  //Centre and Gate Coordinates
+
   const IIM_MAIN_GATE = [22.444902, 88.297164]; 
   const IIM_CENTRE = [22.444948, 88.302142]; 
+
   // 1. Load Rooms
   Papa.parse(sheetCsvUrl, {
     download: true,
@@ -847,7 +894,18 @@
       initTabFromUrl();
     }
   });
-  // 2. Load Paths & Build Custom Navigation Graph
+
+  // 2. Load Near Me POI Data
+  Papa.parse(nearMeCsvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      allNearMeItems = results.data;
+    }
+  });
+
+  // 3. Load Paths & Build Navigation Graph
   Papa.parse(pathsCsvUrl, {
     download: true,
     header: true,
@@ -878,9 +936,101 @@
       });
     }
   });
+
+  // --- NEAR ME FILTER LOGIC ---
+  function filterNearMe(category) {
+    activeNearMeCategory = category;
+    clearMarkers();
+
+    // Highlight active pill button
+    const pills = document.querySelectorAll('.nearme-pill');
+    pills.forEach(p => {
+      p.classList.toggle('active', p.textContent.includes(category) || (category === 'Eateries' && p.textContent.includes('Eateries')));
+    });
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const uLat = pos.coords.latitude;
+        const uLng = pos.coords.longitude;
+
+        if (userLocationMarker) map.removeLayer(userLocationMarker);
+        userLocationMarker = L.marker([uLat, uLng], {
+          icon: L.divIcon({
+            className: 'user-dot',
+            html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
+          })
+        }).addTo(map);
+
+        map.flyTo([uLat, uLng], 18, { animate: true, duration: 1 });
+      }, () => {
+        map.flyTo(IIM_CENTRE, 18, { animate: true, duration: 1 });
+      });
+    } else {
+      map.flyTo(IIM_CENTRE, 18, { animate: true, duration: 1 });
+    }
+
+    // Filter items matching selected category
+    const items = allNearMeItems.filter(item => {
+      const c = (item.Category || '').toLowerCase().trim();
+      const target = category.toLowerCase().trim();
+      if (target.includes('eateries')) return c.includes('eateries') || c.includes('canteen');
+      if (target.includes('washrooms')) return c.includes('washroom');
+      if (target.includes('stores')) return c.includes('store') || c.includes('convenience');
+      if (target.includes('clickable')) return c.includes('clickable') || c.includes('iconic');
+      return c === target;
+    });
+
+    items.forEach(loc => {
+      const lat = parseFloat(loc.Latitude);
+      const lng = parseFloat(loc.Longitude);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const marker = L.marker([lat, lng], { interactive: true });
+
+        const popupContent = `
+          <div>
+            <div class="popup-header">
+              <span class="badge-location"><span class="badge-dot"></span> ${loc.Category || category}</span>
+            </div>
+            
+            <h2 class="popup-title">${loc.Room_Name || loc.Loc_ID}</h2>
+            <div class="popup-subtitle">${loc.Floor || 'Ground Floor'} ${loc.Details ? `• ${loc.Details}` : ''}</div>
+
+            <div class="popup-actions">
+              <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
+                Directions
+              </a>
+              
+              <button class="btn-square" onclick="copyRoomUrl(this, '${loc.Loc_ID}')" title="Share Link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+              </button>
+              
+              <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" class="btn-square" title="Open in Google Maps">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+              </a>
+            </div>
+          </div>
+        `;
+
+        marker.bindPopup(popupContent, { autoPan: false });
+        marker.addTo(map);
+        activeMarkers.push(marker);
+      }
+    });
+  }
+
   /* MATH UTILITIES FOR ROUTING */
   function getHaversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // meters
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI/180;
     const φ2 = lat2 * Math.PI/180;
     const Δφ = (lat2-lat1) * Math.PI/180;
@@ -943,7 +1093,7 @@
     }
     return (path.length > 1 || startKey === endKey) ? path : null;
   }
-  /* END MATH UTILITIES */
+
   // --- Handle Back Button ---
   window.addEventListener('popstate', (event) => {
     const path = window.location.pathname.replace('/', '').toLowerCase();
@@ -1271,7 +1421,7 @@
       window.history.pushState({ path: newUrl }, '', newUrl);
     }
   }
-  // --- MANUAL SOURCE PICKER (RAPIDO STYLE) ---
+  // --- MANUAL SOURCE PICKER ---
   function openManualSourcePicker() {
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
@@ -1333,7 +1483,6 @@
         loaderText.innerText = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
       }
     }
-    // Clean up previous route lines and old ETA badge ONLY (keeps destination marker & popup intact)
     if (currentRouteLayer) {
       if (Array.isArray(currentRouteLayer)) {
         currentRouteLayer.forEach(l => map.removeLayer(l));
@@ -1347,7 +1496,7 @@
       etaMarker = null;
     }
     if (userLocationMarker) map.removeLayer(userLocationMarker);
-    // Custom Source Marker with a Pencil Badge attached to the blue dot
+
     const sourceIcon = L.divIcon({
       className: 'custom-source-marker',
       html: `
@@ -1404,7 +1553,7 @@
       latlngs.push([parseFloat(pts[0]), parseFloat(pts[1])]);
     });
     latlngs.push(destP);
-    // --- 1. TRUE CIRCULAR DOTS WITH 1.5px SOLID WHITE BORDER & EQUAL SPACING ---
+
     const dotWeight = 5;
     const borderThickness = 1.5;
     const whiteWeight = dotWeight + (borderThickness * 2);
@@ -1427,8 +1576,7 @@
     currentRouteLayer = [whiteBorderLayer, blueDotLayer];
     whiteBorderLayer.addTo(map);
     blueDotLayer.addTo(map);
-    // -------------------------------------------------------------------------
-    // --- 2. CALCULATE DISTANCE & ETA WITH +2 MIN BUFFER ---
+
     let totalDistanceMeters = 0;
     for (let i = 0; i < latlngs.length - 1; i++) {
       totalDistanceMeters += getHaversineDistance(
@@ -1446,12 +1594,13 @@
       iconAnchor: [0, 0]
     });
     etaMarker = L.marker(midPointCoord, { icon: etaIcon }).addTo(map);
-    // -----------------------------------------------------
+
     const routeBounds = L.latLngBounds(latlngs);
     map.fitBounds(routeBounds, { padding: [50, 50] });
     if (loader) loader.style.display = 'none';
   }
-  // Register Service Worker for PWA installation
+
+  // Register Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
