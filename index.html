@@ -425,7 +425,7 @@
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
     }
-    /* --- ROUTE ETA BADGE STYLES (SCALED TO 70%) --- */
+    /* --- ROUTE ETA BADGE STYLES --- */
     .route-eta-badge {
       background: #3b82f6;
       color: #ffffff;
@@ -546,7 +546,6 @@
       stroke: #2563eb;
     }
 
-    /* Adjust Leaflet Zoom Position above Bottom Nav */
     .leaflet-bottom {
       bottom: 75px !important;
     }
@@ -580,7 +579,7 @@
       line-height: 1.5;
     }
 
-    /* --- NEAR ME TOP FILTER PILLS BAR --- */
+    /* --- NEAR ME TOP CATEGORY BAR (MOBILE 2x2 GRID, DESKTOP FLEX ROW) --- */
     #nearMeBar {
       position: absolute;
       top: 12px;
@@ -588,35 +587,62 @@
       transform: translateX(-50%);
       z-index: 3000;
       display: none;
-      gap: 8px;
-      overflow-x: auto;
-      max-width: calc(100% - 24px);
-      padding: 4px;
-      background: rgba(255, 255, 255, 0.92);
+      width: calc(100% - 24px);
+      max-width: 440px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-radius: 18px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.8);
-      white-space: nowrap;
+      
+      /* Mobile 2x2 Grid */
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
     }
+
     .nearme-pill {
-      border: none;
-      background: #f1f5f9;
+      border: 1.5px solid #e2e8f0;
+      background: #ffffff;
       color: #0f172a;
-      padding: 8px 14px;
+      padding: 10px 8px;
       border-radius: 12px;
       font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
-      display: inline-flex;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
+      width: 100%;
     }
+
     .nearme-pill.active {
-      background: #2563eb;
+      background: #0f172a;
+      border-color: #0f172a;
       color: #ffffff;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+    }
+
+    @media (min-width: 600px) {
+      #nearMeBar {
+        display: flex;
+        flex-direction: row;
+        width: auto;
+      }
+      .nearme-pill {
+        padding: 8px 14px;
+        width: auto;
+      }
+    }
+
+    /* Custom Google Maps-Style POI Pin Wrapper */
+    .custom-poi-icon {
+      background: transparent;
+      border: none;
     }
   </style>
 </head>
@@ -663,12 +689,12 @@
   </div>
 </div>
 
-<!-- NEAR ME TOP FILTER BAR -->
+<!-- NEAR ME TOP FILTER BAR (2x2 GRID ON MOBILE) -->
 <div id="nearMeBar">
-  <button class="nearme-pill" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
-  <button class="nearme-pill" onclick="filterNearMe('Eateries')">🍽️ Eateries</button>
-  <button class="nearme-pill" onclick="filterNearMe('Clickable Locations')">📸 Iconic Spots</button>
-  <button class="nearme-pill" onclick="filterNearMe('Stores')">🛒 Convenience</button>
+  <button class="nearme-pill active" id="pillEateries" onclick="filterNearMe('Eateries')">🍔 Eateries</button>
+  <button class="nearme-pill" id="pillWashrooms" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
+  <button class="nearme-pill" id="pillClickable" onclick="filterNearMe('Clickable Locations')">📸 Iconic Spots</button>
+  <button class="nearme-pill" id="pillStores" onclick="filterNearMe('Stores')">🛒 Convenience</button>
 </div>
 
 <!-- PWA INSTALL TOAST HTML -->
@@ -728,7 +754,6 @@
 </nav>
 
 <script>
-  // Helper for tracking with Google Analytics 4 safely
   function trackEvent(eventName) {
     if (typeof gtag === 'function') {
       gtag('event', eventName);
@@ -740,32 +765,27 @@
     const tabs = ['home', 'nearme', 'tour', 'saved'];
     if (!tabs.includes(tabName)) tabName = 'home';
 
-    // Update active state on tab buttons
     tabs.forEach(t => {
       const tabBtn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
       if (tabBtn) tabBtn.classList.toggle('active', t === tabName);
     });
 
-    // Control search header visibility vs Near Me pill bar
     const controls = document.getElementById('controls');
     const nearMeBar = document.getElementById('nearMeBar');
 
     if (controls) controls.style.display = (tabName === 'home') ? 'block' : 'none';
-    if (nearMeBar) nearMeBar.style.display = (tabName === 'nearme') ? 'flex' : 'none';
+    if (nearMeBar) nearMeBar.style.display = (tabName === 'nearme') ? 'grid' : 'none';
 
-    // Clear markers when navigating away from tabs
     if (tabName !== 'home' && tabName !== 'nearme') {
       clearMarkers();
     }
 
-    // Toggle Tab Overlays
     const panelTour = document.getElementById('panelTour');
     const panelSaved = document.getElementById('panelSaved');
 
     if (panelTour) panelTour.classList.toggle('active', tabName === 'tour');
     if (panelSaved) panelSaved.classList.toggle('active', tabName === 'saved');
 
-    // Clean URL routing without parameters
     if (pushToHistory) {
       const targetPath = (tabName === 'home') ? '/' : `/${tabName}`;
       if (window.location.pathname !== targetPath) {
@@ -780,7 +800,6 @@
     trackEvent(`tab_switched_${tabName}`);
   }
 
-  // Initialize Route state from current path name
   function initTabFromUrl() {
     const path = window.location.pathname.replace('/', '').toLowerCase();
     if (['nearme', 'tour', 'saved'].includes(path)) {
@@ -790,9 +809,6 @@
     }
   }
 
-  // ==========================================
-  // 📝 ADD YOUR NEW QUOTES HERE!
-  // ==========================================
   const loadingQuotes = [
     `Sip your mocha, 
     Walk through Joka ☕`,
@@ -807,8 +823,7 @@
     `Mohan Da Fan Club
      ASSEMBLE!!`
   ];
-  // ==========================================
-  // --- PWA INSTALL PROMPT & GOOGLE ANALYTICS LOGIC ---
+
   let deferredPrompt;
   const installToast = document.getElementById('installToast');
   const installBtn = document.getElementById('installBtn');
@@ -840,13 +855,12 @@
     });
   }
   window.addEventListener('appinstalled', () => {
-    console.log('🎉 PWA App successfully installed!');
     trackEvent('pwa_installed');
   });
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     trackEvent('app_opened_as_pwa');
   }
-  // --------------------------------------------------
+
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
   const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -881,7 +895,6 @@
   const IIM_MAIN_GATE = [22.444902, 88.297164]; 
   const IIM_CENTRE = [22.444948, 88.302142]; 
 
-  // 1. Load Rooms
   Papa.parse(sheetCsvUrl, {
     download: true,
     header: true,
@@ -895,7 +908,6 @@
     }
   });
 
-  // 2. Load Near Me POI Data
   Papa.parse(nearMeCsvUrl, {
     download: true,
     header: true,
@@ -905,7 +917,6 @@
     }
   });
 
-  // 3. Load Paths & Build Navigation Graph
   Papa.parse(pathsCsvUrl, {
     download: true,
     header: true,
@@ -937,39 +948,90 @@
     }
   });
 
-  // --- NEAR ME FILTER LOGIC ---
+  // --- GOOGLE MAPS STYLE POI MARKER GENERATOR ---
+  function createCustomPoiMarker(category) {
+    let bgColor = '#ef4444'; // Default Eateries Red
+    let svgIcon = `<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/>`; // Hotel/Food
+
+    const cat = category.toLowerCase();
+    if (cat.includes('washroom')) {
+      bgColor = '#2563eb'; // Blue
+      svgIcon = `<path d="M9 22h6V12H9v10zm3-19a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm-5 7h10c.55 0 1 .45 1 1v6h-2v6h-2v-6h-2v6H9v-6H7v-6c0-.55.45-1 1-1z"/>`;
+    } else if (cat.includes('clickable') || cat.includes('iconic')) {
+      bgColor = '#8b5cf6'; // Purple
+      svgIcon = `<circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>`;
+    } else if (cat.includes('store') || cat.includes('convenience')) {
+      bgColor = '#10b981'; // Green
+      svgIcon = `<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>`;
+    }
+
+    const html = `
+      <div style="position: relative; width: 34px; height: 42px; display: flex; align-items: center; justify-content: center;">
+        <svg width="34" height="42" viewBox="0 0 34 42" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));">
+          <path d="M17 0C7.61116 0 0 7.61116 0 17C0 29.75 17 42 17 42C17 42 34 29.75 34 17C34 7.61116 26.3888 0 17 0Z" fill="${bgColor}"/>
+          <circle cx="17" cy="16" r="11" fill="white"/>
+        </svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="${bgColor}" style="position: absolute; top: 8px; left: 9px;">
+          ${svgIcon}
+        </svg>
+      </div>
+    `;
+
+    return L.divIcon({
+      className: 'custom-poi-icon',
+      html: html,
+      iconSize: [34, 42],
+      iconAnchor: [17, 42],
+      popupAnchor: [0, -40]
+    });
+  }
+
+  // --- NEAR ME FILTER LOGIC (WITH OUTSIDE CAMPUS FALLBACK) ---
   function filterNearMe(category) {
     activeNearMeCategory = category;
     clearMarkers();
 
-    // Highlight active pill button
-    const pills = document.querySelectorAll('.nearme-pill');
-    pills.forEach(p => {
-      p.classList.toggle('active', p.textContent.includes(category) || (category === 'Eateries' && p.textContent.includes('Eateries')));
-    });
+    const pillE = document.getElementById('pillEateries');
+    const pillW = document.getElementById('pillWashrooms');
+    const pillC = document.getElementById('pillClickable');
+    const pillS = document.getElementById('pillStores');
+
+    if (pillE) pillE.classList.toggle('active', category === 'Eateries');
+    if (pillW) pillW.classList.toggle('active', category === 'Washrooms');
+    if (pillC) pillC.classList.toggle('active', category === 'Clickable Locations');
+    if (pillS) pillS.classList.toggle('active', category === 'Stores');
+
+    function applyUserPosition(uLat, uLng) {
+      if (userLocationMarker) map.removeLayer(userLocationMarker);
+      userLocationMarker = L.marker([uLat, uLng], {
+        icon: L.divIcon({
+          className: 'user-dot',
+          html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
+        })
+      }).addTo(map);
+
+      map.flyTo([uLat, uLng], 18, { animate: true, duration: 1 });
+    }
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
-        const uLat = pos.coords.latitude;
-        const uLng = pos.coords.longitude;
+        let uLat = pos.coords.latitude;
+        let uLng = pos.coords.longitude;
 
-        if (userLocationMarker) map.removeLayer(userLocationMarker);
-        userLocationMarker = L.marker([uLat, uLng], {
-          icon: L.divIcon({
-            className: 'user-dot',
-            html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
-          })
-        }).addTo(map);
+        const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
+        if (distanceToCentre > 600) {
+          uLat = IIM_CENTRE[0];
+          uLng = IIM_CENTRE[1];
+        }
 
-        map.flyTo([uLat, uLng], 18, { animate: true, duration: 1 });
+        applyUserPosition(uLat, uLng);
       }, () => {
-        map.flyTo(IIM_CENTRE, 18, { animate: true, duration: 1 });
+        applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
       });
     } else {
-      map.flyTo(IIM_CENTRE, 18, { animate: true, duration: 1 });
+      applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
     }
 
-    // Filter items matching selected category
     const items = allNearMeItems.filter(item => {
       const c = (item.Category || '').toLowerCase().trim();
       const target = category.toLowerCase().trim();
@@ -985,7 +1047,8 @@
       const lng = parseFloat(loc.Longitude);
 
       if (!isNaN(lat) && !isNaN(lng)) {
-        const marker = L.marker([lat, lng], { interactive: true });
+        const poiIcon = createCustomPoiMarker(loc.Category || category);
+        const marker = L.marker([lat, lng], { icon: poiIcon, interactive: true });
 
         const popupContent = `
           <div>
@@ -1094,7 +1157,6 @@
     return (path.length > 1 || startKey === endKey) ? path : null;
   }
 
-  // --- Handle Back Button ---
   window.addEventListener('popstate', (event) => {
     const path = window.location.pathname.replace('/', '').toLowerCase();
     if (['nearme', 'tour', 'saved'].includes(path)) {
@@ -1421,7 +1483,6 @@
       window.history.pushState({ path: newUrl }, '', newUrl);
     }
   }
-  // --- MANUAL SOURCE PICKER ---
   function openManualSourcePicker() {
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
@@ -1433,7 +1494,6 @@
     
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
-  // The custom graphing function for Live GPS directions
   function getDirections(destLat, destLng) {
     if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
       alert("Campus paths are still loading. Please try again in a few seconds.");
@@ -1472,7 +1532,6 @@
       maximumAge: 0
     });
   }
-  // Core routing execution logic
   function calculateAndDrawRoute(userP, destP) {
     activeDestination = { lat: destP[0], lng: destP[1] };
     const loader = document.getElementById('routeLoader');
@@ -1600,7 +1659,6 @@
     if (loader) loader.style.display = 'none';
   }
 
-  // Register Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw.js')
