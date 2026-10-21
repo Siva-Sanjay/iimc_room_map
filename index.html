@@ -305,7 +305,6 @@
       font-size: 12px;
       height: 36px;
     }
-    /* --- SQUARE BUTTONS --- */
     .btn-square {
       flex: 0 0 36px;
       display: inline-flex;
@@ -367,7 +366,6 @@
       max-width: 80%;
       text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
     }
-    /* --- MANUAL PICKER OVERLAY UI --- */
     #manualPickerUI {
       position: absolute;
       bottom: 85px;
@@ -410,7 +408,6 @@
     .btn-confirm-location:hover {
       background: black;
     }
-    /* Center Crosshair Marker for Manual Picking */
     #centerCrosshair {
       position: absolute;
       top: 50%;
@@ -427,11 +424,6 @@
       height: 4.5em;
       object-fit : contain;
     }
-    @keyframes bouncePin {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-6px); }
-    }
-    /* --- ROUTE ETA BADGE STYLES --- */
     .route-eta-badge {
       background: #3b82f6;
       color: #ffffff;
@@ -446,7 +438,6 @@
       transform-origin: center center;
       display: inline-block;
     }
-    /* --- PWA INSTALL TOAST STYLES --- */
     #installToast {
       position: absolute;
       top: 180px;
@@ -556,7 +547,6 @@
       bottom: 75px !important;
     }
 
-    /* Overlay Panel for Tabs */
     .tab-panel-overlay {
       position: absolute;
       top: 0;
@@ -584,6 +574,134 @@
       color: #64748b;
       line-height: 1.4;
       margin-bottom: 16px;
+    }
+
+    /* --- CAMPUS TOUR UI STYLES --- */
+    .tour-buttons-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .tour-select-card {
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .tour-select-card:hover {
+      border-color: #2563eb;
+      background: #f8fafc;
+    }
+    .tour-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 4px 0;
+    }
+    .tour-card-sub {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+    }
+    .tour-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #2563eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Floating Guided Tour Dialog Box */
+    #tourFloatingModal {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3800;
+      width: calc(100% - 24px);
+      max-width: 440px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .tour-step-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #2563eb;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tour-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    .tour-modal-desc {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.4;
+      margin: 4px 0 10px 0;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .tour-modal-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn-tour-nav {
+      flex: 1;
+      height: 38px;
+      border-radius: 12px;
+      border: none;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .btn-tour-nav.primary {
+      background: #0f172a;
+      color: #ffffff;
+    }
+    .btn-tour-nav:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .btn-tour-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      color: #94a3b8;
+      cursor: pointer;
     }
 
     /* --- SAVED LOCATIONS LAUNDRY LIST STYLES --- */
@@ -660,7 +778,6 @@
       font-weight: 500;
     }
 
-    /* --- NEAR ME TOP CATEGORY BAR --- */
     #nearMeBar {
       position: absolute;
       top: 12px;
@@ -781,8 +898,22 @@
 
 <!-- TAB 3: CAMPUS TOUR PANEL -->
 <div id="panelTour" class="tab-panel-overlay">
-  <h2 class="tab-panel-title">🚶 Campus Tour</h2>
-  <p class="tab-panel-desc">Take a guided step-by-step walking tour of academic blocks, hostel zones, and sports facilities.</p>
+  <h2 class="tab-panel-title">🚶 Guided Campus Tours</h2>
+  <p class="tab-panel-desc">Select a guided tour below to explore IIM Calcutta step-by-step.</p>
+  <div id="tourCategoryGrid" class="tour-buttons-grid"></div>
+</div>
+
+<!-- FLOATING GUIDED TOUR DIALOG CARD -->
+<div id="tourFloatingModal">
+  <button class="btn-tour-close" onclick="exitCampusTour()">×</button>
+  <div id="tourStepBadge" class="tour-step-badge">Stop 1 of 10</div>
+  <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
+  <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
+  <div id="tourModalActions" class="tour-modal-actions">
+    <button id="btnTourPrev" class="btn-tour-nav" onclick="navigateTourStep(-1)">⬅️ Prev</button>
+    <button id="btnTourDirections" class="btn-tour-nav" onclick="getDirectionsForCurrentTourStop()">🧭 Path</button>
+    <button id="btnTourNext" class="btn-tour-nav primary" onclick="navigateTourStep(1)">Next ➡️</button>
+  </div>
 </div>
 
 <!-- TAB 4: SAVED LOCATIONS PANEL -->
@@ -836,6 +967,12 @@
     }
   }
 
+  // CSV URL DATA SOURCES
+  const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
+  const pathsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1640199293&single=true&output=csv';
+  const nearMeCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1988597004&single=true&output=csv';
+  const tourCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=297077838&single=true&output=csv';
+
   // --- LOCALSTORAGE SAVED LOCATIONS ENGINE ---
   function getSavedLocations() {
     try {
@@ -864,7 +1001,6 @@
 
     localStorage.setItem('joka_saved_locations', JSON.stringify(saved));
     
-    // Update button heart visual instantly inside popup
     const btn = document.getElementById(`heartBtn_${locObj.id}`);
     if (btn) {
       btn.classList.toggle('saved', isLocationSaved(locObj.id));
@@ -873,7 +1009,6 @@
     renderSavedTabList();
   }
 
-  // Category Icon SVG Switcher for Laundry List
   function getCategorySvgIcon(category) {
     const cat = (category || '').toLowerCase();
     if (cat.includes('washroom')) {
@@ -889,12 +1024,10 @@
     } else if (cat.includes('office')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
     } else {
-      // Default Classroom / Academic
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
     }
   }
 
-  // Render Saved Locations Laundry List
   function renderSavedTabList() {
     const listContainer = document.getElementById('savedList');
     if (!listContainer) return;
@@ -925,7 +1058,6 @@
       `;
 
       card.addEventListener('click', () => {
-        // Redirect seamlessly to main map and load room
         switchTab('home');
         
         if (loc.type === 'ROOM') {
@@ -935,7 +1067,6 @@
           const target = allRooms.find(r => (r.Room_ID || r.Room_Number) === loc.id);
           performSearch(false, target || null);
         } else {
-          // Near Me Spot
           clearMarkers();
           const poiIcon = createCustomPoiMarker(loc.category);
           const marker = L.marker([loc.lat, loc.lng], { icon: poiIcon, interactive: true }).addTo(map);
@@ -983,6 +1114,125 @@
 
       listContainer.appendChild(card);
     });
+  }
+
+  // --- CAMPUS TOUR DATA ENGINE ---
+  let allTourItems = [];
+  let currentTourStops = [];
+  let currentTourIndex = 0;
+
+  Papa.parse(tourCsvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      allTourItems = results.data;
+      renderTourSelectionButtons();
+    }
+  });
+
+  function renderTourSelectionButtons() {
+    const grid = document.getElementById('tourCategoryGrid');
+    if (!grid) return;
+
+    const categories = [...new Set(allTourItems.map(item => item.Category ? item.Category.trim() : '').filter(Boolean))];
+    if (categories.length === 0) {
+      grid.innerHTML = `<div class="saved-empty-msg">No tours available right now.</div>`;
+      return;
+    }
+
+    grid.innerHTML = '';
+    categories.forEach(catName => {
+      const stops = allTourItems.filter(i => (i.Category || '').trim() === catName);
+      const card = document.createElement('div');
+      card.className = 'tour-select-card';
+      card.innerHTML = `
+        <div>
+          <h3 class="tour-card-title">${catName}</h3>
+          <p class="tour-card-sub">📍 ${stops.length} Stops & Highlights</p>
+        </div>
+        <div class="tour-card-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        startGuidedTour(catName);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function startGuidedTour(categoryName) {
+    currentTourStops = allTourItems
+      .filter(i => (i.Category || '').trim() === categoryName)
+      .sort((a, b) => parseInt(a.Sno || 0) - parseInt(b.Sno || 0));
+
+    if (currentTourStops.length === 0) return;
+
+    currentTourIndex = 0;
+    switchTab('home');
+    document.getElementById('tourFloatingModal').style.display = 'flex';
+    renderCurrentTourStop();
+  }
+
+  function renderCurrentTourStop() {
+    if (currentTourIndex >= currentTourStops.length) {
+      // Completed State
+      document.getElementById('tourStepBadge').innerText = "🎉 TOUR COMPLETED";
+      document.getElementById('tourModalTitle').innerText = "Thank You!";
+      document.getElementById('tourModalDesc').innerText = "You have completed this campus tour. Hope you enjoyed exploring Joka!";
+      
+      document.getElementById('tourModalActions').innerHTML = `
+        <button class="btn-tour-nav primary" style="width:100%;" onclick="exitCampusTour()">Return to Home</button>
+      `;
+      return;
+    }
+
+    const stop = currentTourStops[currentTourIndex];
+    document.getElementById('tourStepBadge').innerText = `STOP ${currentTourIndex + 1} OF ${currentTourStops.length}`;
+    document.getElementById('tourModalTitle').innerText = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
+    document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
+
+    document.getElementById('tourModalActions').innerHTML = `
+      <button id="btnTourPrev" class="btn-tour-nav" onclick="navigateTourStep(-1)" ${currentTourIndex === 0 ? 'disabled' : ''}>⬅️ Prev</button>
+      <button id="btnTourDirections" class="btn-tour-nav" onclick="getDirectionsForCurrentTourStop()">🧭 Path</button>
+      <button id="btnTourNext" class="btn-tour-nav primary" onclick="navigateTourStep(1)">${currentTourIndex === currentTourStops.length - 1 ? 'Finish 🏁' : 'Next ➡️'}</button>
+    `;
+
+    clearMarkers();
+    const lat = parseFloat(stop.Latitude);
+    const lng = parseFloat(stop.Longitude);
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+      const poiIcon = createCustomPoiMarker(stop.Category || 'Clickable Locations');
+      const marker = L.marker([lat, lng], { icon: poiIcon, interactive: true }).addTo(map);
+      activeMarkers.push(marker);
+
+      map.flyTo([lat, lng], 19, { animate: true, duration: 1 });
+    }
+  }
+
+  function navigateTourStep(direction) {
+    currentTourIndex += direction;
+    renderCurrentTourStop();
+  }
+
+  function getDirectionsForCurrentTourStop() {
+    if (currentTourStops.length === 0) return;
+    const stop = currentTourStops[currentTourIndex];
+    const lat = parseFloat(stop.Latitude);
+    const lng = parseFloat(stop.Longitude);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      getDirections(lat, lng);
+    }
+  }
+
+  function exitCampusTour() {
+    document.getElementById('tourFloatingModal').style.display = 'none';
+    clearMarkers();
+    switchTab('home');
   }
 
   // --- 4-TAB ROUTING & STATE ENGINE ---
@@ -1113,11 +1363,7 @@
   });
   googleSat.addTo(map);
   googleHybridNoPOI.addTo(map);
-  
-  const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
-  const pathsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1640199293&single=true&output=csv';
-  const nearMeCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1988597004&single=true&output=csv';
-  
+
   let allRooms = [];
   let allNearMeItems = [];
   let activeNearMeCategory = 'Eateries';
