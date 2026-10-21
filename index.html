@@ -10,21 +10,17 @@
   <meta property="og:description" content="Campus Room Map & Navigation for IIM Calcutta" />
   <meta property="og:image" content="https://joka-compass.vercel.app/compass_icon.png" />
   <meta property="og:image:type" content="image/png" />
-
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="Joka Compass" />
   <meta name="twitter:description" content="Campus Room Map & Navigation for IIM Calcutta" />
   <meta name="twitter:image" content="https://joka-compass.vercel.app/compass_icon.png" />
-
   <title>Joka Compass</title>
-
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-
   <!-- ========================================== -->
   <!-- 📊 GOOGLE ANALYTICS 4 (GA4) INTEGRATION    -->
   <!-- ========================================== -->
@@ -33,18 +29,15 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-V9JMV0JCBS');
   </script>
   <!-- ========================================== -->
-
   <!-- PWA Manifest & Theme Color -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Joka Compass">
-
   <style>
     * { 
       box-sizing: border-box; 
@@ -59,7 +52,6 @@
       overflow: hidden; 
       background-color: #f2f2f7;
     }
-
     #controls {
       position: absolute;
       top: 12px;
@@ -77,11 +69,9 @@
       max-width: 440px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
     .header-branding {
       margin-bottom: 6px;
     }
-
     .header-branding h1 {
       font-size: 17px;
       font-weight: 700;
@@ -93,26 +83,22 @@
       gap: 6px;
       line-height: 1.2;
     }
-
     .compass-icon {
       font-size: 17px;
       display: inline-block;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
     }
-
     .author-tag {
       font-size: 11px;
       color: #64748b;
       margin: 1px 0 0 0;
       font-weight: 400;
     }
-
     .author-tag a {
       color: #2563eb;
       text-decoration: none;
       font-weight: 500;
     }
-
     .controls-inputs-row {
       display: flex;
       flex-direction: row;
@@ -120,7 +106,6 @@
       gap: 8px;
       width: 100%;
     }
-
     input, select#buildingFilter {
       height: 38px;
       padding: 0 10px;
@@ -137,18 +122,15 @@
       font-weight: 500;
       box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
     }
-
     input::placeholder {
       color: #9ca3af;
       font-weight: 400;
     }
-
     input:focus, select#buildingFilter:focus {
       background: #ffffff;
       border-color: #0f172a;
       box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
     }
-
     select#buildingFilter {
       flex: 1 1 120px;
       min-width: 100px;
@@ -159,17 +141,14 @@
       background-size: 12px 12px !important;
       cursor: pointer;
     }
-
     .search-wrapper {
       position: relative;
       flex: 2 1 130px;
       min-width: 100px;
     }
-
     .search-wrapper input {
       width: 100%;
     }
-
     button.search-btn {
       height: 38px;
       width: 38px;
@@ -187,34 +166,28 @@
       transition: all 0.2s ease;
       box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
     }
-
     button.search-btn:hover {
       background: #1e293b;
     }
-
     @media (max-width: 480px) {
       .controls-inputs-row {
         flex-wrap: wrap;
         gap: 6px;
       }
-
       select#buildingFilter {
         flex: 1 1 100%;
         width: 100%;
       }
-
       .search-wrapper {
         flex: 1 1 calc(80% - 3px);
         min-width: 0;
       }
-
       button.search-btn {
         flex: 0 0 calc(20% - 3px);
         width: auto;
         min-width: 0;
       }
     }
-
     .suggestions-box {
       position: absolute;
       top: calc(100% + 6px);
@@ -232,7 +205,6 @@
       border: 1px solid rgba(0, 0, 0, 0.08);
       padding: 4px;
     }
-
     .suggestion-item {
       padding: 8px 10px;
       border-radius: 6px;
@@ -243,22 +215,18 @@
       font-size: 13px;
       color: #1c1c1e;
     }
-
     .suggestion-item:hover {
       background-color: #f1f5f9;
     }
-
     .room-subtext {
       margin-left: auto;
       font-size: 11px;
       color: #64748b;
     }
-
     #map {
       height: 100vh;
       width: 100vw;
     }
-
     .leaflet-popup-content-wrapper {
       background: #ffffff !important;
       border-radius: 16px !important;
@@ -267,12 +235,10 @@
       overflow: hidden;
       width: 250px !important;
     }
-
     .leaflet-popup-content {
       margin: 12px 14px !important;
       line-height: 1.3 !important;
     }
-
     .leaflet-container a.leaflet-popup-close-button {
       top: 10px !important;
       right: 10px !important;
@@ -281,14 +247,12 @@
       height: 20px !important;
       font-size: 14px !important;
     }
-
     .popup-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 6px;
     }
-
     .badge-location {
       display: inline-flex;
       align-items: center;
@@ -300,14 +264,12 @@
       padding: 2px 8px;
       border-radius: 12px;
     }
-
     .badge-dot {
       width: 6px;
       height: 6px;
       background-color: #22c55e;
       border-radius: 50%;
     }
-
     .popup-title {
       font-size: 18px;
       font-weight: 800;
@@ -315,21 +277,18 @@
       margin: 0 0 2px 0;
       letter-spacing: -0.3px;
     }
-
     .popup-subtitle {
       font-size: 12px;
       color: #64748b;
       margin: 0 0 10px 0;
       font-weight: 500;
     }
-
     .popup-actions {
       display: flex;
       gap: 8px;
       align-items: center;
       margin-top: 10px;
     }
-
     .btn-open-maps {
       flex: 1;
       display: inline-flex;
@@ -345,7 +304,6 @@
       font-size: 12px;
       height: 36px;
     }
-
     /* --- SQUARE BUTTONS --- */
     .btn-square {
       flex: 0 0 36px;
@@ -362,11 +320,9 @@
       text-decoration: none;
       transition: background-color 0.2s ease;
     }
-
     .btn-square:hover {
       background-color: #e2e8f0;
     }
-
     /* --- ROUTE LOADER WITH COMPASS LOTTIE --- */
     #routeLoader {
       position: absolute;
@@ -386,20 +342,17 @@
       text-align: center;
       padding: 24px;
     }
-
     .lottie-loader-container {
       width: 90px;
       height: 90px;
       pointer-events: none;
     }
-
     .lottie-loader-container iframe {
       width: 100%;
       height: 100%;
       border: none;
       background: transparent;
     }
-
     #routeLoader span {
       font-size: 16px;
       font-weight: 700;
@@ -408,11 +361,10 @@
       max-width: 80%;
       text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
     }
-
     /* --- MANUAL PICKER OVERLAY UI --- */
     #manualPickerUI {
       position: absolute;
-      bottom: 30px;
+      bottom: 85px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3000;
@@ -431,14 +383,12 @@
       width: calc(100% - 32px);
       max-width: 360px;
     }
-
     #manualPickerUI p {
       margin: 0;
       font-size: 13px;
       font-weight: 600;
       color: rgba(0,0,0,0.90);
     }
-
     .btn-confirm-location {
       background: #01453b;
       color: white;
@@ -451,11 +401,9 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-
     .btn-confirm-location:hover {
       background: black;
     }
-
     /* Center Crosshair Marker for Manual Picking */
     #centerCrosshair {
       position: absolute;
@@ -468,18 +416,15 @@
       flex-direction: column;
       align-items: center;
     }
-
     .crosshair-pin {
       width: 4.5em;
       height: 4.5em;
       object-fit : contain;
     }
-
     @keyframes bouncePin {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
     }
-
     /* --- ROUTE ETA BADGE STYLES (SCALED TO 70%) --- */
     .route-eta-badge {
       background: #3b82f6;
@@ -495,7 +440,6 @@
       transform-origin: center center;
       display: inline-block;
     }
-
     /* --- PWA INSTALL TOAST STYLES --- */
     #installToast {
       position: absolute;
@@ -520,20 +464,17 @@
       visibility: hidden;
       pointer-events: none;
     }
-
     #installToast.show {
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
     }
-
     .install-toast-text {
       font-size: 12.5px;
       font-weight: 600;
       margin: 0;
       flex: 1;
     }
-
     .btn-install-action {
       background: #2563eb;
       color: white;
@@ -545,11 +486,9 @@
       cursor: pointer;
       transition: background 0.2s;
     }
-
     .btn-install-action:hover {
       background: #1d4ed8;
     }
-
     .btn-install-close {
       background: transparent;
       color: #94a3b8;
@@ -558,10 +497,91 @@
       cursor: pointer;
       padding: 0 4px;
     }
+
+    /* --- 4-TAB BOTTOM NAVIGATION BAR STYLES --- */
+    #bottomNav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 65px;
+      z-index: 4000;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .nav-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 100%;
+      color: #64748b;
+      text-decoration: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: color 0.2s ease;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .nav-tab svg {
+      width: 22px;
+      height: 22px;
+      stroke: #64748b;
+      fill: none;
+      transition: all 0.2s ease;
+    }
+    .nav-tab.active {
+      color: #2563eb;
+    }
+    .nav-tab.active svg {
+      stroke: #2563eb;
+    }
+
+    /* Adjust Leaflet Zoom Position above Bottom Nav */
+    .leaflet-bottom {
+      bottom: 75px !important;
+    }
+
+    /* Overlay Panel for Tabs 2, 3, 4 */
+    .tab-panel-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 65px);
+      z-index: 3500;
+      background: #f8fafc;
+      display: none;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .tab-panel-overlay.active {
+      display: flex;
+    }
+    .tab-panel-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .tab-panel-desc {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
-
 <!-- FULL SCREEN LOADER HTML -->
 <div id="routeLoader">
   <div class="lottie-loader-container">
@@ -586,7 +606,6 @@
     <h1><span class="compass-icon">🧭</span> Joka Compass</h1>
     <p class="author-tag">By <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer">Siva Sanjay</a></p>
   </div>
-
   <div class="controls-inputs-row">
     <select id="buildingFilter" onchange="handleBuildingChange()">
       <option value="ALL">All Buildings</option>
@@ -596,7 +615,6 @@
       <input type="text" id="search" placeholder="Enter Room No..." autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
       <div id="suggestionsBox" class="suggestions-box"></div>
     </div>
-
     <button class="search-btn" onclick="performSearch()" aria-label="Search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
@@ -613,13 +631,113 @@
   <button class="btn-install-close" id="closeInstallToast">×</button>
 </div>
 
+<!-- TAB 2: NEAR ME PANEL -->
+<div id="panelNearme" class="tab-panel-overlay">
+  <h2 class="tab-panel-title">📍 Near Me</h2>
+  <p class="tab-panel-desc">Quickly find washrooms, eateries, convenience stores, and iconic campus spots near your location.</p>
+</div>
+
+<!-- TAB 3: CAMPUS TOUR PANEL -->
+<div id="panelTour" class="tab-panel-overlay">
+  <h2 class="tab-panel-title">🚶 Campus Tour</h2>
+  <p class="tab-panel-desc">Take a guided step-by-step walking tour of academic blocks, hostel zones, and sports facilities.</p>
+</div>
+
+<!-- TAB 4: SAVED LOCATIONS PANEL -->
+<div id="panelSaved" class="tab-panel-overlay">
+  <h2 class="tab-panel-title">❤️ Saved Locations</h2>
+  <p class="tab-panel-desc">Your favorite rooms, spots, and bookmarked campus locations will appear here.</p>
+</div>
+
 <div id="map"></div>
+
+<!-- 4-TAB BOTTOM NAVIGATION BAR -->
+<nav id="bottomNav">
+  <button class="nav-tab active" id="tabHome" onclick="switchTab('home')">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+    </svg>
+    <span>Home</span>
+  </button>
+  
+  <button class="nav-tab" id="tabNearme" onclick="switchTab('nearme')">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+      <circle cx="12" cy="10" r="3"></circle>
+    </svg>
+    <span>Near Me</span>
+  </button>
+  
+  <button class="nav-tab" id="tabTour" onclick="switchTab('tour')">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+      <line x1="8" y1="2" x2="8" y2="18"></line>
+      <line x1="16" y1="6" x2="16" y2="22"></line>
+    </svg>
+    <span>Campus Tour</span>
+  </button>
+  
+  <button class="nav-tab" id="tabSaved" onclick="switchTab('saved')">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+    <span>Saved</span>
+  </button>
+</nav>
 
 <script>
   // Helper for tracking with Google Analytics 4 safely
   function trackEvent(eventName) {
     if (typeof gtag === 'function') {
       gtag('event', eventName);
+    }
+  }
+
+  // --- 4-TAB ROUTING & STATE ENGINE ---
+  function switchTab(tabName, pushToHistory = true) {
+    const tabs = ['home', 'nearme', 'tour', 'saved'];
+    if (!tabs.includes(tabName)) tabName = 'home';
+
+    // Update active state on tab buttons
+    tabs.forEach(t => {
+      const tabBtn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+      if (tabBtn) tabBtn.classList.toggle('active', t === tabName);
+    });
+
+    // Control search header visibility
+    const controls = document.getElementById('controls');
+    if (controls) {
+      controls.style.display = (tabName === 'home') ? 'block' : 'none';
+    }
+
+    // Toggle Tab Overlays
+    const panelNearme = document.getElementById('panelNearme');
+    const panelTour = document.getElementById('panelTour');
+    const panelSaved = document.getElementById('panelSaved');
+
+    if (panelNearme) panelNearme.classList.toggle('active', tabName === 'nearme');
+    if (panelTour) panelTour.classList.toggle('active', tabName === 'tour');
+    if (panelSaved) panelSaved.classList.toggle('active', tabName === 'saved');
+
+    // Clean URL routing without parameters
+    if (pushToHistory) {
+      const targetPath = (tabName === 'home') ? '/' : `/${tabName}`;
+      if (window.location.pathname !== targetPath) {
+        window.history.pushState({ tab: tabName }, '', targetPath);
+      }
+    }
+
+    trackEvent(`tab_switched_${tabName}`);
+  }
+
+  // Initialize Route state from current path name
+  function initTabFromUrl() {
+    const path = window.location.pathname.replace('/', '').toLowerCase();
+    if (['nearme', 'tour', 'saved'].includes(path)) {
+      switchTab(path, false);
+    } else {
+      switchTab('home', false);
     }
   }
 
@@ -641,27 +759,22 @@
      ASSEMBLE!!`
   ];
   // ==========================================
-
   // --- PWA INSTALL PROMPT & GOOGLE ANALYTICS LOGIC ---
   let deferredPrompt;
   const installToast = document.getElementById('installToast');
   const installBtn = document.getElementById('installBtn');
   const closeInstallToast = document.getElementById('closeInstallToast');
-
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-
     setTimeout(() => {
       if (installToast) installToast.classList.add('show');
     }, 3000);
   });
-
   if (installBtn) {
     installBtn.addEventListener('click', async () => {
       // 1. Track install button clicked in GA4
       trackEvent('install_button_clicked');
-
       if (deferredPrompt) {
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
@@ -673,40 +786,33 @@
       installToast.classList.remove('show');
     });
   }
-
   if (closeInstallToast) {
     closeInstallToast.addEventListener('click', () => {
       installToast.classList.remove('show');
     });
   }
-
   // 2. Track actual PWA installation event in GA4
   window.addEventListener('appinstalled', () => {
     console.log('🎉 PWA App successfully installed!');
     trackEvent('pwa_installed');
   });
-
   // 3. Track when the app is opened in standalone/installed mode in GA4
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     trackEvent('app_opened_as_pwa');
   }
   // --------------------------------------------------
-
   const map = L.map('map', { zoomControl: false }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
-
   const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
   });
-
   const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
   });
-
   googleSat.addTo(map);
   googleHybridNoPOI.addTo(map);
   
@@ -722,14 +828,11 @@
   let allPathSegments = []; 
   let currentRouteLayer = null;
   let userLocationMarker = null;
-
   // Stored active navigation destination for manual overrides
   let activeDestination = null;
-
   //Centre and Gate Coordinates
   const IIM_MAIN_GATE = [22.444902, 88.297164]; 
   const IIM_CENTRE = [22.444948, 88.302142]; 
-
   // 1. Load Rooms
   Papa.parse(sheetCsvUrl, {
     download: true,
@@ -740,9 +843,9 @@
       populateBuildingDropdown();
       clearMarkers();
       checkUrlSearchParam();
+      initTabFromUrl();
     }
   });
-
   // 2. Load Paths & Build Custom Navigation Graph
   Papa.parse(pathsCsvUrl, {
     download: true,
@@ -774,7 +877,6 @@
       });
     }
   });
-
   /* MATH UTILITIES FOR ROUTING */
   function getHaversineDistance(lat1, lon1, lat2, lon2) {
     const R = 6371e3; // meters
@@ -786,50 +888,41 @@
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }
-
   function snapPointToSegment(P, A, B) {
     const lat0 = A[0] * Math.PI / 180;
     const kx = Math.cos(lat0) * 111320; 
     const ky = 111000;
-
     const px = (P[1] - A[1]) * kx;
     const py = (P[0] - A[0]) * ky;
     const bx = (B[1] - A[1]) * kx;
     const by = (B[0] - A[0]) * ky;
-
     const magAB2 = bx*bx + by*by;
     let u = magAB2 === 0 ? 0 : (px*bx + py*by) / magAB2;
     
     if (u < 0) u = 0;
     if (u > 1) u = 1;
-
     const projX = A[1] + (u * (B[1] - A[1]));
     const projY = A[0] + (u * (B[0] - A[0]));
     
     const dist = getHaversineDistance(P[0], P[1], projY, projX);
     return { point: [projY, projX], dist: dist, u: u };
   }
-
   function runDijkstra(startKey, endKey, graph) {
     const distances = {};
     const prev = {};
     const queue = [];
-
     for (let v in graph) {
       distances[v] = Infinity;
       prev[v] = null;
     }
     distances[startKey] = 0;
     queue.push({ id: startKey, dist: 0 });
-
     while (queue.length > 0) {
       queue.sort((a, b) => a.dist - b.dist);
       const current = queue.shift();
       const u = current.id;
-
       if (u === endKey) break;
       if (current.dist > distances[u]) continue;
-
       if(graph[u]) {
         for (let neighbor of graph[u]) {
           const alt = distances[u] + neighbor.dist;
@@ -841,7 +934,6 @@
         }
       }
     }
-
     const path = [];
     let curr = endKey;
     while (curr) {
@@ -851,11 +943,16 @@
     return (path.length > 1 || startKey === endKey) ? path : null;
   }
   /* END MATH UTILITIES */
-
   // --- Handle Back Button ---
   window.addEventListener('popstate', (event) => {
+    const path = window.location.pathname.replace('/', '').toLowerCase();
+    if (['nearme', 'tour', 'saved'].includes(path)) {
+      switchTab(path, false);
+      return;
+    }
+    switchTab('home', false);
+
     const urlParams = new URLSearchParams(window.location.search);
-    
     if (!urlParams.has('room')) {
       clearMarkers();
       const searchInput = document.getElementById('search');
@@ -875,11 +972,9 @@
       performSearch(true, matchedRoom);
     }
   });
-
   function populateBuildingDropdown() {
     const select = document.getElementById('buildingFilter');
     select.innerHTML = '<option value="ALL">All Buildings</option>';
-
     const buildings = [...new Set(allRooms.map(r => r.Building ? r.Building.trim() : '').filter(Boolean))];
     buildings.forEach(b => {
       const opt = document.createElement('option');
@@ -888,7 +983,6 @@
       select.appendChild(opt);
     });
   }
-
   function clearMarkers() {
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
@@ -897,7 +991,6 @@
       map.removeLayer(etaMarker);
       etaMarker = null;
     }
-
     if (currentRouteLayer) {
       if (Array.isArray(currentRouteLayer)) {
         currentRouteLayer.forEach(l => map.removeLayer(l));
@@ -911,16 +1004,13 @@
       userLocationMarker = null;
     }
   }
-
   function normalizeText(text) {
     return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
   }
-
   function resetUrlToHome() {
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
     window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
   }
-
   function copyRoomUrl(btn, roomId) {
     const shareUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
     
@@ -934,7 +1024,6 @@
       fallbackCopyText(shareUrl, btn);
     }
   }
-
   function fallbackCopyText(text, btn) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
@@ -951,7 +1040,6 @@
     }
     document.body.removeChild(textArea);
   }
-
   function showCopyFeedback(btn) {
     const originalHTML = btn.innerHTML;
     btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
@@ -960,17 +1048,14 @@
       btn.innerHTML = originalHTML;
     }, 2000);
   }
-
   function checkUrlSearchParam() {
     const navEntries = performance.getEntriesByType('navigation');
     if (navEntries.length > 0 && navEntries[0].type === 'reload') {
       resetUrlToHome();
       return;
     }
-
     const urlParams = new URLSearchParams(window.location.search);
     const roomParam = urlParams.get('room');
-
     if (roomParam) {
       const searchInput = document.getElementById('search');
       if (searchInput) {
@@ -980,7 +1065,6 @@
           normalizeText(r.Room_ID) === cleanParam || 
           normalizeText(r.Room_Number || r['Room Number']) === cleanParam
         );
-
         if (matchedRoom) {
           searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || roomParam;
           performSearch(false, matchedRoom);
@@ -991,14 +1075,11 @@
       }
     }
   }
-
   function handleBuildingChange() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
     if (!selectedBuilding || selectedBuilding === "") return;
-
     const freshCsvUrl = sheetCsvUrl + '&t=' + new Date().getTime();
     const buildingPoints = [];
-
     Papa.parse(freshCsvUrl, {
       download: true,
       header: true,
@@ -1025,18 +1106,15 @@
       }
     });
   }
-
   function handleSearchInput() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
     const box = document.getElementById('suggestionsBox');
-
     const buildingRooms = allRooms.filter(r => {
       if (!r.Building) return false;
       return selectedBuilding === 'ALL' || r.Building.trim() === selectedBuilding;
     });  
-
     const matches = buildingRooms.filter(r => {
       if (!cleanQuery) return true;
       const roomNum = normalizeText(r.Room_Number || r['Room Number']);
@@ -1044,12 +1122,10 @@
       const roomId = normalizeText(r.Room_ID);
       return roomNum.includes(cleanQuery) || roomName.includes(cleanQuery) || roomId.includes(cleanQuery);
     });
-
     if (matches.length === 0) {
       hideSuggestions();
       return;
     }
-
     box.innerHTML = '';
     matches.forEach(room => {
       const item = document.createElement('div');
@@ -1057,7 +1133,6 @@
       
       const buildingName = room.Building ? room.Building.trim() : '';
       const displayRoomNum = room.Room_Number || room['Room Number'] || '';
-
       item.innerHTML = `
         <span><b>${displayRoomNum}</b></span>
         ${buildingName ? `<span class="room-subtext">${buildingName}</span>` : ''}
@@ -1071,45 +1146,35 @@
         hideSuggestions();
         performSearch(false, room);
       });
-
       box.appendChild(item);
     });
-
     box.style.display = 'block';
   }
-
   function hideSuggestions() {
     document.getElementById('suggestionsBox').style.display = 'none';
   }
-
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrapper')) {
       hideSuggestions();
     }
   });
-
   function handleKeyPress(event) {
     if (event.key === 'Enter') {
       hideSuggestions();
       performSearch();
     }
   }
-
   function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
       searchInput.blur();
     }
-
     clearMarkers();
     hideSuggestions();
-
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
     const selectedBuilding = document.getElementById('buildingFilter').value;
-
     let filtered = [];
-
     if (targetRoom) {
       filtered = [targetRoom];
     } else {
@@ -1118,40 +1183,31 @@
         resetUrlToHome();
         return;
       }
-
       filtered = allRooms.filter(room => {
         const cleanRoomNum = normalizeText(room.Room_Number || room['Room Number']);
         const cleanRoomName = normalizeText(room.Room_Name);
         const cleanRoomId = normalizeText(room.Room_ID);
         const building = room.Building ? room.Building.trim() : '';
-
         const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
         const matchQuery = cleanRoomNum === cleanQuery || cleanRoomName.includes(cleanQuery) || cleanRoomId === cleanQuery;
-
         return matchBuilding && matchQuery;
       });
     }
-
     if (filtered.length === 0) {
       alert("No matching room found.");
       resetUrlToHome();
       return;
     }
-
     const bounds = [];
-
     filtered.forEach(room => {
       const lat = parseFloat(room.Latitude);
       const lng = parseFloat(room.Longitude);
-
       if (!isNaN(lat) && !isNaN(lng)) {
         const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
         const roomId = room.Room_ID || roomNo;
         const buildingName = room.Building || 'N/A';
         const floorName = room.Floor || 'N/A';
-
         const marker = L.marker([lat, lng], { interactive: true });
-
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -1160,7 +1216,6 @@
             
             <h2 class="popup-title">${room.Room_Name}</h2>
             <div class="popup-subtitle">${buildingName} •  ${floorName}</div>
-
             <div class="popup-actions">
               <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
                 Directions
@@ -1185,36 +1240,29 @@
             </div>
           </div>
         `;
-
         marker.bindPopup(popupContent, { autoPan: false });
         marker.addTo(map);
         activeMarkers.push(marker);
         bounds.push([lat, lng]);
       }
     });
-
     if (bounds.length === 1) {
       const targetLatLng = bounds[0];
       const zoomLevel = 20;
-
       if (activeMarkers[0]) {
         activeMarkers[0].openPopup();
       }
-
       const targetPoint = map.project(targetLatLng, zoomLevel);
       const offsetPoint = L.point(targetPoint.x, targetPoint.y - 100);
       const offsetLatLng = map.unproject(offsetPoint, zoomLevel);
-
       map.flyTo(offsetLatLng, zoomLevel, {
         animate: true,
         duration: 1.2,
         easeLinearity: 0.25
       });
-
     } else if (bounds.length > 1) {
       map.fitBounds(bounds, { padding: [60, 60] });
     }
-
     const targetRoomId = filtered[0].Room_ID || rawQuery;
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
     
@@ -1222,34 +1270,28 @@
       window.history.pushState({ path: newUrl }, '', newUrl);
     }
   }
-
   // --- MANUAL SOURCE PICKER (RAPIDO STYLE) ---
   function openManualSourcePicker() {
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
   }
-
   function confirmManualLocation() {
     document.getElementById('centerCrosshair').style.display = 'none';
     document.getElementById('manualPickerUI').style.display = 'none';
-
     const centerLatLng = map.getCenter();
     
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
-
   // The custom graphing function for Live GPS directions
   function getDirections(destLat, destLng) {
     if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
       alert("Campus paths are still loading. Please try again in a few seconds.");
       return;
     }
-
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
     }
-
     const loader = document.getElementById('routeLoader');
     const loaderText = document.getElementById('loaderText');
     if (loader && loaderText) {
@@ -1257,7 +1299,6 @@
       loaderText.innerText = randomQuote;
       loader.style.display = 'flex';
     }
-
     navigator.geolocation.getCurrentPosition((position) => {
       let userLat = position.coords.latitude;
       let userLng = position.coords.longitude;
@@ -1271,7 +1312,6 @@
       }
       
       calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
-
     }, (error) => {
       if (loader) loader.style.display = 'none';
       alert("Could not get your location. Please ensure location permissions are granted.");
@@ -1281,11 +1321,9 @@
       maximumAge: 0
     });
   }
-
   // Core routing execution logic
   function calculateAndDrawRoute(userP, destP) {
     activeDestination = { lat: destP[0], lng: destP[1] };
-
     const loader = document.getElementById('routeLoader');
     if (loader && loader.style.display !== 'flex') {
       loader.style.display = 'flex';
@@ -1294,7 +1332,6 @@
         loaderText.innerText = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
       }
     }
-
     // Clean up previous route lines and old ETA badge ONLY (keeps destination marker & popup intact)
     if (currentRouteLayer) {
       if (Array.isArray(currentRouteLayer)) {
@@ -1304,14 +1341,11 @@
       }
       currentRouteLayer = null;
     }
-
     if (etaMarker) {
       map.removeLayer(etaMarker);
       etaMarker = null;
     }
-
     if (userLocationMarker) map.removeLayer(userLocationMarker);
-
     // Custom Source Marker with a Pencil Badge attached to the blue dot
     const sourceIcon = L.divIcon({
       className: 'custom-source-marker',
@@ -1326,12 +1360,9 @@
       iconSize: [32, 32],
       iconAnchor: [16, 16]
     });
-
     userLocationMarker = L.marker(userP, { icon: sourceIcon }).addTo(map);
-
     let bestS = null, bestE = null;
     let minDistS = Infinity, minDistE = Infinity;
-
     allPathSegments.forEach(seg => {
       const resS = snapPointToSegment(userP, seg.A, seg.B);
       if (resS.dist < minDistS) { minDistS = resS.dist; bestS = { ...resS, seg: seg }; }
@@ -1339,54 +1370,43 @@
       const resE = snapPointToSegment(destP, seg.A, seg.B);
       if (resE.dist < minDistE) { minDistE = resE.dist; bestE = { ...resE, seg: seg }; }
     });
-
     const tg = {};
     for(let k in routeGraph) { tg[k] = [...routeGraph[k]]; }
-
     const kS = bestS.point[0]+","+bestS.point[1];
     const kE = bestE.point[0]+","+bestE.point[1];
-
     tg[kS] = [];
     tg[kE] = [];
-
     const dSA = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.A[0], bestS.seg.A[1]);
     const dSB = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.B[0], bestS.seg.B[1]);
     tg[kS].push({node: bestS.seg.keyA, dist: dSA}, {node: bestS.seg.keyB, dist: dSB});
     tg[bestS.seg.keyA].push({node: kS, dist: dSA});
     tg[bestS.seg.keyB].push({node: kS, dist: dSB});
-
     const dEA = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.A[0], bestE.seg.A[1]);
     const dEB = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.B[0], bestE.seg.B[1]);
     tg[kE].push({node: bestE.seg.keyA, dist: dEA}, {node: bestE.seg.keyB, dist: dEB});
     tg[bestE.seg.keyA].push({node: kE, dist: dEA});
     tg[bestE.seg.keyB].push({node: kE, dist: dEB});
-
     if (bestS.seg.keyA === bestE.seg.keyA && bestS.seg.keyB === bestE.seg.keyB) {
       const dSE = getHaversineDistance(bestS.point[0], bestS.point[1], bestE.point[0], bestE.point[1]);
       tg[kS].push({node: kE, dist: dSE});
       tg[kE].push({node: kS, dist: dSE});
     }
-
     const pathKeys = runDijkstra(kS, kE, tg);
-
     if(!pathKeys) {
       if (loader) loader.style.display = 'none';
       alert("Could not calculate a path. Make sure your paths network is fully connected.");
       return;
     }
-
     const latlngs = [userP];
     pathKeys.forEach(k => {
       const pts = k.split(',');
       latlngs.push([parseFloat(pts[0]), parseFloat(pts[1])]);
     });
     latlngs.push(destP);
-
     // --- 1. TRUE CIRCULAR DOTS WITH 1.5px SOLID WHITE BORDER & EQUAL SPACING ---
     const dotWeight = 5;
     const borderThickness = 1.5;
     const whiteWeight = dotWeight + (borderThickness * 2);
-
     const whiteBorderLayer = L.polyline(latlngs, {
       color: '#ffffff',
       weight: whiteWeight,
@@ -1395,7 +1415,6 @@
       lineCap: 'round',    
       lineJoin: 'round'
     });
-
     const blueDotLayer = L.polyline(latlngs, {
       color: '#3b82f6',
       weight: dotWeight,
@@ -1404,12 +1423,10 @@
       lineCap: 'round',    
       lineJoin: 'round'
     });
-
     currentRouteLayer = [whiteBorderLayer, blueDotLayer];
     whiteBorderLayer.addTo(map);
     blueDotLayer.addTo(map);
     // -------------------------------------------------------------------------
-
     // --- 2. CALCULATE DISTANCE & ETA WITH +2 MIN BUFFER ---
     let totalDistanceMeters = 0;
     for (let i = 0; i < latlngs.length - 1; i++) {
@@ -1418,27 +1435,21 @@
         latlngs[i+1][0], latlngs[i+1][1]
       );
     }
-
     const walkingMinutes = Math.max(1, Math.round(totalDistanceMeters / 83)) + 2;
     const midIndex = Math.floor(latlngs.length / 2);
     const midPointCoord = latlngs[midIndex];
-
     const etaIcon = L.divIcon({
       className: 'eta-icon-wrapper',
       html: `<div class="route-eta-badge">🚶‍♂️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
       iconSize: [0, 0],
       iconAnchor: [0, 0]
     });
-
     etaMarker = L.marker(midPointCoord, { icon: etaIcon }).addTo(map);
     // -----------------------------------------------------
-
     const routeBounds = L.latLngBounds(latlngs);
     map.fitBounds(routeBounds, { padding: [50, 50] });
-
     if (loader) loader.style.display = 'none';
   }
-
   // Register Service Worker for PWA installation
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -1448,6 +1459,5 @@
     });
   }
 </script>
-
 </body>
 </html>
