@@ -68,24 +68,39 @@
       width: calc(100% - 24px);
       max-width: 440px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      display: none; /* Hidden by default */
+      display: none;
     }
+
+    /* TOUR MODE CONTROL BAR COMPACT STATE */
+    #controls.tour-minimized .controls-inputs-row {
+      display: none !important;
+    }
+    #controls.tour-minimized .author-tag {
+      display: none !important;
+    }
+    #controls.tour-minimized {
+      padding: 8px 14px;
+      width: auto;
+      max-width: 90%;
+    }
+
     .header-branding {
-      margin-bottom: 6px;
+      margin-bottom: 0px;
     }
     .header-branding h1 {
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 700;
       letter-spacing: -0.4px;
       color: #0f172a;
       margin: 0;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       line-height: 1.2;
     }
     .compass-icon {
-      font-size: 17px;
+      font-size: 16px;
       display: inline-block;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
     }
@@ -94,6 +109,7 @@
       color: #64748b;
       margin: 1px 0 0 0;
       font-weight: 400;
+      text-align: center;
     }
     .author-tag a {
       color: #2563eb;
@@ -106,6 +122,7 @@
       align-items: center;
       gap: 8px;
       width: 100%;
+      margin-top: 6px;
     }
     input, select#buildingFilter {
       height: 38px;
@@ -328,7 +345,6 @@
       stroke: #ef4444;
     }
 
-    /* --- ROUTE LOADER WITH COMPASS LOTTIE --- */
     #routeLoader {
       position: absolute;
       top: 0;
@@ -495,7 +511,7 @@
       padding: 0 4px;
     }
 
-    /* --- 4-TAB BOTTOM NAVIGATION BAR STYLES --- */
+    /* BOTTOM NAV BAR */
     #bottomNav {
       position: absolute;
       bottom: 0;
@@ -511,7 +527,12 @@
       justify-content: space-around;
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      transition: all 0.2s ease;
     }
+    #bottomNav.tour-hidden {
+      display: none !important;
+    }
+
     .nav-tab {
       flex: 1;
       display: flex;
@@ -576,7 +597,6 @@
       margin-bottom: 16px;
     }
 
-    /* --- CAMPUS TOUR UI STYLES --- */
     .tour-buttons-grid {
       display: flex;
       flex-direction: column;
@@ -623,88 +643,98 @@
       justify-content: center;
     }
 
-    /* Floating Guided Tour Dialog Box */
+    /* --- COMPACT 70% BLACK OPACITY FLOATING TOUR DIALOG --- */
     #tourFloatingModal {
       position: absolute;
-      bottom: 80px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3800;
-      width: calc(100% - 24px);
+      width: calc(100% - 28px);
       max-width: 440px;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: rgba(15, 23, 42, 0.70);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
       border-radius: 20px;
-      padding: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      padding: 14px 16px 16px 16px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       display: none;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
+      color: #ffffff;
     }
     .tour-step-badge {
       font-size: 11px;
       font-weight: 700;
-      color: #2563eb;
+      color: #60a5fa;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .tour-modal-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
-      color: #0f172a;
-      margin: 0;
+      color: #ffffff;
+      margin: 0 0 4px 0;
+      padding-right: 24px;
+    }
+
+    /* SIDE-BY-SIDE DESCRIPTION & ARROW CONTROLS */
+    .tour-body-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
     }
     .tour-modal-desc {
-      font-size: 13px;
-      color: #475569;
-      line-height: 1.4;
-      margin: 4px 0 10px 0;
-      max-height: 100px;
+      flex: 1;
+      font-size: 12.5px;
+      color: #cbd5e1;
+      line-height: 1.35;
+      margin: 0;
+      max-height: 85px;
       overflow-y: auto;
     }
-    .tour-modal-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .btn-tour-nav {
-      flex: 1;
-      height: 38px;
-      border-radius: 12px;
-      border: none;
-      background: #f1f5f9;
-      color: #0f172a;
-      font-size: 13px;
-      font-weight: 700;
+    .btn-tour-arrow {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 36px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 4px;
       transition: all 0.2s ease;
     }
-    .btn-tour-nav.primary {
-      background: #0f172a;
-      color: #ffffff;
+    .btn-tour-arrow:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
-    .btn-tour-nav:disabled {
-      opacity: 0.4;
+    .btn-tour-arrow:disabled {
+      opacity: 0.25;
       cursor: not-allowed;
     }
     .btn-tour-close {
       position: absolute;
-      top: 12px;
+      top: 10px;
       right: 12px;
       background: transparent;
       border: none;
-      font-size: 18px;
+      font-size: 20px;
       color: #94a3b8;
       cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+    .btn-tour-close:hover {
+      color: #ffffff;
     }
 
-    /* --- SAVED LOCATIONS LAUNDRY LIST STYLES --- */
     .saved-list-container {
       display: flex;
       flex-direction: column;
@@ -903,16 +933,16 @@
   <div id="tourCategoryGrid" class="tour-buttons-grid"></div>
 </div>
 
-<!-- FLOATING GUIDED TOUR DIALOG CARD -->
+<!-- FLOATING COMPACT DARK TOUR DIALOG -->
 <div id="tourFloatingModal">
-  <button class="btn-tour-close" onclick="exitCampusTour()">×</button>
+  <button class="btn-tour-close" onclick="exitCampusTour()" title="Exit Tour">✕</button>
   <div id="tourStepBadge" class="tour-step-badge">Stop 1 of 10</div>
   <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
-  <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
-  <div id="tourModalActions" class="tour-modal-actions">
-    <button id="btnTourPrev" class="btn-tour-nav" onclick="navigateTourStep(-1)">⬅️ Prev</button>
-    <button id="btnTourDirections" class="btn-tour-nav" onclick="getDirectionsForCurrentTourStop()">🧭 Path</button>
-    <button id="btnTourNext" class="btn-tour-nav primary" onclick="navigateTourStep(1)">Next ➡️</button>
+  
+  <div class="tour-body-row">
+    <button id="btnTourPrev" class="btn-tour-arrow" onclick="navigateTourStep(-1)" aria-label="Previous">‹</button>
+    <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
+    <button id="btnTourNext" class="btn-tour-arrow" onclick="navigateTourStep(1)" aria-label="Next">›</button>
   </div>
 </div>
 
@@ -1120,6 +1150,7 @@
   let allTourItems = [];
   let currentTourStops = [];
   let currentTourIndex = 0;
+  let isTourActive = false;
 
   Papa.parse(tourCsvUrl, {
     download: true,
@@ -1172,21 +1203,35 @@
     if (currentTourStops.length === 0) return;
 
     currentTourIndex = 0;
-    switchTab('home');
+    isTourActive = true;
+
+    // 1. Hide bottom nav bar & near me top bar
+    document.getElementById('bottomNav').classList.add('tour-hidden');
+    document.getElementById('nearMeBar').style.display = 'none';
+
+    // 2. Minimize top controls bar to just title
+    const controls = document.getElementById('controls');
+    controls.style.display = 'block';
+    controls.classList.add('tour-minimized');
+
+    // 3. Switch overlay tab off so map is visible
+    const panelTour = document.getElementById('panelTour');
+    if (panelTour) panelTour.classList.remove('active');
+
     document.getElementById('tourFloatingModal').style.display = 'flex';
     renderCurrentTourStop();
   }
 
   function renderCurrentTourStop() {
     if (currentTourIndex >= currentTourStops.length) {
-      // Completed State
-      document.getElementById('tourStepBadge').innerText = "🎉 TOUR COMPLETED";
+      document.getElementById('tourStepBadge').innerText = "🎉 COMPLETED";
       document.getElementById('tourModalTitle').innerText = "Thank You!";
-      document.getElementById('tourModalDesc').innerText = "You have completed this campus tour. Hope you enjoyed exploring Joka!";
+      document.getElementById('tourModalDesc').innerText = "You have completed this tour! Tap exit to return.";
       
-      document.getElementById('tourModalActions').innerHTML = `
-        <button class="btn-tour-nav primary" style="width:100%;" onclick="exitCampusTour()">Return to Home</button>
-      `;
+      const prevBtn = document.getElementById('btnTourPrev');
+      const nextBtn = document.getElementById('btnTourNext');
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
       return;
     }
 
@@ -1195,11 +1240,11 @@
     document.getElementById('tourModalTitle').innerText = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
     document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
 
-    document.getElementById('tourModalActions').innerHTML = `
-      <button id="btnTourPrev" class="btn-tour-nav" onclick="navigateTourStep(-1)" ${currentTourIndex === 0 ? 'disabled' : ''}>⬅️ Prev</button>
-      <button id="btnTourDirections" class="btn-tour-nav" onclick="getDirectionsForCurrentTourStop()">🧭 Path</button>
-      <button id="btnTourNext" class="btn-tour-nav primary" onclick="navigateTourStep(1)">${currentTourIndex === currentTourStops.length - 1 ? 'Finish 🏁' : 'Next ➡️'}</button>
-    `;
+    const prevBtn = document.getElementById('btnTourPrev');
+    const nextBtn = document.getElementById('btnTourNext');
+
+    if (prevBtn) prevBtn.disabled = (currentTourIndex === 0);
+    if (nextBtn) nextBtn.disabled = (currentTourIndex === currentTourStops.length - 1);
 
     clearMarkers();
     const lat = parseFloat(stop.Latitude);
@@ -1215,28 +1260,30 @@
   }
 
   function navigateTourStep(direction) {
+    if (!isTourActive) return;
     currentTourIndex += direction;
     renderCurrentTourStop();
   }
 
-  function getDirectionsForCurrentTourStop() {
-    if (currentTourStops.length === 0) return;
-    const stop = currentTourStops[currentTourIndex];
-    const lat = parseFloat(stop.Latitude);
-    const lng = parseFloat(stop.Longitude);
-    if (!isNaN(lat) && !isNaN(lng)) {
-      getDirections(lat, lng);
-    }
-  }
-
   function exitCampusTour() {
+    isTourActive = false;
     document.getElementById('tourFloatingModal').style.display = 'none';
+    
+    // Restore top controls bar
+    const controls = document.getElementById('controls');
+    controls.classList.remove('tour-minimized');
+
+    // Restore bottom nav bar
+    document.getElementById('bottomNav').classList.remove('tour-hidden');
+
     clearMarkers();
-    switchTab('home');
+    switchTab('tour');
   }
 
   // --- 4-TAB ROUTING & STATE ENGINE ---
   function switchTab(tabName, pushToHistory = true) {
+    if (isTourActive) return; // Ignore tab switching while actively in tour mode
+
     const tabs = ['home', 'nearme', 'tour', 'saved'];
     if (!tabs.includes(tabName)) tabName = 'home';
 
@@ -1639,6 +1686,7 @@
   }
 
   window.addEventListener('popstate', (event) => {
+    if (isTourActive) return;
     const path = window.location.pathname.replace('/', '').toLowerCase();
     if (['nearme', 'tour', 'saved'].includes(path)) {
       switchTab(path, false);
