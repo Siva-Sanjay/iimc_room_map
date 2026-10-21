@@ -68,7 +68,7 @@
       width: calc(100% - 24px);
       max-width: 440px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      display: none; /* Hidden by default to prevent load flashes */
+      display: none; /* Hidden by default */
     }
     .header-branding {
       margin-bottom: 6px;
@@ -324,6 +324,11 @@
     .btn-square:hover {
       background-color: #e2e8f0;
     }
+    .btn-heart.saved svg {
+      fill: #ef4444;
+      stroke: #ef4444;
+    }
+
     /* --- ROUTE LOADER WITH COMPASS LOTTIE --- */
     #routeLoader {
       position: absolute;
@@ -572,22 +577,97 @@
       font-size: 22px;
       font-weight: 800;
       color: #0f172a;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
     .tab-panel-desc {
-      font-size: 14px;
+      font-size: 13px;
       color: #64748b;
-      line-height: 1.5;
+      line-height: 1.4;
+      margin-bottom: 16px;
     }
 
-    /* --- NEAR ME TOP CATEGORY BAR (HIDDEN BY DEFAULT TO PREVENT LOAD FLASHES) --- */
+    /* --- SAVED LOCATIONS LAUNDRY LIST STYLES --- */
+    .saved-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .saved-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .saved-card:active {
+      scale: 0.98;
+      background: #f1f5f9;
+    }
+    .saved-card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 40px;
+      color: #2563eb;
+    }
+    .saved-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .saved-card-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .saved-card-subtitle {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+      font-weight: 500;
+    }
+    .saved-card-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0f172a;
+      flex: 0 0 32px;
+    }
+    .saved-empty-msg {
+      text-align: center;
+      padding: 40px 20px;
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* --- NEAR ME TOP CATEGORY BAR --- */
     #nearMeBar {
       position: absolute;
       top: 12px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 3000;
-      display: none; /* Hidden by default */
+      display: none;
       width: calc(100% - 24px);
       max-width: 440px;
       padding: 8px;
@@ -597,8 +677,6 @@
       border-radius: 18px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       border: 1px solid rgba(255, 255, 255, 0.8);
-      
-      /* Mobile 2x2 Grid */
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
@@ -686,7 +764,7 @@
   </div>
 </div>
 
-<!-- NEAR ME TOP FILTER BAR (2x2 GRID ON MOBILE) -->
+<!-- NEAR ME TOP FILTER BAR -->
 <div id="nearMeBar">
   <button class="nearme-pill active" id="pillEateries" onclick="filterNearMe('Eateries')">🍔 Eateries</button>
   <button class="nearme-pill" id="pillWashrooms" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
@@ -710,7 +788,8 @@
 <!-- TAB 4: SAVED LOCATIONS PANEL -->
 <div id="panelSaved" class="tab-panel-overlay">
   <h2 class="tab-panel-title">❤️ Saved Locations</h2>
-  <p class="tab-panel-desc">Your favorite rooms, spots, and bookmarked campus locations will appear here.</p>
+  <p class="tab-panel-desc">Your favorited rooms, spots, and bookmarked campus locations appear below.</p>
+  <div id="savedList" class="saved-list-container"></div>
 </div>
 
 <div id="map"></div>
@@ -757,6 +836,155 @@
     }
   }
 
+  // --- LOCALSTORAGE SAVED LOCATIONS ENGINE ---
+  function getSavedLocations() {
+    try {
+      const raw = localStorage.getItem('joka_saved_locations');
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function isLocationSaved(id) {
+    const saved = getSavedLocations();
+    return saved.some(item => item.id === id);
+  }
+
+  function toggleSaveLocation(locObj) {
+    let saved = getSavedLocations();
+    const index = saved.findIndex(item => item.id === locObj.id);
+
+    if (index > -1) {
+      saved.splice(index, 1);
+    } else {
+      locObj.savedAt = Date.now();
+      saved.push(locObj);
+    }
+
+    localStorage.setItem('joka_saved_locations', JSON.stringify(saved));
+    
+    // Update button heart visual instantly inside popup
+    const btn = document.getElementById(`heartBtn_${locObj.id}`);
+    if (btn) {
+      btn.classList.toggle('saved', isLocationSaved(locObj.id));
+    }
+
+    renderSavedTabList();
+  }
+
+  // Category Icon SVG Switcher for Laundry List
+  function getCategorySvgIcon(category) {
+    const cat = (category || '').toLowerCase();
+    if (cat.includes('washroom')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 22h6V12H9v10zm3-19a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm-5 7h10c.55 0 1 .45 1 1v6h-2v6h-2v-6h-2v6H9v-6H7v-6c0-.55.45-1 1-1z"/></svg>`;
+    } else if (cat.includes('eateries') || cat.includes('canteen') || cat.includes('food')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/></svg>`;
+    } else if (cat.includes('sports') || cat.includes('facility')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>`;
+    } else if (cat.includes('clickable') || cat.includes('iconic') || cat.includes('photo')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>`;
+    } else if (cat.includes('meeting') || cat.includes('conference')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+    } else if (cat.includes('office')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>`;
+    } else {
+      // Default Classroom / Academic
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
+    }
+  }
+
+  // Render Saved Locations Laundry List
+  function renderSavedTabList() {
+    const listContainer = document.getElementById('savedList');
+    if (!listContainer) return;
+
+    const saved = getSavedLocations();
+    if (saved.length === 0) {
+      listContainer.innerHTML = `<div class="saved-empty-msg">No saved locations yet.<br>Tap the heart ❤️ on any location popup to save it here!</div>`;
+      return;
+    }
+
+    listContainer.innerHTML = '';
+    saved.forEach(loc => {
+      const card = document.createElement('div');
+      card.className = 'saved-card';
+      const subtitleText = loc.subtext || (loc.building ? `${loc.building} • ${loc.floor}` : loc.floor || 'Campus Location');
+
+      card.innerHTML = `
+        <div class="saved-card-icon">
+          ${getCategorySvgIcon(loc.category)}
+        </div>
+        <div class="saved-card-info">
+          <h3 class="saved-card-title">${loc.name}</h3>
+          <p class="saved-card-subtitle">${subtitleText}</p>
+        </div>
+        <div class="saved-card-arrow">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        // Redirect seamlessly to main map and load room
+        switchTab('home');
+        
+        if (loc.type === 'ROOM') {
+          const searchInput = document.getElementById('search');
+          if (searchInput) searchInput.value = loc.name;
+          
+          const target = allRooms.find(r => (r.Room_ID || r.Room_Number) === loc.id);
+          performSearch(false, target || null);
+        } else {
+          // Near Me Spot
+          clearMarkers();
+          const poiIcon = createCustomPoiMarker(loc.category);
+          const marker = L.marker([loc.lat, loc.lng], { icon: poiIcon, interactive: true }).addTo(map);
+          activeMarkers.push(marker);
+
+          const isSaved = isLocationSaved(loc.id);
+          const popupContent = `
+            <div>
+              <div class="popup-header">
+                <span class="badge-location"><span class="badge-dot"></span> ${loc.category}</span>
+              </div>
+              
+              <h2 class="popup-title">${loc.name}</h2>
+              <div class="popup-subtitle">${loc.floor} ${loc.details ? `• ${loc.details}` : ''}</div>
+
+              <div class="popup-actions">
+                <a href="javascript:void(0)" onclick="getDirections(${loc.lat}, ${loc.lng})" class="btn-open-maps">
+                  Directions
+                </a>
+                
+                <button id="heartBtn_${loc.id}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.id}', type:'NEAR_ME', name:'${loc.name.replace(/'/g, "\\'")}', category:'${loc.category}', floor:'${loc.floor}', details:'${loc.details||''}', lat:${loc.lat}, lng:${loc.lng}})" title="Save Location">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                  </svg>
+                </button>
+
+                <button class="btn-square" onclick="copyRoomUrl(this, '${loc.id}')" title="Share Link">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          `;
+
+          marker.bindPopup(popupContent, { autoPan: false });
+          map.flyTo([loc.lat, loc.lng], 20, { animate: true, duration: 1 });
+          setTimeout(() => marker.openPopup(), 1000);
+        }
+      });
+
+      listContainer.appendChild(card);
+    });
+  }
+
   // --- 4-TAB ROUTING & STATE ENGINE ---
   function switchTab(tabName, pushToHistory = true) {
     const tabs = ['home', 'nearme', 'tour', 'saved'];
@@ -787,7 +1015,10 @@
     const panelSaved = document.getElementById('panelSaved');
 
     if (panelTour) panelTour.classList.toggle('active', tabName === 'tour');
-    if (panelSaved) panelSaved.classList.toggle('active', tabName === 'saved');
+    if (panelSaved) {
+      panelSaved.classList.toggle('active', tabName === 'saved');
+      if (tabName === 'saved') renderSavedTabList();
+    }
 
     if (pushToHistory) {
       const targetPath = (tabName === 'home') ? '/' : `/${tabName}`;
@@ -812,7 +1043,6 @@
     }
   }
 
-  // Run tab view routing immediately on DOM load to prevent top bar flashes
   document.addEventListener('DOMContentLoaded', () => {
     initTabFromUrl();
   });
@@ -955,20 +1185,19 @@
     }
   });
 
-  // --- GOOGLE MAPS STYLE POI MARKER GENERATOR ---
   function createCustomPoiMarker(category) {
-    let bgColor = '#ef4444'; // Default Eateries Red
-    let svgIcon = `<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/>`; // Hotel/Food
+    let bgColor = '#ef4444';
+    let svgIcon = `<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/>`;
 
-    const cat = category.toLowerCase();
+    const cat = (category || '').toLowerCase();
     if (cat.includes('washroom')) {
-      bgColor = '#2563eb'; // Blue
+      bgColor = '#2563eb';
       svgIcon = `<path d="M9 22h6V12H9v10zm3-19a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm-5 7h10c.55 0 1 .45 1 1v6h-2v6h-2v-6h-2v6H9v-6H7v-6c0-.55.45-1 1-1z"/>`;
     } else if (cat.includes('clickable') || cat.includes('iconic')) {
-      bgColor = '#8b5cf6'; // Purple
+      bgColor = '#8b5cf6';
       svgIcon = `<circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>`;
     } else if (cat.includes('store') || cat.includes('convenience')) {
-      bgColor = '#10b981'; // Green
+      bgColor = '#10b981';
       svgIcon = `<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>`;
     }
 
@@ -993,7 +1222,6 @@
     });
   }
 
-  // --- NEAR ME FILTER LOGIC (WITH OUTSIDE CAMPUS FALLBACK) ---
   function filterNearMe(category) {
     activeNearMeCategory = category;
     clearMarkers();
@@ -1057,6 +1285,7 @@
         const poiIcon = createCustomPoiMarker(loc.Category || category);
         const marker = L.marker([lat, lng], { icon: poiIcon, interactive: true });
 
+        const isSaved = isLocationSaved(loc.Loc_ID);
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -1071,6 +1300,12 @@
                 Directions
               </a>
               
+              <button id="heartBtn_${loc.Loc_ID}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.Loc_ID}', type:'NEAR_ME', name:'${(loc.Room_Name||loc.Loc_ID).replace(/'/g, "\\'")}', category:'${loc.Category||category}', floor:'${loc.Floor||'Ground Floor'}', details:'${loc.Details||''}', lat:${lat}, lng:${lng}})" title="Save Location">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
+
               <button class="btn-square" onclick="copyRoomUrl(this, '${loc.Loc_ID}')" title="Share Link">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="18" cy="5" r="3"></circle>
@@ -1080,13 +1315,6 @@
                   <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                 </svg>
               </button>
-              
-              <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" class="btn-square" title="Open in Google Maps">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-              </a>
             </div>
           </div>
         `;
@@ -1192,6 +1420,7 @@
       performSearch(true, matchedRoom);
     }
   });
+
   function populateBuildingDropdown() {
     const select = document.getElementById('buildingFilter');
     select.innerHTML = '<option value="ALL">All Buildings</option>';
@@ -1203,6 +1432,7 @@
       select.appendChild(opt);
     });
   }
+
   function clearMarkers() {
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
@@ -1224,13 +1454,16 @@
       userLocationMarker = null;
     }
   }
+
   function normalizeText(text) {
     return text ? text.toString().toLowerCase().replace(/[^a-z0-9]/g, '') : '';
   }
+
   function resetUrlToHome() {
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
     window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
   }
+
   function copyRoomUrl(btn, roomId) {
     const shareUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(roomId)}`;
     
@@ -1244,6 +1477,7 @@
       fallbackCopyText(shareUrl, btn);
     }
   }
+
   function fallbackCopyText(text, btn) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
@@ -1260,6 +1494,7 @@
     }
     document.body.removeChild(textArea);
   }
+
   function showCopyFeedback(btn) {
     const originalHTML = btn.innerHTML;
     btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
@@ -1268,6 +1503,7 @@
       btn.innerHTML = originalHTML;
     }, 2000);
   }
+
   function checkUrlSearchParam() {
     const navEntries = performance.getEntriesByType('navigation');
     if (navEntries.length > 0 && navEntries[0].type === 'reload') {
@@ -1295,6 +1531,7 @@
       }
     }
   }
+
   function handleBuildingChange() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
     if (!selectedBuilding || selectedBuilding === "") return;
@@ -1326,6 +1563,7 @@
       }
     });
   }
+
   function handleSearchInput() {
     const selectedBuilding = document.getElementById('buildingFilter').value;
     const rawQuery = document.getElementById('search').value.trim();
@@ -1370,20 +1608,24 @@
     });
     box.style.display = 'block';
   }
+
   function hideSuggestions() {
     document.getElementById('suggestionsBox').style.display = 'none';
   }
+
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.search-wrapper')) {
       hideSuggestions();
     }
   });
+
   function handleKeyPress(event) {
     if (event.key === 'Enter') {
       hideSuggestions();
       performSearch();
     }
   }
+
   function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
@@ -1428,6 +1670,8 @@
         const buildingName = room.Building || 'N/A';
         const floorName = room.Floor || 'N/A';
         const marker = L.marker([lat, lng], { interactive: true });
+
+        const isSaved = isLocationSaved(roomId);
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -1441,6 +1685,12 @@
                 Directions
               </a>
               
+              <button id="heartBtn_${roomId}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${roomId}', type:'ROOM', name:'${room.Room_Name.replace(/'/g, "\\'")}', category:'${room.Category}', building:'${buildingName}', floor:'${floorName}', lat:${lat}, lng:${lng}})" title="Save Location">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
+
               <button class="btn-square" onclick="copyRoomUrl(this, '${roomId}')" title="Share Link">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="18" cy="5" r="3"></circle>
@@ -1450,13 +1700,6 @@
                   <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                 </svg>
               </button>
-              
-              <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}" target="_blank" class="btn-square" title="Open in Google Maps">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-              </a>
             </div>
           </div>
         `;
@@ -1490,10 +1733,12 @@
       window.history.pushState({ path: newUrl }, '', newUrl);
     }
   }
+
   function openManualSourcePicker() {
     document.getElementById('centerCrosshair').style.display = 'flex';
     document.getElementById('manualPickerUI').style.display = 'flex';
   }
+
   function confirmManualLocation() {
     document.getElementById('centerCrosshair').style.display = 'none';
     document.getElementById('manualPickerUI').style.display = 'none';
@@ -1501,6 +1746,7 @@
     
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
+
   function getDirections(destLat, destLng) {
     if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
       alert("Campus paths are still loading. Please try again in a few seconds.");
@@ -1539,6 +1785,7 @@
       maximumAge: 0
     });
   }
+
   function calculateAndDrawRoute(userP, destP) {
     activeDestination = { lat: destP[0], lng: destP[1] };
     const loader = document.getElementById('routeLoader');
