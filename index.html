@@ -58,13 +58,13 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(15, 23, 42, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       padding: 10px 12px;
       border-radius: 18px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       width: calc(100% - 24px);
       max-width: 440px;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -90,7 +90,7 @@
       font-size: 16px;
       font-weight: 700;
       letter-spacing: -0.4px;
-      color: #0f172a;
+      color: #ffffff;
       margin: 0;
       display: flex;
       align-items: center;
@@ -105,13 +105,13 @@
     }
     .author-tag {
       font-size: 11px;
-      color: #64748b;
+      color: #94a3b8;
       margin: 1px 0 0 0;
       font-weight: 400;
       text-align: center;
     }
     .author-tag a {
-      color: #2563eb;
+      color: #60a5fa;
       text-decoration: none;
       font-weight: 500;
     }
@@ -145,8 +145,8 @@
     }
     input:focus, select#buildingFilter:focus {
       background: #ffffff;
-      border-color: #0f172a;
-      box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.1);
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
     select#buildingFilter {
       flex: 1 1 120px;
@@ -175,16 +175,16 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #0f172a;
+      background: #2563eb;
       color: white;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
     }
     button.search-btn:hover {
-      background: #1e293b;
+      background: #1d4ed8;
     }
     @media (max-width: 480px) {
       .controls-inputs-row {
@@ -625,7 +625,6 @@
       max-width: 500px;
       margin: 0 auto;
     }
-    /* WHITE CARDS FOR TOUR SELECT PANEL */
     .tour-select-card {
       background: #ffffff;
       border: 1.5px solid #e2e8f0;
@@ -762,7 +761,6 @@
       max-width: 500px;
       margin: 0 auto;
     }
-    /* WHITE CARDS FOR SAVED LOCATIONS PANEL */
     .saved-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -828,7 +826,6 @@
       font-weight: 500;
     }
 
-    /* NEAR ME CONTAINER WITH BRANDING HEADER */
     #nearMeBar {
       position: absolute;
       top: 12px;
@@ -840,12 +837,12 @@
       width: calc(100% - 24px);
       max-width: 440px;
       padding: 10px 12px;
-      background: rgba(255, 255, 255, 0.94);
+      background: rgba(15, 23, 42, 0.92);
       backdrop-filter: blur(20px) saturate(180%);
       -webkit-backdrop-filter: blur(20px) saturate(180%);
       border-radius: 18px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.15);
       gap: 8px;
     }
 
@@ -857,7 +854,7 @@
     }
 
     .nearme-pill {
-      border: 1.5px solid #e2e8f0;
+      border: 1.5px solid #334155;
       background: #ffffff;
       color: #0f172a;
       padding: 10px 8px;
@@ -874,10 +871,10 @@
     }
 
     .nearme-pill.active {
-      background: #0f172a;
-      border-color: #0f172a;
+      background: #2563eb;
+      border-color: #2563eb;
       color: #ffffff;
-      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.2);
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
     }
 
     @media (min-width: 600px) {
@@ -891,16 +888,25 @@
       border: none;
     }
 
+    /* UNIFORM STABLE TOUR PIN STYLES */
     .tour-red-marker {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       white-space: nowrap;
       pointer-events: auto;
     }
+    .tour-marker-pin-wrapper {
+      width: 24px;
+      height: 32px;
+      flex: 0 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .tour-marker-pin {
-      width: 32px;
-      height: 40px;
+      width: 24px;
+      height: 32px;
       filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
     }
     .tour-marker-badge {
@@ -960,7 +966,7 @@
   </div>
 </div>
 
-<!-- NEAR ME TOP FILTER BAR WITH JOKA COMPASS BRANDING -->
+<!-- NEAR ME TOP FILTER BAR WITH DARK THEME AND JOKA COMPASS BRANDING -->
 <div id="nearMeBar">
   <div class="header-branding">
     <h1><span class="compass-icon">🧭</span> Joka Compass</h1>
@@ -1223,13 +1229,16 @@
     }
   });
 
+  // FIX: STABLE & CONSISTENT TOUR PIN MARKER WITH FIXED CONSTRAINED WRAPPER
   function createTourRedMarker(buildingName) {
     const html = `
       <div class="tour-red-marker">
-        <svg class="tour-marker-pin" viewBox="0 0 34 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17 0C7.61116 0 0 7.61116 0 17C0 29.75 17 42 17 42C17 42 34 29.75 34 17C34 7.61116 26.3888 0 17 0Z" fill="#ef4444"/>
-          <circle cx="17" cy="16" r="7" fill="white"/>
-        </svg>
+        <div class="tour-marker-pin-wrapper">
+          <svg class="tour-marker-pin" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C5.37258 0 0 5.37258 0 12C0 21 12 32 12 32C12 32 24 21 24 12C24 5.37258 18.6274 0 12 0Z" fill="#ef4444"/>
+            <circle cx="12" cy="11" r="5" fill="white"/>
+          </svg>
+        </div>
         <div class="tour-marker-badge">${buildingName}</div>
       </div>
     `;
@@ -1237,8 +1246,8 @@
     return L.divIcon({
       className: 'custom-poi-icon',
       html: html,
-      iconSize: [180, 42],
-      iconAnchor: [16, 40]
+      iconSize: [200, 32],
+      iconAnchor: [12, 32]
     });
   }
 
@@ -1481,7 +1490,6 @@
   const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.44645, 88.30245], 19);
   L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  // PRE-LOADING MAP IMAGERY SETUP
   const tileOptions = {
     maxZoom: 21,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
@@ -1496,7 +1504,6 @@
   googleSat.addTo(map);
   googleHybridNoPOI.addTo(map);
 
-  // PRE-CACHE IMAGERY TILES WITHIN 600m RADIUS
   function preloadCampusTiles() {
     const centerLat = 22.444948;
     const centerLng = 88.302142;
