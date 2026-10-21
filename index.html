@@ -511,7 +511,6 @@
       padding: 0 4px;
     }
 
-    /* BOTTOM NAV BAR */
     #bottomNav {
       position: absolute;
       bottom: 0;
@@ -643,7 +642,7 @@
       justify-content: center;
     }
 
-    /* --- COMPACT 70% BLACK OPACITY FLOATING TOUR DIALOG --- */
+    /* COMPACT 70% BLACK OPACITY FLOATING TOUR DIALOG */
     #tourFloatingModal {
       position: absolute;
       bottom: 24px;
@@ -679,7 +678,6 @@
       padding-right: 24px;
     }
 
-    /* SIDE-BY-SIDE DESCRIPTION & ARROW CONTROLS */
     .tour-body-row {
       display: flex;
       align-items: center;
@@ -865,6 +863,32 @@
     .custom-poi-icon {
       background: transparent;
       border: none;
+    }
+
+    /* RED POINTER WITH BUILDING NAME TEXT BADGE */
+    .tour-red-marker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      pointer-events: auto;
+    }
+    .tour-marker-pin {
+      width: 32px;
+      height: 40px;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.35));
+    }
+    .tour-marker-badge {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      line-height: 1.2;
     }
   </style>
 </head>
@@ -1162,6 +1186,25 @@
     }
   });
 
+  function createTourRedMarker(buildingName) {
+    const html = `
+      <div class="tour-red-marker">
+        <svg class="tour-marker-pin" viewBox="0 0 34 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 0C7.61116 0 0 7.61116 0 17C0 29.75 17 42 17 42C17 42 34 29.75 34 17C34 7.61116 26.3888 0 17 0Z" fill="#ef4444"/>
+          <circle cx="17" cy="16" r="7" fill="white"/>
+        </svg>
+        <div class="tour-marker-badge">${buildingName}</div>
+      </div>
+    `;
+
+    return L.divIcon({
+      className: 'custom-poi-icon',
+      html: html,
+      iconSize: [180, 42],
+      iconAnchor: [16, 40]
+    });
+  }
+
   function renderTourSelectionButtons() {
     const grid = document.getElementById('tourCategoryGrid');
     if (!grid) return;
@@ -1205,16 +1248,13 @@
     currentTourIndex = 0;
     isTourActive = true;
 
-    // 1. Hide bottom nav bar & near me top bar
     document.getElementById('bottomNav').classList.add('tour-hidden');
     document.getElementById('nearMeBar').style.display = 'none';
 
-    // 2. Minimize top controls bar to just title
     const controls = document.getElementById('controls');
     controls.style.display = 'block';
     controls.classList.add('tour-minimized');
 
-    // 3. Switch overlay tab off so map is visible
     const panelTour = document.getElementById('panelTour');
     if (panelTour) panelTour.classList.remove('active');
 
@@ -1224,35 +1264,43 @@
 
   function renderCurrentTourStop() {
     if (currentTourIndex >= currentTourStops.length) {
-      document.getElementById('tourStepBadge').innerText = "🎉 COMPLETED";
+      // Completed Thank You Screen State
+      document.getElementById('tourStepBadge').innerText = "🎉 TOUR COMPLETED";
       document.getElementById('tourModalTitle').innerText = "Thank You!";
-      document.getElementById('tourModalDesc').innerText = "You have completed this tour! Tap exit to return.";
-      
+      document.getElementById('tourModalDesc').innerHTML = `
+        You have completed this tour! Hope you enjoyed exploring Joka.<br><br>
+        <button class="btn-confirm-location" style="margin-top:6px; background:#2563eb;" onclick="exitCampusTour()">Return to Tour Menu</button>
+      `;
+
       const prevBtn = document.getElementById('btnTourPrev');
       const nextBtn = document.getElementById('btnTourNext');
-      if (prevBtn) prevBtn.disabled = true;
-      if (nextBtn) nextBtn.disabled = true;
+      if (prevBtn) prevBtn.style.display = 'none';
+      if (nextBtn) nextBtn.style.display = 'none';
       return;
     }
 
-    const stop = currentTourStops[currentTourIndex];
-    document.getElementById('tourStepBadge').innerText = `STOP ${currentTourIndex + 1} OF ${currentTourStops.length}`;
-    document.getElementById('tourModalTitle').innerText = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
-    document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
-
     const prevBtn = document.getElementById('btnTourPrev');
     const nextBtn = document.getElementById('btnTourNext');
+    if (prevBtn) prevBtn.style.display = 'flex';
+    if (nextBtn) nextBtn.style.display = 'flex';
+
+    const stop = currentTourStops[currentTourIndex];
+    const bName = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
+    
+    document.getElementById('tourStepBadge').innerText = `STOP ${currentTourIndex + 1} OF ${currentTourStops.length}`;
+    document.getElementById('tourModalTitle').innerText = bName;
+    document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
 
     if (prevBtn) prevBtn.disabled = (currentTourIndex === 0);
-    if (nextBtn) nextBtn.disabled = (currentTourIndex === currentTourStops.length - 1);
+    if (nextBtn) nextBtn.disabled = false; // Always enabled to proceed to next stop or thank you screen
 
     clearMarkers();
     const lat = parseFloat(stop.Latitude);
     const lng = parseFloat(stop.Longitude);
 
     if (!isNaN(lat) && !isNaN(lng)) {
-      const poiIcon = createCustomPoiMarker(stop.Category || 'Clickable Locations');
-      const marker = L.marker([lat, lng], { icon: poiIcon, interactive: true }).addTo(map);
+      const redMarkerIcon = createTourRedMarker(bName);
+      const marker = L.marker([lat, lng], { icon: redMarkerIcon, interactive: true }).addTo(map);
       activeMarkers.push(marker);
 
       map.flyTo([lat, lng], 19, { animate: true, duration: 1 });
@@ -1269,11 +1317,9 @@
     isTourActive = false;
     document.getElementById('tourFloatingModal').style.display = 'none';
     
-    // Restore top controls bar
     const controls = document.getElementById('controls');
     controls.classList.remove('tour-minimized');
 
-    // Restore bottom nav bar
     document.getElementById('bottomNav').classList.remove('tour-hidden');
 
     clearMarkers();
@@ -1282,7 +1328,7 @@
 
   // --- 4-TAB ROUTING & STATE ENGINE ---
   function switchTab(tabName, pushToHistory = true) {
-    if (isTourActive) return; // Ignore tab switching while actively in tour mode
+    if (isTourActive) return;
 
     const tabs = ['home', 'nearme', 'tour', 'saved'];
     if (!tabs.includes(tabName)) tabName = 'home';
