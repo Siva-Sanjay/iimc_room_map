@@ -888,7 +888,6 @@
       border: none;
     }
 
-    /* UNIFORM STABLE TOUR PIN STYLES */
     .tour-red-marker {
       display: inline-flex;
       align-items: center;
@@ -1229,7 +1228,6 @@
     }
   });
 
-  // FIX: STABLE & CONSISTENT TOUR PIN MARKER WITH FIXED CONSTRAINED WRAPPER
   function createTourRedMarker(buildingName) {
     const html = `
       <div class="tour-red-marker">
@@ -1395,7 +1393,8 @@
       }
     }
 
-    if (tabName !== 'home' && tabName !== 'nearme') {
+    // WIPE POI AND USER LOCATION POINTERS WHEN NAVIGATING AWAY FROM NEAR ME
+    if (tabName !== 'nearme') {
       clearMarkers();
     }
 
@@ -1856,9 +1855,15 @@
     });
   }
 
+  // UPDATED WIPE FUNCTION THAT INCLUDES THE USER LOCATION MARKER
   function clearMarkers() {
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
+    
+    if (userLocationMarker) {
+      map.removeLayer(userLocationMarker);
+      userLocationMarker = null;
+    }
     
     if (etaMarker) {
       map.removeLayer(etaMarker);
@@ -1871,10 +1876,6 @@
         map.removeLayer(currentRouteLayer);
       }
       currentRouteLayer = null;
-    }
-    if (userLocationMarker) {
-      map.removeLayer(userLocationMarker);
-      userLocationMarker = null;
     }
   }
 
