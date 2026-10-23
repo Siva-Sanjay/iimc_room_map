@@ -1234,10 +1234,10 @@
 
   // SEQUENTIAL IMAGES CYCLING FOR TOUR PILLS
   const tourImages = [
-    '/images/campus.jpg',
-    '/images/acad_block.jpg',
-    '/images/hostel.jpg',
-    '/images/iimc_logo.jpg'
+    'images/campus.jpg',
+    'images/acad_block.jpg',
+    'images/hostel.jpg',
+    'images/iimc_logo.jpg'
   ];
 
   Papa.parse(tourCsvUrl, {
@@ -1273,7 +1273,7 @@
 
   function renderTourSelectionButtons() {
     const grid = document.getElementById('tourCategoryGrid');
-    if (!grid) return;
+    if (!grid || allTourItems.length === 0) return;
 
     const categories = [...new Set(allTourItems.map(item => item.Category ? item.Category.trim() : '').filter(Boolean))];
     if (categories.length === 0) {
@@ -1289,7 +1289,7 @@
       const card = document.createElement('div');
       card.className = 'tour-select-card';
       card.innerHTML = `
-        <img src="${thumbSrc}" alt="${catName}" class="tour-card-thumb" onerror="this.src='/compass_icon.png'" />
+        <img src="${thumbSrc}" alt="${catName}" class="tour-card-thumb" onerror="this.onerror=null; this.src='compass_icon.png';" />
         <div class="tour-card-info">
           <h3 class="tour-card-title">${catName}</h3>
           <p class="tour-card-sub">📍 ${stops.length} Stops & Highlights</p>
@@ -1411,11 +1411,7 @@
 
     if (controls) controls.style.display = (tabName === 'home') ? 'block' : 'none';
     if (nearMeBar) {
-      if (tabName === 'nearme') {
-        nearMeBar.style.display = 'flex';
-      } else {
-        nearMeBar.style.display = 'none';
-      }
+      nearMeBar.style.display = (tabName === 'nearme') ? 'flex' : 'none';
     }
 
     if (tabName !== 'nearme') {
@@ -1425,7 +1421,10 @@
     const panelTour = document.getElementById('panelTour');
     const panelSaved = document.getElementById('panelSaved');
 
-    if (panelTour) panelTour.classList.toggle('active', tabName === 'tour');
+    if (panelTour) {
+      panelTour.classList.toggle('active', tabName === 'tour');
+      if (tabName === 'tour') renderTourSelectionButtons();
+    }
     if (panelSaved) {
       panelSaved.classList.toggle('active', tabName === 'saved');
       if (tabName === 'saved') renderSavedTabList();
