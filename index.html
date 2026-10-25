@@ -567,30 +567,47 @@
       bottom: 75px !important;
     }
 
-    /* GOOGLE MAPS STYLE LOCATE BUTTON */
+    /* ENHANCED ZOOM & LOCATION BUTTONS STYLING */
+    .leaflet-control-zoom-in, 
+    .leaflet-control-zoom-out {
+      width: 36px !important;
+      height: 36px !important;
+      line-height: 34px !important;
+      font-size: 20px !important;
+      font-weight: bold !important;
+    }
+
+    .leaflet-control-locate-container {
+      margin-bottom: 8px !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
     .leaflet-control-locate {
-      background: #ffffff;
-      border-radius: 4px;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      background: #2563eb !important;
+      border-radius: 8px !important;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
       cursor: pointer;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 6px !important;
-      transition: background-color 0.2s ease;
+      width: 36px !important;
+      height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-decoration: none !important;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
     }
     .leaflet-control-locate:hover {
-      background-color: #f4f4f4;
+      background-color: #1d4ed8 !important;
     }
     .leaflet-control-locate svg {
-      width: 18px;
-      height: 18px;
-      color: #334155;
+      width: 20px;
+      height: 20px;
+      color: #ffffff;
+      display: block;
+      margin: 0 auto;
     }
     .leaflet-control-locate.locating svg {
-      color: #2563eb;
       animation: pulseLocate 1.2s infinite ease-in-out;
     }
     @keyframes pulseLocate {
@@ -1552,16 +1569,16 @@
   const LocateControl = L.Control.extend({
     options: { position: 'bottomright' },
     onAdd: function() {
-      const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+      const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control-locate-container');
       const btn = L.DomUtil.create('a', 'leaflet-control-locate', container);
       btn.href = '#';
       btn.title = 'Show your current location';
       btn.role = 'button';
       btn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
-          <circle cx="12" cy="12" r="8"></circle>
+          <circle cx="12" cy="12" r="7.5"></circle>
         </svg>
       `;
 
