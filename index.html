@@ -945,7 +945,7 @@
   <span id="loaderText">Loading...</span> 
 </div>
 
-<!-- MANUAL PICKER UI -->
+<!-- Manual source location picker -->
 <div id="manualPickerUI">
   <p>Move the map to set your start position</p>
   <button class="btn-confirm-location" onclick="confirmManualLocation()">Confirm Location</button>
@@ -1005,15 +1005,15 @@
   <div class="tab-panel-top-banner">
     <div class="tab-panel-branding"><span class="compass-icon">🧭</span> Joka Compass</div>
   </div>
-  <h2 class="tab-panel-title">🚶 Guided Campus Tours</h2>
-  <p class="tab-panel-desc">Select a guided tour below to explore IIM Calcutta step-by-step.</p>
+  <h2 class="tab-panel-title"> 🗺️ Campus Tour Guide</h2>
+  <p class="tab-panel-desc">Select a guided tour below to explore Joka step-by-step.</p>
   <div id="tourCategoryGrid" class="tour-buttons-grid"></div>
 </div>
 
 <!-- FLOATING COMPACT DARK TOUR DIALOG -->
 <div id="tourFloatingModal">
   <button class="btn-tour-close" onclick="exitCampusTour()" title="Exit Tour">✕</button>
-  <div id="tourStepBadge" class="tour-step-badge">Stop 1 of 10</div>
+  <div id="tourStepBadge" class="tour-step-badge"> 1/10</div>
   <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
   
   <div class="tour-body-row">
@@ -1028,7 +1028,7 @@
   <div class="tab-panel-top-banner">
     <div class="tab-panel-branding"><span class="compass-icon">🧭</span> Joka Compass</div>
   </div>
-  <h2 class="tab-panel-title">❤️ Saved Locations</h2>
+  <h2 class="tab-panel-title"> ❤ Saved Locations</h2>
   <p class="tab-panel-desc">Your favorited rooms, spots, and bookmarked campus locations appear below.</p>
   <div id="savedList" class="saved-list-container"></div>
 </div>
@@ -1333,10 +1333,10 @@
 
   function renderCurrentTourStop() {
     if (currentTourIndex >= currentTourStops.length) {
-      document.getElementById('tourStepBadge').innerText = "🎉 TOUR COMPLETED";
+      document.getElementById('tourStepBadge').innerText = "🎉HOPE YOU ENJOYED THE TOUR";
       document.getElementById('tourModalTitle').innerText = "Thank You!";
       document.getElementById('tourModalDesc').innerHTML = `
-        You have completed this tour! Hope you enjoyed exploring Joka.<br><br>
+        <br>
         <button class="btn-confirm-location" style="margin-top:6px; background:#2563eb;" onclick="exitCampusTour()">Return to Tour Menu</button>
       `;
 
@@ -1355,7 +1355,7 @@
     const stop = currentTourStops[currentTourIndex];
     const bName = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
     
-    document.getElementById('tourStepBadge').innerText = `STOP ${currentTourIndex + 1} OF ${currentTourStops.length}`;
+    document.getElementById('tourStepBadge').innerText = ` ${currentTourIndex + 1}/${currentTourStops.length}`;
     document.getElementById('tourModalTitle').innerText = bName;
     document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
 
