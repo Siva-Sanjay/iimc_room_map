@@ -567,6 +567,38 @@
       bottom: 75px !important;
     }
 
+    /* GOOGLE MAPS STYLE LOCATE BUTTON */
+    .leaflet-control-locate {
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 6px !important;
+      transition: background-color 0.2s ease;
+    }
+    .leaflet-control-locate:hover {
+      background-color: #f4f4f4;
+    }
+    .leaflet-control-locate svg {
+      width: 18px;
+      height: 18px;
+      color: #334155;
+    }
+    .leaflet-control-locate.locating svg {
+      color: #2563eb;
+      animation: pulseLocate 1.2s infinite ease-in-out;
+    }
+    @keyframes pulseLocate {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     .tab-panel-overlay {
       position: absolute;
       top: 0;
@@ -1317,6 +1349,9 @@
     currentTourIndex = 0;
     isTourActive = true;
 
+    // Push history state to capture back-button during active tour
+    window.history.pushState({ inActiveTour: true }, '', window.location.href);
+
     document.getElementById('bottomNav').classList.add('tour-hidden');
     document.getElementById('nearMeBar').style.display = 'none';
 
@@ -1333,10 +1368,9 @@
 
   function renderCurrentTourStop() {
     if (currentTourIndex >= currentTourStops.length) {
-      document.getElementById('tourStepBadge').innerText = "🎉HOPE YOU ENJOYED THE TOUR";
-      document.getElementById('tourModalTitle').innerText = "Thank You!";
+      document.getElementById('tourStepBadge').innerText = "Thank You!";
+      document.getElementById('tourModalTitle').innerText = "🎉Hope you enjoyed the tour!";
       document.getElementById('tourModalDesc').innerHTML = `
-        <br>
         <button class="btn-confirm-location" style="margin-top:6px; background:#2563eb;" onclick="exitCampusTour()">Return to Tour Menu</button>
       `;
 
@@ -1510,7 +1544,78 @@
   }
 
   const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.44645, 88.30245], 19);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  
+  // LEAFLET ZOOM CONTROL ON BOTTOM-RIGHT
+  const zoomControl = L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  // CUSTOM GOOGLE MAPS STYLE LOCATE CONTROL (STACKED ABOVE ZOOM BUTTONS)
+  const LocateControl = L.Control.extend({
+    options: { position: 'bottomright' },
+    onAdd: function() {
+      const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+      const btn = L.DomUtil.create('a', 'leaflet-control-locate', container);
+      btn.href = '#';
+      btn.title = 'Show your current location';
+      btn.role = 'button';
+      btn.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+          <circle cx="12" cy="12" r="8"></circle>
+        </svg>
+      `;
+
+      L.DomEvent.disableClickPropagation(btn);
+      L.DomEvent.on(btn, 'click', function(e) {
+        L.DomEvent.stop(e);
+        triggerCurrentLocation(btn);
+      });
+
+      return container;
+    }
+  });
+
+  map.addControl(new LocateControl());
+
+  function triggerCurrentLocation(btnElement) {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    if (btnElement) btnElement.classList.add('locating');
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (btnElement) btnElement.classList.remove('locating');
+        let uLat = pos.coords.latitude;
+        let uLng = pos.coords.longitude;
+
+        const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
+        if (distanceToCentre > 600) {
+          uLat = IIM_CENTRE[0];
+          uLng = IIM_CENTRE[1];
+        }
+
+        if (userLocationMarker) map.removeLayer(userLocationMarker);
+
+        userLocationMarker = L.marker([uLat, uLng], {
+          icon: L.divIcon({
+            className: 'user-dot',
+            html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
+          })
+        }).addTo(map);
+
+        map.flyTo([uLat, uLng], 19, { animate: true, duration: 1 });
+        trackEvent('current_location_button_clicked');
+      },
+      (err) => {
+        if (btnElement) btnElement.classList.remove('locating');
+        alert("Could not fetch your location. Please check location permissions.");
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  }
 
   const tileOptions = {
     maxZoom: 21,
@@ -1837,7 +1942,12 @@
   }
 
   window.addEventListener('popstate', (event) => {
-    if (isTourActive) return;
+    // Intercept back button when actively exploring a campus tour
+    if (isTourActive) {
+      exitCampusTour();
+      return;
+    }
+
     const path = window.location.pathname.replace('/', '').toLowerCase();
     if (['nearme', 'tour', 'saved'].includes(path)) {
       switchTab(path, false);
