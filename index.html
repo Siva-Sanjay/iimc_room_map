@@ -1580,17 +1580,17 @@
     trackEvent('app_opened_as_pwa');
   }
 
-  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([IIM_CENTRE[0], IIM_CENTRE[1]], 19);
+  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.444948, 88.302142], 16);
 
   // Persistent Campus Boundary Wall Layer
-// const campusBorderLayer = L.polygon(campusBoundaryCoords, {
-//   color: '#2563eb',       
-//   weight: 3,             
-//   opacity: 0.85,        
-//   fillOpacity: 0,     // Set to 0 if you only want the border outline without fill
-//   // dashArray: '6, 8',     // Optional: makes it a dashed border line (remove for solid line)
-//   interactive: false     // Prevents clicking/blocking map taps beneath it
-// }).addTo(map);
+const campusBorderLayer = L.polygon(campusBoundaryCoords, {
+  color: '#2563eb',       
+  weight: 3,             
+  opacity: 0.85,        
+  fillOpacity: 0,     // Set to 0 if you only want the border outline without fill
+  // dashArray: '6, 8',     // Optional: makes it a dashed border line (remove for solid line)
+  interactive: false     // Prevents clicking/blocking map taps beneath it
+}).addTo(map);
 
 
   
