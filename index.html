@@ -1131,6 +1131,26 @@
   const pathsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1640199293&single=true&output=csv';
   const nearMeCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1988597004&single=true&output=csv';
   const tourCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=297077838&single=true&output=csv';
+  const campusBounds =
+  [
+    [22.446408,88.297989],[22.44672,88.298177],[22.446737,88.29875],
+    [22.446909,88.299336],[22.446967,88.299775],[22.446993,88.300257],
+    [22.447063,88.300941],[22.447117,88.301416],[22.447179,88.302095],
+    [22.447211,88.302714],[22.4473,88.303609],[22.447362,88.304139],
+    [22.447431,88.305045],[22.447492,88.305993],[22.447649,88.307074],
+    [22.447698,88.307267],[22.446629,88.306943],[22.445947,88.306706],
+    [22.444929,88.306245],[22.444252,88.306069],[22.444258,88.305939],
+    [22.443622,88.305791],[22.4432,88.305695],[22.442823,88.305611],
+    [22.442481,88.305521],[22.442414,88.305515],[22.442423,88.305444],
+    [22.442293,88.305393],[22.441771,88.305218],[22.441566,88.305135],
+    [22.441333,88.304977],[22.440482,88.304709],[22.440769,88.303592],
+    [22.440989,88.302737],[22.441143,88.302244],[22.441202,88.301853],
+    [22.441413,88.301642],[22.441533,88.301364],[22.441744,88.300715],
+    [22.441873,88.300271],[22.441977,88.299904],[22.442164,88.299476],
+    [22.442927,88.29839],[22.443204,88.298032],[22.443863,88.297711],
+    [22.444221,88.297593],[22.444569,88.297481],[22.444654,88.297277],
+    [22.444764,88.297006],[22.445954,88.297687],[22.446408,88.297989]
+  ];
 
   // --- LOCALSTORAGE SAVED LOCATIONS ENGINE ---
   function getSavedLocations() {
@@ -1560,7 +1580,19 @@
     trackEvent('app_opened_as_pwa');
   }
 
-  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.44645, 88.30245], 19);
+  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([IIM_CENTRE[0], IIM_CENTRE[1]], 16);
+
+  // Persistent Campus Boundary Wall Layer
+const campusBorderLayer = L.polygon(campusBoundaryCoords, {
+  color: '#2563eb',       
+  weight: 3,             
+  opacity: 0.85,        
+  fillOpacity: 0,     // Set to 0 if you only want the border outline without fill
+  // dashArray: '6, 8',     // Optional: makes it a dashed border line (remove for solid line)
+  interactive: false     // Prevents clicking/blocking map taps beneath it
+}).addTo(map);
+
+
   
   // LEAFLET ZOOM CONTROL ON BOTTOM-RIGHT
   const zoomControl = L.control.zoom({ position: 'bottomright' }).addTo(map);
