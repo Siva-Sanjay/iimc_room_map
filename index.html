@@ -666,64 +666,67 @@
       margin-bottom: 16px;
     }
 
+    /* 2-COLUMN TOUR GRID STYLING */
     .tour-buttons-grid {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       margin: 0 auto;
     }
     .tour-select-card {
-      background: #ffffff;
-      border: 1.5px solid #e2e8f0;
+      position: relative;
+      height: 220px;
       border-radius: 16px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      overflow: hidden;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      background: #1e293b;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .tour-select-card:hover {
-      border-color: #2563eb;
-      background: #f8fafc;
+    .tour-select-card:hover, .tour-select-card:active {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
     }
     .tour-card-thumb {
-      width: 50px;
-      height: 50px;
-      border-radius: 12px;
+      width: 100%;
+      height: 70%;
       object-fit: cover;
-      flex: 0 0 50px;
-      background-color: #f1f5f9;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      display: block;
     }
     .tour-card-info {
-      flex: 1;
-      min-width: 0;
+      height: 30%;
+      width: 100%;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.98) 100%);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
     }
     .tour-card-title {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 700;
-      color: #0f172a;
-      margin: 0 0 4px 0;
+      color: #ffffff;
+      margin: 0 0 2px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.2;
     }
     .tour-card-sub {
-      font-size: 12px;
-      color: #64748b;
+      font-size: 11px;
+      color: #94a3b8;
       margin: 0;
-    }
-    .tour-card-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: #eff6ff;
-      color: #2563eb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 36px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     #tourFloatingModal {
@@ -887,6 +890,7 @@
       color: #94a3b8;
       font-size: 14px;
       font-weight: 500;
+      grid-column: 1 / -1;
     }
 
     #nearMeBar {
@@ -1016,7 +1020,7 @@
     </select>
     
     <div class="search-wrapper">
-      <input type="text" id="search" placeholder="Enter Room No..." autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
+      <input type="text" id="search" placeholder="Where're we going today?" autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
       <div id="suggestionsBox" class="suggestions-box"></div>
     </div>
     <button class="search-btn" onclick="performSearch()" aria-label="Search">
@@ -1363,9 +1367,6 @@
           <h3 class="tour-card-title">${catName}</h3>
           <p class="tour-card-sub">📍 ${stops.length} Stops & Highlights</p>
         </div>
-        <div class="tour-card-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-        </div>
       `;
 
       card.addEventListener('click', () => {
@@ -1580,20 +1581,17 @@
     trackEvent('app_opened_as_pwa');
   }
 
-  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.444948, 88.302142], 16);
+  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.444948, 88.302142], 17);
 
-  // Persistent Campus Boundary Wall Layer
-const campusBorderLayer = L.polygon(campusBounds, {
-  color: '#ffffff',       
-  weight: 1.5,             
-  opacity: 0.7,        
-  fillOpacity: 0,     // Set to 0 if you only want the border outline without fill
-  // dashArray: '6, 8',     // Optional: makes it a dashed border line (remove for solid line)
-  interactive: false     // Prevents clicking/blocking map taps beneath it
-}).addTo(map);
+  // Campus Boundary Wall Layer
+  const campusBorderLayer = L.polygon(campusBounds, {
+    color: '#ffffff',       
+    weight: 1.5,             
+    opacity: 0.7,        
+    fillOpacity: 0,    
+    interactive: false     
+  }).addTo(map);
 
-
-  
   // LEAFLET ZOOM CONTROL ON BOTTOM-RIGHT
   const zoomControl = L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -1991,7 +1989,6 @@ const campusBorderLayer = L.polygon(campusBounds, {
   }
 
   window.addEventListener('popstate', (event) => {
-    // Intercept back button when actively exploring a campus tour
     if (isTourActive) {
       exitCampusTour();
       return;
