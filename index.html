@@ -1583,7 +1583,7 @@
   const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.444948, 88.302142], 16);
 
   // Persistent Campus Boundary Wall Layer
-const campusBorderLayer = L.polygon(campusBoundaryCoords, {
+const campusBorderLayer = L.polygon(campusBounds, {
   color: '#2563eb',       
   weight: 3,             
   opacity: 0.85,        
