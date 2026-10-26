@@ -667,67 +667,222 @@
       margin-bottom: 16px;
     }
 
-    /* ABOUT PANEL STYLING */
-    .about-card-container {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      width: 100%;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    .about-card {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .about-card-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #60a5fa;
-      font-size: 15px;
-      font-weight: 700;
-    }
-    .about-card-body {
-      font-size: 13px;
-      color: #cbd5e1;
-      line-height: 1.5;
-      margin: 0;
-    }
-    .about-feature-list {
-      margin: 4px 0 0 0;
-      padding-left: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .about-feature-list li {
-      font-size: 12.5px;
-      color: #cbd5e1;
-    }
-    .about-link-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 6px;
-      padding: 10px 14px;
-      background: #2563eb;
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-      border-radius: 10px;
-      transition: background 0.2s ease;
-    }
-    .about-link-btn:hover {
-      background: #1d4ed8;
-    }
+ /* MAGAZINE STYLE ABOUT PAGE STYLING */
+#panelAbout {
+  background: #091221;
+  padding: 0 0 40px 0;
+}
+
+.about-mag-header {
+  padding: 24px 20px 16px 20px;
+  position: relative;
+}
+
+.about-mag-tag {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #60a5fa;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.about-mag-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.5px;
+}
+
+.about-mag-title span {
+  color: #3b82f6;
+}
+
+.about-mag-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin: 0 0 12px 0;
+}
+
+.about-mag-desc {
+  font-size: 13px;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+  max-width: 85%;
+}
+
+.about-mag-slogan {
+  position: absolute;
+  top: 24px;
+  right: 20px;
+  text-align: right;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.3;
+  color: #94a3b8;
+  font-family: serif;
+}
+
+/* HERO IMAGE BANNER */
+.about-mag-hero {
+  width: 100%;
+  height: 180px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.about-mag-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.about-mag-hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, #091221 0%, transparent 20%, transparent 80%, #091221 100%);
+}
+
+/* EXPLORE JOKA SECTION */
+.about-mag-section {
+  padding: 0 20px;
+}
+
+.about-mag-sec-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.about-mag-sec-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 20px 0;
+}
+
+/* 2x2 FEATURE GRID */
+.about-mag-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 16px;
+  margin-bottom: 30px;
+}
+
+.about-mag-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.about-mag-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(30, 58, 138, 0.35);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #60a5fa;
+  margin-bottom: 10px;
+}
+
+.about-mag-grid-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.about-mag-grid-desc {
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* DEVELOPER CARD FOOTER */
+.about-mag-dev-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.about-mag-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  flex: 0 0 48px;
+}
+
+.about-mag-dev-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.about-mag-dev-label {
+  font-size: 10px;
+  color: #64748b;
+  margin: 0 0 2px 0;
+}
+
+.about-mag-dev-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.about-mag-dev-quote {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.35;
+  font-style: italic;
+  margin: 0;
+}
+
+.about-mag-socials {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.about-mag-social-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.about-mag-social-btn:hover {
+  background: #2563eb;
+}
+
 
     /* 2-COLUMN TOUR GRID STYLING WITH TEXT OVERLAY & GRADIENT */
     .tour-buttons-grid {
@@ -1150,52 +1305,86 @@
 </div>
 
 <!-- TAB 5: ABOUT PANEL -->
+<!-- TAB 5: ABOUT PANEL (MAGAZINE STYLE) -->
 <div id="panelAbout" class="tab-panel-overlay">
-  <div class="tab-panel-top-banner">
-    <div class="tab-panel-branding"><span class="compass-icon">🧭</span> Joka Compass</div>
+  <div class="about-mag-header">
+    <div class="about-mag-tag">ABOUT</div>
+    <h1 class="about-mag-title">Joka <span>Compass</span></h1>
+    <p class="about-mag-subtitle">Your guide to IIM Calcutta</p>
+    <p class="about-mag-desc">
+      Joka Compass helps you find rooms, locate key facilities, and navigate the IIM Calcutta campus with ease.
+    </p>
+    <div class="about-mag-slogan">
+      Explore<br>Navigate<br>Belong
+    </div>
   </div>
-  <h2 class="tab-panel-title">ℹ️ About Joka Compass</h2>
-  <p class="tab-panel-desc">Your smart campus navigation guide for IIM Calcutta.</p>
-  
-  <div class="about-card-container">
-    <div class="about-card">
-      <div class="about-card-header">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-        <span>App Purpose</span>
+
+  <div class="about-mag-hero">
+    <img src="images/campus.jpg" alt="IIM Calcutta Campus aerial view" onerror="this.onerror=null; this.src='compass_icon.png';" />
+    <div class="about-mag-hero-overlay"></div>
+  </div>
+
+  <div class="about-mag-section">
+    <h2 class="about-mag-sec-title">Explore Joka</h2>
+    <p class="about-mag-sec-sub">Everything you need, all in one place.</p>
+
+    <div class="about-mag-grid">
+      <!-- Feature 1 -->
+      <div class="about-mag-grid-item">
+        <div class="about-mag-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3 class="about-mag-grid-title">Find places</h3>
+        <p class="about-mag-grid-desc">Get the exact location, shortest path and ETA.</p>
       </div>
-      <p class="about-card-body">
-        Joka Compass was built to make finding rooms, lecture halls, and facilities across IIM Calcutta effortless. Whether you are a student, faculty member, or visitor, navigate the campus pathways with step-by-step walking directions.
-      </p>
+
+      <!-- Feature 2 -->
+      <div class="about-mag-grid-item">
+        <div class="about-mag-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3 class="about-mag-grid-title">Explore nearby</h3>
+        <p class="about-mag-grid-desc">Washrooms, eateries, convenience stores and iconic spots.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="about-mag-grid-item">
+        <div class="about-mag-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        </div>
+        <h3 class="about-mag-grid-title">Take a tour</h3>
+        <p class="about-mag-grid-desc">Guided tours of campus, academic blocks, hostels and sports facilities.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="about-mag-grid-item">
+        <div class="about-mag-icon-box">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <h3 class="about-mag-grid-title">Save locations</h3>
+        <p class="about-mag-grid-desc">Click the heart button on locations to save the places you need later.</p>
+      </div>
     </div>
 
-    <div class="about-card">
-      <div class="about-card-header">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-        <span>How to Use</span>
+    <!-- Developer Footer Card -->
+    <div class="about-mag-dev-card">
+      <div class="about-mag-avatar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      <ul class="about-feature-list">
-        <li><b>Search Rooms:</b> Type any room ID or name in the home search bar to pinpoint its exact location.</li>
-        <li><b>Near Me:</b> Quickly find eateries, washrooms, convenience stores, and iconic photo spots near you.</li>
-        <li><b>Campus Tour:</b> Take step-by-step guided tours across academic blocks, hostels, and key landmarks.</li>
-        <li><b>Get Directions:</b> Tap any pin to generate optimal walking paths with real-time ETA calculations.</li>
-      </ul>
-    </div>
-
-    <div class="about-card">
-      <div class="about-card-header">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Developer</span>
+      <div class="about-mag-dev-info">
+        <div class="about-mag-dev-label">Designed & Built by</div>
+        <div class="about-mag-dev-name">Siva Sanjay</div>
+        <p class="about-mag-dev-quote">"Hey there, Hope you love this. Made with 20gms of code and 80gms of Joka Spirit. Text me for any feedback and comments."</p>
       </div>
-      <p class="about-card-body">
-        Designed & developed by <b>Siva Sanjay</b> to enhance campus exploration and accessibility.
-      </p>
-      <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer" class="about-link-btn">
-        <span>Connect on LinkedIn</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-      </a>
+      <div class="about-mag-socials">
+        <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer" class="about-mag-social-btn" title="LinkedIn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+        </a>
+      </div>
     </div>
   </div>
 </div>
+
 
 <div id="map"></div>
 
