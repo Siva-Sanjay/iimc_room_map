@@ -546,12 +546,13 @@
       border: none;
       cursor: pointer;
       transition: color 0.2s ease;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
+      padding: 0;
     }
     .nav-tab svg {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       stroke: #64748b;
       fill: none;
       transition: all 0.2s ease;
@@ -664,6 +665,68 @@
       color: #94a3b8;
       line-height: 1.4;
       margin-bottom: 16px;
+    }
+
+    /* ABOUT PANEL STYLING */
+    .about-card-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .about-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .about-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #60a5fa;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .about-card-body {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .about-feature-list {
+      margin: 4px 0 0 0;
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .about-feature-list li {
+      font-size: 12.5px;
+      color: #cbd5e1;
+    }
+    .about-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 10px 14px;
+      background: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: background 0.2s ease;
+    }
+    .about-link-btn:hover {
+      background: #1d4ed8;
     }
 
     /* 2-COLUMN TOUR GRID STYLING WITH TEXT OVERLAY & GRADIENT */
@@ -1086,9 +1149,57 @@
   <div id="savedList" class="saved-list-container"></div>
 </div>
 
+<!-- TAB 5: ABOUT PANEL -->
+<div id="panelAbout" class="tab-panel-overlay">
+  <div class="tab-panel-top-banner">
+    <div class="tab-panel-branding"><span class="compass-icon">🧭</span> Joka Compass</div>
+  </div>
+  <h2 class="tab-panel-title">ℹ️ About Joka Compass</h2>
+  <p class="tab-panel-desc">Your smart campus navigation guide for IIM Calcutta.</p>
+  
+  <div class="about-card-container">
+    <div class="about-card">
+      <div class="about-card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span>App Purpose</span>
+      </div>
+      <p class="about-card-body">
+        Joka Compass was built to make finding rooms, lecture halls, and facilities across IIM Calcutta effortless. Whether you are a student, faculty member, or visitor, navigate the campus pathways with step-by-step walking directions.
+      </p>
+    </div>
+
+    <div class="about-card">
+      <div class="about-card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span>How to Use</span>
+      </div>
+      <ul class="about-feature-list">
+        <li><b>Search Rooms:</b> Type any room ID or name in the home search bar to pinpoint its exact location.</li>
+        <li><b>Near Me:</b> Quickly find eateries, washrooms, convenience stores, and iconic photo spots near you.</li>
+        <li><b>Campus Tour:</b> Take step-by-step guided tours across academic blocks, hostels, and key landmarks.</li>
+        <li><b>Get Directions:</b> Tap any pin to generate optimal walking paths with real-time ETA calculations.</li>
+      </ul>
+    </div>
+
+    <div class="about-card">
+      <div class="about-card-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>Developer</span>
+      </div>
+      <p class="about-card-body">
+        Designed & developed by <b>Siva Sanjay</b> to enhance campus exploration and accessibility.
+      </p>
+      <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer" class="about-link-btn">
+        <span>Connect on LinkedIn</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
 <div id="map"></div>
 
-<!-- 4-TAB BOTTOM NAVIGATION BAR -->
+<!-- 5-TAB BOTTOM NAVIGATION BAR -->
 <nav id="bottomNav">
   <button class="nav-tab active" id="tabHome" onclick="switchTab('home')">
     <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1112,7 +1223,7 @@
       <line x1="8" y1="2" x2="8" y2="18"></line>
       <line x1="16" y1="6" x2="16" y2="22"></line>
     </svg>
-    <span>Campus Tour</span>
+    <span>Tour</span>
   </button>
   
   <button class="nav-tab" id="tabSaved" onclick="switchTab('saved')">
@@ -1120,6 +1231,15 @@
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
     </svg>
     <span>Saved</span>
+  </button>
+
+  <button class="nav-tab" id="tabAbout" onclick="switchTab('about')">
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="16" x2="12" y2="12"></line>
+      <line x1="12" y1="8" x2="12.01" y2="8"></line>
+    </svg>
+    <span>About</span>
   </button>
 </nav>
 
@@ -1466,11 +1586,11 @@
     switchTab('tour');
   }
 
-  // --- 4-TAB ROUTING & STATE ENGINE ---
+  // --- 5-TAB ROUTING & STATE ENGINE ---
   function switchTab(tabName, pushToHistory = true) {
     if (isTourActive) return;
 
-    const tabs = ['home', 'nearme', 'tour', 'saved'];
+    const tabs = ['home', 'nearme', 'tour', 'saved', 'about'];
     if (!tabs.includes(tabName)) tabName = 'home';
 
     tabs.forEach(t => {
@@ -1492,6 +1612,7 @@
 
     const panelTour = document.getElementById('panelTour');
     const panelSaved = document.getElementById('panelSaved');
+    const panelAbout = document.getElementById('panelAbout');
 
     if (panelTour) {
       panelTour.classList.toggle('active', tabName === 'tour');
@@ -1500,6 +1621,9 @@
     if (panelSaved) {
       panelSaved.classList.toggle('active', tabName === 'saved');
       if (tabName === 'saved') renderSavedTabList();
+    }
+    if (panelAbout) {
+      panelAbout.classList.toggle('active', tabName === 'about');
     }
 
     if (pushToHistory) {
@@ -1518,7 +1642,7 @@
 
   function initTabFromUrl() {
     const path = window.location.pathname.replace('/', '').toLowerCase();
-    if (['nearme', 'tour', 'saved'].includes(path)) {
+    if (['nearme', 'tour', 'saved', 'about'].includes(path)) {
       switchTab(path, false);
     } else {
       switchTab('home', false);
@@ -1995,7 +2119,7 @@
     }
 
     const path = window.location.pathname.replace('/', '').toLowerCase();
-    if (['nearme', 'tour', 'saved'].includes(path)) {
+    if (['nearme', 'tour', 'saved', 'about'].includes(path)) {
       switchTab(path, false);
       return;
     }
