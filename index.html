@@ -551,17 +551,19 @@
       padding: 0;
     }
     .nav-tab svg {
-      width: 20px;
-      height: 20px;
+      width: 25px;
+      height: 25px;
       stroke: #64748b;
       fill: none;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
     }
     .nav-tab.active {
       color: #2563eb;
     }
-    .nav-tab.active svg {
-      stroke: #2563eb;
+    .nav-tab.active svg {      
+        stroke: whitesmoke;
+        fill: #0053e4;
+        width: 30px;
     }
 
     .leaflet-bottom {
@@ -1240,7 +1242,7 @@
     </select>
     
     <div class="search-wrapper">
-      <input type="text" id="search" placeholder="Where're we going today?" autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
+      <input type="text" id="search" placeholder="Search your room no/name..." autocomplete="off" oninput="handleSearchInput()" onkeydown="handleKeyPress(event)" onfocus="handleSearchInput()">
       <div id="suggestionsBox" class="suggestions-box"></div>
     </div>
     <button class="search-btn" onclick="performSearch()" aria-label="Search">
@@ -1384,7 +1386,7 @@
       <div class="about-mag-dev-info">
         <div class="about-mag-dev-label">Designed & Built by</div>
         <div class="about-mag-dev-name">Siva Sanjay</div>
-        <p class="about-mag-dev-quote">" Made with 20gms of code and 80gms of Joka Spirit. Text me for any feedback and comments."</p>
+        <p class="about-mag-dev-quote">"20gms of code, 80gms of Joka Spirit. Text me for any feedback and comments."</p>
       </div>
       <div class="about-mag-socials">
         <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer" class="about-mag-social-btn" title="LinkedIn">
@@ -1404,8 +1406,8 @@
 <nav id="bottomNav">
   <button class="nav-tab active" id="tabHome" onclick="switchTab('home')">
     <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2h-4v-10H9v10H5a2 2 0 0 1-2-2Z"></path>
+      
     </svg>
     <span>Home</span>
   </button>
