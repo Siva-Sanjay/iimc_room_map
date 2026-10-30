@@ -1453,6 +1453,54 @@
     }
   }
 
+  // GLOBAL LIVE LOCATION CACHE ENGINE
+  let cachedUserLocation = null;
+  let bgLocationInterval = null;
+
+  function updateBackgroundLocation() {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        let uLat = pos.coords.latitude;
+        let uLng = pos.coords.longitude;
+        const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
+        if (distanceToCentre > 600) {
+          uLat = IIM_MAIN_GATE[0];
+          uLng = IIM_MAIN_GATE[1];
+        }
+        cachedUserLocation = [uLat, uLng];
+      },
+      (err) => { console.log('Background location update silent fail:', err); },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  }
+
+  function initLocationTrackingIfGranted() {
+    if ('permissions' in navigator && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'granted') {
+          updateBackgroundLocation();
+          if (!bgLocationInterval) {
+            bgLocationInterval = setInterval(updateBackgroundLocation, 60000);
+          }
+        }
+        result.onchange = () => {
+          if (result.state === 'granted') {
+            updateBackgroundLocation();
+            if (!bgLocationInterval) {
+              bgLocationInterval = setInterval(updateBackgroundLocation, 60000);
+            }
+          } else if (bgLocationInterval) {
+            clearInterval(bgLocationInterval);
+            bgLocationInterval = null;
+          }
+        };
+      }).catch(() => {});
+    }
+  }
+
+  initLocationTrackingIfGranted();
+
   // CSV URL DATA SOURCES
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
   const pathsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=1640199293&single=true&output=csv';
@@ -1959,6 +2007,16 @@
 
     if (btnElement) btnElement.classList.add('locating');
 
+    // Show loading UI if a route is active to recalculate smooth experience
+    if (activeDestination) {
+      const loader = document.getElementById('routeLoader');
+      const loaderText = document.getElementById('loaderText');
+      if (loader && loaderText) {
+        loaderText.innerText = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
+        loader.style.display = 'flex';
+      }
+    }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         if (btnElement) btnElement.classList.remove('locating');
@@ -1967,24 +2025,34 @@
 
         const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
         if (distanceToCentre > 600) {
-          uLat = IIM_CENTRE[0];
-          uLng = IIM_CENTRE[1];
+          uLat = IIM_MAIN_GATE[0];
+          uLng = IIM_MAIN_GATE[1];
         }
+
+        // Update cached live location
+        cachedUserLocation = [uLat, uLng];
 
         if (userLocationMarker) map.removeLayer(userLocationMarker);
 
-        userLocationMarker = L.marker([uLat, uLng], {
-          icon: L.divIcon({
-            className: 'user-dot',
-            html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
-          })
-        }).addTo(map);
+        // Re-calculate route if destination is active
+        if (activeDestination) {
+          calculateAndDrawRoute([uLat, uLng], [activeDestination.lat, activeDestination.lng]);
+        } else {
+          userLocationMarker = L.marker([uLat, uLng], {
+            icon: L.divIcon({
+              className: 'user-dot',
+              html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
+            })
+          }).addTo(map);
 
-        map.flyTo([uLat, uLng], 19, { animate: true, duration: 1 });
+          map.flyTo([uLat, uLng], 19, { animate: true, duration: 1 });
+        }
         trackEvent('current_location_button_clicked');
       },
       (err) => {
         if (btnElement) btnElement.classList.remove('locating');
+        const loader = document.getElementById('routeLoader');
+        if (loader) loader.style.display = 'none';
         alert("Could not fetch your location. Please check location permissions.");
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
@@ -2171,17 +2239,21 @@
       map.flyTo([uLat, uLng], 18, { animate: true, duration: 1 });
     }
 
-    if (navigator.geolocation) {
+    if (cachedUserLocation) {
+      applyUserPosition(cachedUserLocation[0], cachedUserLocation[1]);
+    } else if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(pos => {
         let uLat = pos.coords.latitude;
         let uLng = pos.coords.longitude;
 
         const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
         if (distanceToCentre > 600) {
-          uLat = IIM_CENTRE[0];
-          uLng = IIM_CENTRE[1];
+          uLat = IIM_MAIN_GATE[0];
+          uLng = IIM_MAIN_GATE[1];
         }
 
+        cachedUserLocation = [uLat, uLng];
+        initLocationTrackingIfGranted();
         applyUserPosition(uLat, uLng);
       }, () => {
         applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
@@ -2382,6 +2454,7 @@
       }
       currentRouteLayer = null;
     }
+    activeDestination = null;
   }
 
   function normalizeText(text) {
@@ -2681,10 +2754,18 @@
       alert("Campus paths are still loading. Please try again in a few seconds.");
       return;
     }
+
+    // Fast path: use cached live location directly if available
+    if (cachedUserLocation) {
+      calculateAndDrawRoute([cachedUserLocation[0], cachedUserLocation[1]], [destLat, destLng]);
+      return;
+    }
+
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
     }
+
     const loader = document.getElementById('routeLoader');
     const loaderText = document.getElementById('loaderText');
     if (loader && loaderText) {
@@ -2692,6 +2773,7 @@
       loaderText.innerText = randomQuote;
       loader.style.display = 'flex';
     }
+
     navigator.geolocation.getCurrentPosition((position) => {
       let userLat = position.coords.latitude;
       let userLng = position.coords.longitude;
@@ -2703,6 +2785,10 @@
         userLat = IIM_MAIN_GATE[0];
         userLng = IIM_MAIN_GATE[1];
       }
+
+      // Save initial cache and activate background updates
+      cachedUserLocation = [userLat, userLng];
+      initLocationTrackingIfGranted();
       
       calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
     }, (error) => {
