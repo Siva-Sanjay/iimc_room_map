@@ -1590,7 +1590,7 @@
     } else if (cat.includes('eateries') || cat.includes('canteen') || cat.includes('food')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/></svg>`;
     } else if (cat.includes('sports') || cat.includes('facility')) {
-      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>`;
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/><path d="M2 12h20"/></svg>`;
     } else if (cat.includes('clickable') || cat.includes('iconic') || cat.includes('photo')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>`;
     } else if (cat.includes('meeting') || cat.includes('conference')) {
@@ -1976,79 +1976,17 @@
     trackEvent('app_opened_as_pwa');
   }
 
+  // MAP INITIALIZATION (Touch rotation disabled to keep pinch-zoom smooth)
+  const canvasRenderer = L.canvas({ padding: 0.5 });
 
-
- // MAP INITIALIZATION
-const map = L.map('map', { 
-  zoomControl: false, 
-  preferCanvas: true,
-  rotate: true,
-  touchRotate: true,
-  rotateControl: false
-}).setView([22.444948, 88.302142], 17);
-
-// =========================================================================
-// STRICT MUTUAL EXCLUSION: LOCK EITHER ROTATE OR ZOOM (CAPTURE PHASE)
-// =========================================================================
-let activeGesture = null; // 'zoom' | 'rotate' | null
-let touchStartDist = 0;
-let touchStartAngle = 0;
-
-const mapEl = document.getElementById('map');
-
-if (mapEl) {
-  // Capture phase (true) intercepts touch BEFORE Leaflet touch handlers process it
-  mapEl.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      const t1 = e.touches[0];
-      const t2 = e.touches[1];
-      touchStartDist = Math.hypot(t1.pageX - t2.pageX, t1.pageY - t2.pageY);
-      touchStartAngle = Math.atan2(t2.pageY - t1.pageY, t2.pageX - t1.pageX) * (180 / Math.PI);
-      activeGesture = null;
-    }
-  }, true);
-
-  mapEl.addEventListener('touchmove', (e) => {
-    if (e.touches.length === 2) {
-      const t1 = e.touches[0];
-      const t2 = e.touches[1];
-      
-      const currentDist = Math.hypot(t1.pageX - t2.pageX, t1.pageY - t2.pageY);
-      const currentAngle = Math.atan2(t2.pageY - t1.pageY, t2.pageX - t1.pageX) * (180 / Math.PI);
-
-      const distChange = Math.abs(currentDist - touchStartDist);
-      let angleChange = Math.abs(currentAngle - touchStartAngle);
-      if (angleChange > 180) angleChange = 360 - angleChange;
-
-      // 1. If gesture hasn't been locked yet, decide based on initial movement
-      if (!activeGesture) {
-        if (distChange > 10 && distChange > angleChange * 1.2) {
-          activeGesture = 'zoom';
-        } else if (angleChange > 8) {
-          activeGesture = 'rotate';
-        }
-      }
-
-      // 2. Enforce strict lock by disabling the opposite plugin handler on the fly
-      if (activeGesture === 'zoom') {
-        if (map.touchRotate && map.touchRotate.enabled()) map.touchRotate.disable();
-        if (map.touchZoom && !map.touchZoom.enabled()) map.touchZoom.enable();
-      } else if (activeGesture === 'rotate') {
-        if (map.touchZoom && map.touchZoom.enabled()) map.touchZoom.disable();
-        if (map.touchRotate && !map.touchRotate.enabled()) map.touchRotate.enable();
-      }
-    }
-  }, true);
-
-  mapEl.addEventListener('touchend', (e) => {
-    if (e.touches.length < 2) {
-      activeGesture = null;
-      // Re-enable both for the next touch gesture
-      if (map.touchRotate) map.touchRotate.enable();
-      if (map.touchZoom) map.touchZoom.enable();
-    }
-  }, true);
-}
+  const map = L.map('map', { 
+    zoomControl: false, 
+    preferCanvas: true,
+    renderer: canvasRenderer,
+    rotate: true,
+    touchRotate: false, // Disables 2-finger gesture rotation lag
+    rotateControl: false
+  }).setView([22.444948, 88.302142], 17);
 
   // Campus Boundary Wall Layer
   const campusBorderLayer = L.polygon(campusBounds, {
@@ -2056,7 +1994,8 @@ if (mapEl) {
     weight: 1.5,             
     opacity: 0.7,        
     fillOpacity: 0,    
-    interactive: false 
+    interactive: false,
+    renderer: canvasRenderer
   }).addTo(map);
 
   // LEAFLET ZOOM CONTROL ON BOTTOM-RIGHT
@@ -2131,8 +2070,9 @@ if (mapEl) {
 
   // HIDE REVERSED TILE LABELS DURING MAP ROTATION (>15 deg)
   map.on('rotate', function() {
-    const bearing = map.getBearing ? map.getBearing() : 0;
-    if (Math.abs(bearing) > 15) {
+    const bearing = typeof map.getBearing === 'function' ? map.getBearing() : (map.getAngle ? map.getAngle() : (map._bearing || 0));
+    const normalizedBearing = Math.abs((bearing % 360 + 540) % 360 - 180);
+    if (normalizedBearing > 15) {
       if (map.hasLayer(googleHybridNoPOI)) map.removeLayer(googleHybridNoPOI);
     } else {
       if (!map.hasLayer(googleHybridNoPOI)) map.addLayer(googleHybridNoPOI);
@@ -3102,7 +3042,8 @@ if (mapEl) {
       opacity: 1,
       dashArray: '1, 10', 
       lineCap: 'round',    
-      lineJoin: 'round'
+      lineJoin: 'round',
+      renderer: canvasRenderer
     });
     const blueDotLayer = L.polyline(latlngs, {
       color: '#3b82f6',
@@ -3110,7 +3051,8 @@ if (mapEl) {
       opacity: 1,
       dashArray: '1, 10', 
       lineCap: 'round',    
-      lineJoin: 'round'
+      lineJoin: 'round',
+      renderer: canvasRenderer
     });
     currentRouteLayer = [whiteBorderLayer, blueDotLayer];
     whiteBorderLayer.addTo(map);
