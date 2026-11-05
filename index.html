@@ -1988,57 +1988,67 @@ const map = L.map('map', {
 }).setView([22.444948, 88.302142], 17);
 
 // =========================================================================
-// MUTUAL EXCLUSION HANDLER: ZOOM OR ROTATE (NEVER BOTH SIMULTANEOUSLY)
+// STRICT MUTUAL EXCLUSION: LOCK EITHER ROTATE OR ZOOM (CAPTURE PHASE)
 // =========================================================================
-let touchMode = null; // 'zoom' or 'rotate'
-let initialAngle = null;
-let initialDist = null;
+let activeGesture = null; // 'zoom' | 'rotate' | null
+let touchStartDist = 0;
+let touchStartAngle = 0;
 
 const mapEl = document.getElementById('map');
 
-mapEl.addEventListener('touchstart', (e) => {
-  if (e.touches.length === 2) {
-    const t1 = e.touches[0];
-    const t2 = e.touches[1];
-
-    initialDist = Math.hypot(t1.pageX - t2.pageX, t1.pageY - t2.pageY);
-    initialAngle = Math.atan2(t2.pageY - t1.pageY, t2.pageX - t1.pageX) * (180 / Math.PI);
-    touchMode = null;
-  }
-}, { passive: true });
-
-mapEl.addEventListener('touchmove', (e) => {
-  if (e.touches.length === 2 && !touchMode) {
-    const t1 = e.touches[0];
-    const t2 = e.touches[1];
-
-    const currentDist = Math.hypot(t1.pageX - t2.pageX, t1.pageY - t2.pageY);
-    const currentAngle = Math.atan2(t2.pageY - t1.pageY, t2.pageX - t1.pageX) * (180 / Math.PI);
-
-    const distDelta = Math.abs(currentDist - initialDist);
-    let angleDelta = Math.abs(currentAngle - initialAngle);
-    if (angleDelta > 180) angleDelta = 360 - angleDelta;
-
-    // Decide primary gesture based on movement threshold
-    if (distDelta > 15 && distDelta > angleDelta * 1.5) {
-      touchMode = 'zoom';
-      if (map.touchRotate) map.touchRotate.disable(); // Freeze rotation while zooming
-    } else if (angleDelta > 10) {
-      touchMode = 'rotate';
-      if (map.touchZoom) map.touchZoom.disable();     // Freeze zoom while rotating
+if (mapEl) {
+  // Capture phase (true) intercepts touch BEFORE Leaflet touch handlers process it
+  mapEl.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      touchStartDist = Math.hypot(t1.pageX - t2.pageX, t1.pageY - t2.pageY);
+      touchStartAngle = Math.atan2(t2.pageY - t1.pageY, t2.pageX - t1.pageX) * (180 / Math.PI);
+      activeGesture = null;
     }
-  }
-}, { passive: true });
+  }, true);
 
-mapEl.addEventListener('touchend', () => {
-  touchMode = null;
-  initialAngle = null;
-  initialDist = null;
+  mapEl.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      
+      const currentDist = Math.hypot(t1.pageX - t2.pageX, t1.pageY - t2.pageY);
+      const currentAngle = Math.atan2(t2.pageY - t1.pageY, t2.pageX - t1.pageX) * (180 / Math.PI);
 
-  // Restore touch capabilities after gesture ends
-  if (map.touchRotate) map.touchRotate.enable();
-  if (map.touchZoom) map.touchZoom.enable();
-}, { passive: true });
+      const distChange = Math.abs(currentDist - touchStartDist);
+      let angleChange = Math.abs(currentAngle - touchStartAngle);
+      if (angleChange > 180) angleChange = 360 - angleChange;
+
+      // 1. If gesture hasn't been locked yet, decide based on initial movement
+      if (!activeGesture) {
+        if (distChange > 10 && distChange > angleChange * 1.2) {
+          activeGesture = 'zoom';
+        } else if (angleChange > 8) {
+          activeGesture = 'rotate';
+        }
+      }
+
+      // 2. Enforce strict lock by disabling the opposite plugin handler on the fly
+      if (activeGesture === 'zoom') {
+        if (map.touchRotate && map.touchRotate.enabled()) map.touchRotate.disable();
+        if (map.touchZoom && !map.touchZoom.enabled()) map.touchZoom.enable();
+      } else if (activeGesture === 'rotate') {
+        if (map.touchZoom && map.touchZoom.enabled()) map.touchZoom.disable();
+        if (map.touchRotate && !map.touchRotate.enabled()) map.touchRotate.enable();
+      }
+    }
+  }, true);
+
+  mapEl.addEventListener('touchend', (e) => {
+    if (e.touches.length < 2) {
+      activeGesture = null;
+      // Re-enable both for the next touch gesture
+      if (map.touchRotate) map.touchRotate.enable();
+      if (map.touchZoom) map.touchZoom.enable();
+    }
+  }, true);
+}
 
   // Campus Boundary Wall Layer
   const campusBorderLayer = L.polygon(campusBounds, {
