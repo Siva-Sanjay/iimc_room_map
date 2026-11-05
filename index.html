@@ -1220,6 +1220,15 @@
       border: 1px solid rgba(255, 255, 255, 0.8);
       line-height: 1.2;
     }
+
+    .leaflet-pane > svg,
+    .leaflet-pane > canvas,
+    .leaflet-zoom-animated {
+      will-change: transform;
+      transform-style: preserve-3d;
+      backface-visibility: hidden;
+      image-rendering: -webkit-optimize-contrast;
+    }
   </style>
 </head>
 <body>
