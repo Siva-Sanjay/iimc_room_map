@@ -20,6 +20,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Leaflet Rotate Plugin for 2-finger touch rotation -->
+  <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.js"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <!-- ========================================== -->
   <!-- 📊 GOOGLE ANALYTICS 4 (GA4) INTEGRATION    -->
@@ -603,12 +606,17 @@
     .leaflet-control-locate:hover {
       background-color: #1d4ed8 !important;
     }
+    .leaflet-control-locate.compass-mode {
+      background-color: #0f172a !important;
+      border-color: #3b82f6 !important;
+    }
     .leaflet-control-locate svg {
       width: 20px;
       height: 20px;
       color: #ffffff;
       display: block;
       margin: 0 auto;
+      transition: transform 0.2s ease;
     }
     .leaflet-control-locate.locating svg {
       animation: pulseLocate 1.2s infinite ease-in-out;
@@ -1956,7 +1964,14 @@
     trackEvent('app_opened_as_pwa');
   }
 
-  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([22.444948, 88.302142], 17);
+  // MAP INITIALIZATION WITH 2-FINGER TOUCH ROTATION ENABLED
+  const map = L.map('map', { 
+    zoomControl: false, 
+    preferCanvas: true,
+    rotate: true,
+    touchRotate: true,
+    rotateControl: false
+  }).setView([22.444948, 88.302142], 17);
 
   // Campus Boundary Wall Layer
   const campusBorderLayer = L.polygon(campusBounds, {
@@ -1970,7 +1985,40 @@
   // LEAFLET ZOOM CONTROL ON BOTTOM-RIGHT
   const zoomControl = L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-  // CUSTOM GOOGLE MAPS STYLE LOCATE CONTROL (STACKED ABOVE ZOOM BUTTONS)
+  // SVG ICONS FOR DUAL-STATE LOCATE CONTROL
+  const iconCrosshairSVG = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
+      <circle cx="12" cy="12" r="7.5"></circle>
+    </svg>
+  `;
+
+  const iconCompassSVG = `
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+    </svg>
+  `;
+
+  // MAP STATE TRACKER
+  let isMapCentered = false;
+  let isCompassActive = false;
+  let deviceOrientationHandler = null;
+
+  function updateLocateButtonIcon(btn, state) {
+    if (!btn) return;
+    if (state === 'crosshair') {
+      btn.innerHTML = iconCrosshairSVG;
+      btn.classList.remove('compass-mode');
+      btn.title = "Center on your current location";
+    } else if (state === 'compass') {
+      btn.innerHTML = iconCompassSVG;
+      btn.classList.add('compass-mode');
+      btn.title = "Toggle compass heading mode";
+    }
+  }
+
+  // DUAL-PURPOSE LOCATE CONTROL (GOOGLE MAPS STYLE)
   const LocateControl = L.Control.extend({
     options: { position: 'bottomright' },
     onAdd: function() {
@@ -1979,18 +2027,12 @@
       btn.href = '#';
       btn.title = 'Show your current location';
       btn.role = 'button';
-      btn.innerHTML = `
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3"></path>
-          <circle cx="12" cy="12" r="7.5"></circle>
-        </svg>
-      `;
+      btn.innerHTML = iconCrosshairSVG;
 
       L.DomEvent.disableClickPropagation(btn);
       L.DomEvent.on(btn, 'click', function(e) {
         L.DomEvent.stop(e);
-        triggerCurrentLocation(btn);
+        handleLocateButtonClick(btn);
       });
 
       return container;
@@ -1998,6 +2040,83 @@
   });
 
   map.addControl(new LocateControl());
+
+  // Listen for user map drag to switch state back to Crosshair
+  map.on('movestart', function(e) {
+    if (e.hard) return; // Ignore animated flyTo calls
+    if (isMapCentered || isCompassActive) {
+      isMapCentered = false;
+      disableCompassHeading();
+      const btn = document.querySelector('.leaflet-control-locate');
+      updateLocateButtonIcon(btn, 'crosshair');
+    }
+  });
+
+  function handleLocateButtonClick(btnElement) {
+    // STATE 1: Map is Uncentered -> Snap map back to current location
+    if (!isMapCentered) {
+      triggerCurrentLocation(btnElement);
+      return;
+    }
+
+    // STATE 2: Map is already Centered -> Toggle Compass Heading Mode
+    if (!isCompassActive) {
+      enableCompassHeading(btnElement);
+    } else {
+      disableCompassHeading();
+      if (map.setBearing) map.setBearing(0); // Reset rotation to True North
+      updateLocateButtonIcon(btnElement, 'compass');
+      const svg = btnElement.querySelector('svg');
+      if (svg) svg.style.transform = 'rotate(0deg)';
+    }
+  }
+
+  function enableCompassHeading(btnElement) {
+    const startOrientation = () => {
+      isCompassActive = true;
+      if (btnElement) btnElement.classList.add('compass-mode');
+
+      deviceOrientationHandler = (event) => {
+        let heading = null;
+        if (event.webkitCompassHeading) {
+          heading = event.webkitCompassHeading; // iOS Safari
+        } else if (event.alpha !== null) {
+          heading = 360 - event.alpha; // Android Chrome
+        }
+
+        if (heading !== null && isCompassActive) {
+          if (map.setBearing) {
+            map.setBearing(-heading);
+          }
+          const svg = btnElement ? btnElement.querySelector('svg') : null;
+          if (svg) svg.style.transform = `rotate(${heading}deg)`;
+        }
+      };
+
+      window.addEventListener('deviceorientationabsolute', deviceOrientationHandler, true);
+      window.addEventListener('deviceorientation', deviceOrientationHandler, true);
+    };
+
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(response => {
+          if (response === 'granted') startOrientation();
+          else alert("Orientation permission denied.");
+        })
+        .catch(console.error);
+    } else {
+      startOrientation();
+    }
+  }
+
+  function disableCompassHeading() {
+    isCompassActive = false;
+    if (deviceOrientationHandler) {
+      window.removeEventListener('deviceorientationabsolute', deviceOrientationHandler, true);
+      window.removeEventListener('deviceorientation', deviceOrientationHandler, true);
+      deviceOrientationHandler = null;
+    }
+  }
 
   function triggerCurrentLocation(btnElement) {
     if (!navigator.geolocation) {
@@ -2047,6 +2166,11 @@
 
           map.flyTo([uLat, uLng], 19, { animate: true, duration: 1 });
         }
+
+        // Mark map as centered and switch icon to Compass Arrow
+        isMapCentered = true;
+        updateLocateButtonIcon(btnElement, 'compass');
+
         trackEvent('current_location_button_clicked');
       },
       (err) => {
