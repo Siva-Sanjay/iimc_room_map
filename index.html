@@ -1988,11 +1988,46 @@
     rotateControl: false
   }).setView([22.444948, 88.302142], 17);
 
-  map.on('zoom rotate anim', function() {
-    if (canvasRenderer && canvasRenderer._update) {
-      canvasRenderer._update();
-    }
-  });
+   // =========================================================================
+  // CUSTOM TOUCH PINCH GESTURE LISTENER (PREVENTS VECTOR LAG / SNAPPING)
+  // =========================================================================
+  let initialTouchDistance = null;
+  const mapContainer = document.getElementById('map');
+
+  if (mapContainer) {
+    mapContainer.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        initialTouchDistance = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+      }
+    }, { passive: true });
+
+    mapContainer.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && initialTouchDistance) {
+        const currentDistance = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const scale = currentDistance / initialTouchDistance;
+
+        // Trigger discrete zoom steps when scale passes threshold to keep vectors rendered
+        if (scale > 1.15) {
+          map.zoomIn(0.25, { animate: true });
+          initialTouchDistance = currentDistance;
+        } else if (scale < 0.85) {
+          map.zoomOut(0.25, { animate: true });
+          initialTouchDistance = currentDistance;
+        }
+      }
+    }, { passive: true });
+
+    mapContainer.addEventListener('touchend', () => {
+      initialTouchDistance = null;
+    }, { passive: true });
+  }
+
 
   // Campus Boundary Wall Layer
   const campusBorderLayer = L.polygon(campusBounds, {
