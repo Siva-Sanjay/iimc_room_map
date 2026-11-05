@@ -1967,10 +1967,13 @@
     trackEvent('app_opened_as_pwa');
   }
 
-  // MAP INITIALIZATION WITH 2-FINGER TOUCH ROTATION ENABLED
+  // MAP INITIALIZATION WITH CANVAS RENDERER & SMOOTH ZOOM SCALING
+  const canvasRenderer = L.canvas({ padding: 0.5 });
+
   const map = L.map('map', { 
     zoomControl: false, 
     preferCanvas: true,
+    renderer: canvasRenderer,
     rotate: true,
     touchRotate: true,
     rotateControl: false
@@ -1982,7 +1985,8 @@
     weight: 1.5,             
     opacity: 0.7,        
     fillOpacity: 0,    
-    interactive: false     
+    interactive: false ,
+    renderer: canvasRenderer
   }).addTo(map);
 
   // LEAFLET ZOOM CONTROL ON BOTTOM-RIGHT
@@ -3028,7 +3032,8 @@
       opacity: 1,
       dashArray: '1, 10', 
       lineCap: 'round',    
-      lineJoin: 'round'
+      lineJoin: 'round',
+      renderer: canvasRenderer
     });
     const blueDotLayer = L.polyline(latlngs, {
       color: '#3b82f6',
@@ -3036,7 +3041,8 @@
       opacity: 1,
       dashArray: '1, 10', 
       lineCap: 'round',    
-      lineJoin: 'round'
+      lineJoin: 'round',
+      renderer: canvasRenderer
     });
     currentRouteLayer = [whiteBorderLayer, blueDotLayer];
     whiteBorderLayer.addTo(map);
