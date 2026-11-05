@@ -1979,6 +1979,12 @@
     rotateControl: false
   }).setView([22.444948, 88.302142], 17);
 
+  map.on('zoom rotate anim', function() {
+    if (canvasRenderer && canvasRenderer._update) {
+      canvasRenderer._update();
+    }
+  });
+
   // Campus Boundary Wall Layer
   const campusBorderLayer = L.polygon(campusBounds, {
     color: '#ffffff',       
