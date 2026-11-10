@@ -970,7 +970,7 @@
       z-index: 3800;
       width: calc(100% - 28px);
       max-width: 440px;
-      background: rgba(15, 23, 42, 0.70);
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(16px) saturate(180%);
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       border-radius: 20px;
@@ -989,45 +989,55 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    .tour-modal-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #ffffff;
-      margin: 0 0 4px 0;
-      padding-right: 24px;
-    }
 
     .tour-body-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       width: 100%;
-      margin-top: 4px;
+      margin-top: 6px;
     }
 
     .tour-modal-content-box {
       flex: 1;
       display: flex;
-      align-items: center;
-      gap: 10px;
-      max-height: 85px;
-      overflow-y: auto;
+      align-items: flex-start;
+      gap: 12px;
+      min-width: 0;
     }
     .tour-modal-img {
-      width: 60px;
-      height: 60px;
+      width: 72px;
+      height: 72px;
       object-fit: cover;
-      border-radius: 10px;
-      flex: 0 0 60px;
+      border-radius: 12px;
+      flex: 0 0 72px;
       border: 1px solid rgba(255, 255, 255, 0.2);
       display: none;
     }
-    .tour-modal-desc {
+    .tour-modal-text-group {
       flex: 1;
-      font-size: 12.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .tour-modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+    .tour-modal-desc {
+      font-size: 12px;
       color: #cbd5e1;
       line-height: 1.35;
       margin: 0;
+      max-height: 65px;
+      overflow-y: auto;
     }
     .btn-tour-arrow {
       width: 36px;
@@ -1326,14 +1336,16 @@
 <div id="tourFloatingModal">
   <button class="btn-tour-close" onclick="exitCampusTour()" title="Exit Tour">✕</button>
   <div id="tourStepBadge" class="tour-step-badge"> 1/10</div>
-  <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
   
   <div class="tour-body-row">
     <button id="btnTourPrev" class="btn-tour-arrow" onclick="navigateTourStep(-1)" aria-label="Previous">‹</button>
     
     <div class="tour-modal-content-box">
       <img id="tourModalImg" class="tour-modal-img" src="" alt="Location Image" onerror="this.style.display='none';" />
-      <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
+      <div class="tour-modal-text-group">
+        <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
+        <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
+      </div>
     </div>
     
     <button id="btnTourNext" class="btn-tour-arrow" onclick="navigateTourStep(1)" aria-label="Next">›</button>
