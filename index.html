@@ -1004,14 +1004,30 @@
       width: 100%;
       margin-top: 4px;
     }
+
+    .tour-modal-content-box {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-height: 85px;
+      overflow-y: auto;
+    }
+    .tour-modal-img {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 10px;
+      flex: 0 0 60px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: none;
+    }
     .tour-modal-desc {
       flex: 1;
       font-size: 12.5px;
       color: #cbd5e1;
       line-height: 1.35;
       margin: 0;
-      max-height: 85px;
-      overflow-y: auto;
     }
     .btn-tour-arrow {
       width: 36px;
@@ -1314,7 +1330,12 @@
   
   <div class="tour-body-row">
     <button id="btnTourPrev" class="btn-tour-arrow" onclick="navigateTourStep(-1)" aria-label="Previous">‹</button>
-    <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
+    
+    <div class="tour-modal-content-box">
+      <img id="tourModalImg" class="tour-modal-img" src="" alt="Location Image" onerror="this.style.display='none';" />
+      <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
+    </div>
+    
     <button id="btnTourNext" class="btn-tour-arrow" onclick="navigateTourStep(1)" aria-label="Next">›</button>
   </div>
 </div>
@@ -1796,12 +1817,14 @@
   }
 
   function renderCurrentTourStop() {
+    const tourImgEl = document.getElementById('tourModalImg');
     if (currentTourIndex >= currentTourStops.length) {
       document.getElementById('tourStepBadge').innerText = "Thank You!";
       document.getElementById('tourModalTitle').innerText = "🎉Hope you enjoyed the tour!";
       document.getElementById('tourModalDesc').innerHTML = `
         <button class="btn-confirm-location" style="margin-top:6px; background:#2563eb;" onclick="exitCampusTour()">Return to Tour Menu</button>
       `;
+      if (tourImgEl) tourImgEl.style.display = 'none';
 
       const prevBtn = document.getElementById('btnTourPrev');
       const nextBtn = document.getElementById('btnTourNext');
@@ -1821,6 +1844,15 @@
     document.getElementById('tourStepBadge').innerText = ` ${currentTourIndex + 1}/${currentTourStops.length}`;
     document.getElementById('tourModalTitle').innerText = bName;
     document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
+
+    // HANDLE LOCATION IMAGE DISPLAY
+    const imgSrc = stop.Loc_images || stop['Loc_images'] || stop.Loc_image || stop['Loc_image'];
+    if (imgSrc && imgSrc.trim() !== '') {
+      tourImgEl.src = imgSrc.trim();
+      tourImgEl.style.display = 'block';
+    } else {
+      tourImgEl.style.display = 'none';
+    }
 
     if (prevBtn) prevBtn.disabled = (currentTourIndex === 0);
     if (nextBtn) nextBtn.disabled = false;
