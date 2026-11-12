@@ -962,6 +962,7 @@
       text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
     }
 
+    /* FLUSH FULL-BLEED TOUR FLOATING MODAL */
     #tourFloatingModal {
       position: absolute;
       bottom: 24px;
@@ -970,82 +971,84 @@
       z-index: 3800;
       width: calc(100% - 28px);
       max-width: 440px;
-      background: rgba(15, 23, 42, 0.85);
+      height: 136px;
+      background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(16px) saturate(180%);
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       border-radius: 20px;
-      padding: 14px 16px 16px 16px;
+      padding: 0;
+      overflow: hidden;
       box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
       border: 1px solid rgba(255, 255, 255, 0.15);
       display: none;
-      flex-direction: column;
-      gap: 4px;
+      flex-direction: row;
+      align-items: stretch;
       color: #ffffff;
     }
+
+    .tour-modal-img {
+      width: 128px;
+      height: 100%;
+      object-fit: cover;
+      flex: 0 0 128px;
+      display: none;
+    }
+
+    .tour-modal-text-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 12px 44px 12px 14px;
+      min-width: 0;
+    }
+
     .tour-step-badge {
       font-size: 11px;
       font-weight: 700;
       color: #60a5fa;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      margin-bottom: 2px;
     }
 
-    .tour-body-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      margin-top: 6px;
-    }
-
-    .tour-modal-content-box {
-      flex: 1;
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      min-width: 0;
-    }
-    .tour-modal-img {
-      width: 72px;
-      height: 72px;
-      object-fit: cover;
-      border-radius: 12px;
-      flex: 0 0 72px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      display: none;
-    }
-    .tour-modal-text-group {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      min-width: 0;
-    }
     .tour-modal-title {
       font-size: 16px;
       font-weight: 800;
       color: #ffffff;
-      margin: 0;
+      margin: 0 0 4px 0;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       line-height: 1.25;
+      padding-right: 16px;
     }
+
     .tour-modal-desc {
       font-size: 12px;
       color: #cbd5e1;
       line-height: 1.35;
       margin: 0;
-      max-height: 65px;
+      max-height: 68px;
       overflow-y: auto;
+      scrollbar-width: none;
     }
+    .tour-modal-desc::-webkit-scrollbar {
+      display: none;
+    }
+
     .btn-tour-arrow {
-      width: 36px;
-      height: 36px;
-      flex: 0 0 36px;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
       color: #ffffff;
       font-size: 18px;
       font-weight: 600;
@@ -1055,20 +1058,28 @@
       justify-content: center;
       transition: all 0.2s ease;
     }
+    #btnTourPrev {
+      left: 8px;
+    }
+    #btnTourNext {
+      right: 8px;
+    }
     .btn-tour-arrow:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(15, 23, 42, 0.85);
     }
     .btn-tour-arrow:disabled {
       opacity: 0.25;
       cursor: not-allowed;
     }
+
     .btn-tour-close {
       position: absolute;
-      top: 10px;
-      right: 12px;
+      top: 8px;
+      right: 10px;
+      z-index: 10;
       background: transparent;
       border: none;
-      font-size: 20px;
+      font-size: 18px;
       color: #94a3b8;
       cursor: pointer;
       line-height: 1;
@@ -1335,21 +1346,17 @@
 <!-- FLOATING COMPACT DARK TOUR DIALOG -->
 <div id="tourFloatingModal">
   <button class="btn-tour-close" onclick="exitCampusTour()" title="Exit Tour">✕</button>
-  <div id="tourStepBadge" class="tour-step-badge"> 1/10</div>
+  <button id="btnTourPrev" class="btn-tour-arrow" onclick="navigateTourStep(-1)" aria-label="Previous">‹</button>
   
-  <div class="tour-body-row">
-    <button id="btnTourPrev" class="btn-tour-arrow" onclick="navigateTourStep(-1)" aria-label="Previous">‹</button>
-    
-    <div class="tour-modal-content-box">
-      <img id="tourModalImg" class="tour-modal-img" src="" alt="Location Image" onerror="this.style.display='none';" />
-      <div class="tour-modal-text-group">
-        <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
-        <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
-      </div>
-    </div>
-    
-    <button id="btnTourNext" class="btn-tour-arrow" onclick="navigateTourStep(1)" aria-label="Next">›</button>
+  <img id="tourModalImg" class="tour-modal-img" src="" alt="Location Image" onerror="this.style.display='none';" />
+  
+  <div class="tour-modal-text-group">
+    <div id="tourStepBadge" class="tour-step-badge">1/10</div>
+    <h3 id="tourModalTitle" class="tour-modal-title">Building Name</h3>
+    <p id="tourModalDesc" class="tour-modal-desc">Location description details go here...</p>
   </div>
+  
+  <button id="btnTourNext" class="btn-tour-arrow" onclick="navigateTourStep(1)" aria-label="Next">›</button>
 </div>
 
 <!-- TAB 4: SAVED LOCATIONS PANEL -->
@@ -1830,13 +1837,16 @@
 
   function renderCurrentTourStop() {
     const tourImgEl = document.getElementById('tourModalImg');
+    const textGroup = document.querySelector('.tour-modal-text-group');
+
     if (currentTourIndex >= currentTourStops.length) {
       document.getElementById('tourStepBadge').innerText = "Thank You!";
-      document.getElementById('tourModalTitle').innerText = "🎉Hope you enjoyed the tour!";
+      document.getElementById('tourModalTitle').innerText = "🎉 Hope you enjoyed the tour!";
       document.getElementById('tourModalDesc').innerHTML = `
         <button class="btn-confirm-location" style="margin-top:6px; background:#2563eb;" onclick="exitCampusTour()">Return to Tour Menu</button>
       `;
       if (tourImgEl) tourImgEl.style.display = 'none';
+      if (textGroup) textGroup.style.paddingLeft = '16px';
 
       const prevBtn = document.getElementById('btnTourPrev');
       const nextBtn = document.getElementById('btnTourNext');
@@ -1853,7 +1863,7 @@
     const stop = currentTourStops[currentTourIndex];
     const bName = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
     
-    document.getElementById('tourStepBadge').innerText = ` ${currentTourIndex + 1}/${currentTourStops.length}`;
+    document.getElementById('tourStepBadge').innerText = `${currentTourIndex + 1}/${currentTourStops.length}`;
     document.getElementById('tourModalTitle').innerText = bName;
     document.getElementById('tourModalDesc').innerText = stop.Details || 'Campus location highlight.';
 
@@ -1862,8 +1872,10 @@
     if (imgSrc && imgSrc.trim() !== '') {
       tourImgEl.src = imgSrc.trim();
       tourImgEl.style.display = 'block';
+      if (textGroup) textGroup.style.paddingLeft = '14px';
     } else {
       tourImgEl.style.display = 'none';
+      if (textGroup) textGroup.style.paddingLeft = '48px';
     }
 
     if (prevBtn) prevBtn.disabled = (currentTourIndex === 0);
