@@ -304,6 +304,15 @@
       margin: 0 0 10px 0;
       font-weight: 500;
     }
+    .popup-subtitle a {
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    .popup-subtitle a:hover {
+      color: #1d4ed8;
+    }
     .popup-actions {
       display: flex;
       gap: 8px;
@@ -1687,6 +1696,10 @@
           activeMarkers.push(marker);
 
           const isSaved = isLocationSaved(loc.id);
+
+         const safeDetailsForAttr = (loc.details || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          const safeNameForAttr = (loc.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          
           const popupContent = `
             <div>
               <div class="popup-header">
@@ -1695,18 +1708,18 @@
               
               <h2 class="popup-title">${loc.name}</h2>
               <div class="popup-subtitle">${loc.floor} ${loc.details ? `• ${loc.details}` : ''}</div>
-
+          
               <div class="popup-actions">
                 <a href="javascript:void(0)" onclick="getDirections(${loc.lat}, ${loc.lng})" class="btn-open-maps">
                   Directions
                 </a>
                 
-                <button id="heartBtn_${loc.id}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.id}', type:'NEAR_ME', name:'${loc.name.replace(/'/g, "\\'")}', category:'${loc.category}', floor:'${loc.floor}', details:'${loc.details||''}', lat:${loc.lat}, lng:${loc.lng}})" title="Save Location">
+                <button id="heartBtn_${loc.id}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.id}', type:'NEAR_ME', name:'${safeNameForAttr}', category:'${loc.category}', floor:'${loc.floor}', details:'${safeDetailsForAttr}', lat:${loc.lat}, lng:${loc.lng}})" title="Save Location">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                   </svg>
                 </button>
-
+          
                 <button class="btn-square" onclick="copyRoomUrl(this, '${loc.id}')" title="Share Link">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="18" cy="5" r="3"></circle>
@@ -2488,6 +2501,10 @@
         const marker = L.marker([lat, lng], { icon: poiIcon, interactive: true });
 
         const isSaved = isLocationSaved(loc.Loc_ID);
+
+        const safeDetailsForAttr = (loc.Details || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeNameForAttr = (loc.Room_Name || loc.Loc_ID).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        
         const popupContent = `
           <div>
             <div class="popup-header">
@@ -2496,18 +2513,18 @@
             
             <h2 class="popup-title">${loc.Room_Name || loc.Loc_ID}</h2>
             <div class="popup-subtitle">${loc.Floor || 'Ground Floor'} ${loc.Details ? `• ${loc.Details}` : ''}</div>
-
+        
             <div class="popup-actions">
               <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
                 Directions
               </a>
               
-              <button id="heartBtn_${loc.Loc_ID}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.Loc_ID}', type:'NEAR_ME', name:'${(loc.Room_Name||loc.Loc_ID).replace(/'/g, "\\'")}', category:'${loc.Category||category}', floor:'${loc.Floor||'Ground Floor'}', details:'${loc.Details||''}', lat:${lat}, lng:${lng}})" title="Save Location">
+              <button id="heartBtn_${loc.Loc_ID}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.Loc_ID}', type:'NEAR_ME', name:'${safeNameForAttr}', category:'${loc.Category||category}', floor:'${loc.Floor||'Ground Floor'}', details:'${safeDetailsForAttr}', lat:${lat}, lng:${lng}})" title="Save Location">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </button>
-
+        
               <button class="btn-square" onclick="copyRoomUrl(this, '${loc.Loc_ID}')" title="Share Link">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="18" cy="5" r="3"></circle>
@@ -2520,7 +2537,6 @@
             </div>
           </div>
         `;
-
         marker.bindPopup(popupContent, { autoPan: false });
         marker.addTo(map);
         activeMarkers.push(marker);
