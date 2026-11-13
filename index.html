@@ -369,8 +369,8 @@
       top: 0;
       transform-origin: center center;
       color: #ffffff;
-      font-weight: 800;
-      font-size: 13px;
+      font-weight: 550;
+      font-size:20px;
       line-height: 1.15;
       letter-spacing: 0.2px;
       text-align: center;
@@ -2034,9 +2034,18 @@
       }
     }
 
-    if (tabName === 'nearme' && activeNearMeCategory) {
-      filterNearMe(activeNearMeCategory);
+    if (tabName === 'nearme') {
+      if (!isNearMeLoaded) {
+        showScreenLoader();
+      } else if (activeNearMeCategory) {
+        filterNearMe(activeNearMeCategory);
+      }
+    } else if (!isNearMeLoaded) {
+      // Hide loader if the user switches away before the sheet finishes loading
+      hideScreenLoader();
     }
+
+    
 
     trackEvent(`tab_switched_${tabName}`);
   }
@@ -2389,6 +2398,7 @@
   let allRooms = [];
   let placeLabelMarkers = [];
   let allNearMeItems = [];
+  let isNearMeLoaded = false; // Tracks whether nearMeCsvUrl has finished fetching
   let activeNearMeCategory = NEAR_ME_CATEGORIES[0];
   let activeMarkers = [];
   let etaMarker = null;
@@ -2501,20 +2511,42 @@
   // Render hardcoded pills immediately on load
   renderNearMePills();
 
-  Papa.parse(nearMeCsvUrl, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      allNearMeItems = results.data;
+  function showScreenLoader() {
+    const loader = document.getElementById('routeLoader');
+    const loaderText = document.getElementById('loaderText');
+    if (loader && loaderText) {
+      loaderText.innerText = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
+      loader.style.display = 'flex';
+    }
+  }
 
-      // Drop pins automatically if the user already opened the Near Me tab
-      const nearMeBar = document.getElementById('nearMeBar');
-      if (nearMeBar && nearMeBar.style.display === 'flex' && activeNearMeCategory) {
+  function hideScreenLoader() {
+    const loader = document.getElementById('routeLoader');
+    if (loader) loader.style.display = 'none';
+  }
+
+Papa.parse(nearMeCsvUrl, {
+  download: true,
+  header: true,
+  skipEmptyLines: true,
+  complete: function(results) {
+    allNearMeItems = results.data;
+    isNearMeLoaded = true;
+
+    const nearMeBar = document.getElementById('nearMeBar');
+    if (nearMeBar && nearMeBar.style.display === 'flex') {
+      hideScreenLoader();
+      if (activeNearMeCategory) {
         filterNearMe(activeNearMeCategory);
       }
     }
-  });
+  },
+  error: function(err) {
+    console.error('Error loading Near Me sheet:', err);
+    isNearMeLoaded = true;
+    hideScreenLoader();
+  }
+});
 
   Papa.parse(pathsCsvUrl, {
     download: true,
@@ -2601,6 +2633,11 @@
     document.querySelectorAll('#nearMePillsGrid .nearme-pill').forEach(pill => {
       pill.classList.toggle('active', pill.dataset.category === category);
     });
+
+    if (!isNearMeLoaded) {
+      showScreenLoader();
+      return;
+     }
 
     function applyUserPosition(uLat, uLng) {
       if (userLocationMarker) map.removeLayer(userLocationMarker);
