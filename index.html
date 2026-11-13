@@ -1450,7 +1450,7 @@
     <div class="about-mag-dev-card">
       <div class="about-mag-avatar">
   <img
-    src="https://media.licdn.com/dms/image/v2/D5603AQEYvFeNW7mrEg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1720414685877?e=1794441600&v=beta&t=BscIz1bhfoGj5dMKEc20kkUNW-ZojQCHZzt2l2V__v8"
+    src="/images/dev_photo.jpg"
     alt="Profile" style="width: 48px; object-fit: cover; border-radius: 50%;"
   />
 </div>
@@ -2335,12 +2335,13 @@
   preloadCampusTiles();
 
   const NEAR_ME_CATEGORIES = [
-    '🚻 Washrooms',
     '🍔 Eateries',
+    '🚻 Washrooms',    
     '🏪 Stores',
-    '📸 Iconic Spots',
     '🎉 Fest venues',
-    '🅿️ Parking'
+    '📸 Iconic Spots',
+    '🅿️ Parking',
+    '🚌 Golf Carts',
   ];
 
   let allRooms = [];
@@ -2454,6 +2455,9 @@
     } else if (cat.includes('parking')) {
       bgColor = '#4f46e5';
       svgIcon = `<path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/>`;
+    } else if (cat.includes('golf') || cat.includes('cart')) {
+      bgColor = '#0d9488'; // Teal pin
+      svgIcon = `<path d="M5 5h10v2H7v4h9.5l1.5 3.5V17h-1.2a2.5 2.5 0 0 1-4.6 0H8.8a2.5 2.5 0 0 1-4.6 0H3v-4l2-4V5zm1.5 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm8 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM7 7v4h7.2l-1-4H7z"/>`;
     }
 
     const html = `
