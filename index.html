@@ -2334,9 +2334,18 @@
 
   preloadCampusTiles();
 
+  const NEAR_ME_CATEGORIES = [
+    '🚻 Washrooms',
+    '🍔 Eateries',
+    '🏪 Stores',
+    '📸 Iconic Spots',
+    '🎉 Fest venues',
+    '🅿️ Parking'
+  ];
+
   let allRooms = [];
   let allNearMeItems = [];
-  let activeNearMeCategory = '';
+  let activeNearMeCategory = NEAR_ME_CATEGORIES[0];
   let activeMarkers = [];
   let etaMarker = null;
   
@@ -2361,44 +2370,12 @@
     }
   });
 
-  Papa.parse(nearMeCsvUrl, {
-    download: true,
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      allNearMeItems = results.data;
-      renderNearMePills();
-    }
-  });
-
   function renderNearMePills() {
     const grid = document.getElementById('nearMePillsGrid');
     if (!grid) return;
 
-    // Extract unique categories directly from the Excel sheet (with emojis intact)
-    const sheetCategories = [...new Set(
-      allNearMeItems
-        .map(item => (item.Category || '').trim())
-        .filter(Boolean)
-    )];
-
-    // Append the 2 dummy pills
-    const dummyCategories = ['🎉 Fest venues', '🅿️ Parking'];
-    const allCategories = [...sheetCategories];
-    dummyCategories.forEach(dummy => {
-      if (!allCategories.some(c => c.toLowerCase().includes(dummy.replace(/^[^\w]+/, '').toLowerCase()))) {
-        allCategories.push(dummy);
-      }
-    });
-
-    if (allCategories.length === 0) return;
-
-    if (!activeNearMeCategory || !allCategories.includes(activeNearMeCategory)) {
-      activeNearMeCategory = allCategories[0];
-    }
-
     grid.innerHTML = '';
-    allCategories.forEach(cat => {
+    NEAR_ME_CATEGORIES.forEach(cat => {
       const btn = document.createElement('button');
       btn.className = `nearme-pill ${cat === activeNearMeCategory ? 'active' : ''}`;
       btn.dataset.category = cat;
@@ -2406,13 +2383,25 @@
       btn.onclick = () => filterNearMe(cat);
       grid.appendChild(btn);
     });
-
-    // If user is already on the Near Me tab when data finishes loading, render pins immediately
-    const nearMeBar = document.getElementById('nearMeBar');
-    if (nearMeBar && nearMeBar.style.display === 'flex') {
-      filterNearMe(activeNearMeCategory);
-    }
   }
+
+  // Render hardcoded pills immediately on load
+  renderNearMePills();
+
+  Papa.parse(nearMeCsvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      allNearMeItems = results.data;
+
+      // Drop pins automatically if the user already opened the Near Me tab
+      const nearMeBar = document.getElementById('nearMeBar');
+      if (nearMeBar && nearMeBar.style.display === 'flex' && activeNearMeCategory) {
+        filterNearMe(activeNearMeCategory);
+      }
+    }
+  });
 
   Papa.parse(pathsCsvUrl, {
     download: true,
@@ -2459,7 +2448,7 @@
     } else if (cat.includes('store') || cat.includes('convenience')) {
       bgColor = '#10b981';
       svgIcon = `<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>`;
-    } else if (cat.includes('fest') || cat.includes('venue') || cat.includes('stage') || cat.includes('event')) {
+    } else if (cat.includes('fest') || cat.includes('venue') || cat.includes('event')) {
       bgColor = '#f59e0b';
       svgIcon = `<path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>`;
     } else if (cat.includes('parking')) {
@@ -2478,7 +2467,7 @@
         </svg>
       </div>
     `;
-
+ 
     return L.divIcon({
       className: 'custom-poi-icon',
       html: html,
