@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Leaflet Rotate Plugin for 2-finger touch rotation -->
+  <!-- Leaflet Rotate Plugin for touch/compass rotation -->
   <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -355,6 +355,39 @@
     .btn-heart.saved svg {
       fill: #ef4444;
       stroke: #ef4444;
+    }
+
+    /* CUSTOM PLACE BUILDING LABELS (ROTATABLE, ZOOM-SCALABLE, CLICKABLE) */
+    .place-label-marker {
+      background: transparent !important;
+      border: none !important;
+      overflow: visible !important;
+    }
+    .place-label-text {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform-origin: center center;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 13px;
+      line-height: 1.15;
+      letter-spacing: 0.2px;
+      text-align: center;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      -webkit-text-stroke: 2.5px rgba(15, 23, 42, 0.92);
+      paint-order: stroke fill;
+      text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.95),
+        0 0 6px rgba(0, 0, 0, 0.85);
+      transition: opacity 0.2s ease;
+    }
+    .place-label-text:active {
+      opacity: 0.75;
     }
 
     #routeLoader {
@@ -1523,6 +1556,23 @@
     }
   }
 
+  // SAFE STRING HELPERS FOR HTML ATTRIBUTES & SAVED LIST
+  function stripHtml(html) {
+    if (!html) return '';
+    return String(html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function escapeJsAttr(str) {
+    return stripHtml(str)
+      .replace(/\\/g, '\\\\')
+      .replace(/'/g, "\\'")
+      .replace(/"/g, '&quot;');
+  }
+
+  function isPlaceCategory(row) {
+    return (row && row.Category ? row.Category.trim().toLowerCase() : '') === 'place';
+  }
+
   // GLOBAL LIVE LOCATION CACHE ENGINE
   let cachedUserLocation = null;
   let bgLocationInterval = null;
@@ -1635,7 +1685,9 @@
 
   function getCategorySvgIcon(category) {
     const cat = (category || '').toLowerCase();
-    if (cat.includes('washroom')) {
+    if (cat === 'place') {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg>`;
+    } else if (cat.includes('washroom')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 22h6V12H9v10zm3-19a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm-5 7h10c.55 0 1 .45 1 1v6h-2v6h-2v-6h-2v6H9v-6H7v-6c0-.55.45-1 1-1z"/></svg>`;
     } else if (cat.includes('eateries') || cat.includes('canteen') || cat.includes('food')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/></svg>`;
@@ -1643,6 +1695,8 @@
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg>`;
     } else if (cat.includes('parking')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>`;
+    } else if (cat.includes('golf') || cat.includes('cart')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5h10v2H7v4h9.5l1.5 3.5V17h-1.2a2.5 2.5 0 0 1-4.6 0H8.8a2.5 2.5 0 0 1-4.6 0H3v-4l2-4V5zm1.5 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm8 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM7 7v4h7.2l-1-4H7z"/></svg>`;
     } else if (cat.includes('sports') || cat.includes('facility')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/><path d="M2 12h20"/></svg>`;
     } else if (cat.includes('clickable') || cat.includes('iconic') || cat.includes('photo')) {
@@ -1670,14 +1724,15 @@
     saved.forEach(loc => {
       const card = document.createElement('div');
       card.className = 'saved-card';
-      const subtitleText = loc.subtext || (loc.building ? `${loc.building} • ${loc.floor}` : loc.floor || 'Campus Location');
+      const cleanFloor = stripHtml(loc.floor);
+      const subtitleText = stripHtml(loc.subtext) || (loc.building ? `${loc.building}${cleanFloor ? ` • ${cleanFloor}` : ''}` : cleanFloor || 'Campus Location');
 
       card.innerHTML = `
         <div class="saved-card-icon">
           ${getCategorySvgIcon(loc.category)}
         </div>
         <div class="saved-card-info">
-          <h3 class="saved-card-title">${loc.name}</h3>
+          <h3 class="saved-card-title">${stripHtml(loc.name)}</h3>
           <p class="saved-card-subtitle">${subtitleText}</p>
         </div>
         <div class="saved-card-arrow">
@@ -1690,9 +1745,9 @@
         
         if (loc.type === 'ROOM') {
           const searchInput = document.getElementById('search');
-          if (searchInput) searchInput.value = loc.name;
+          if (searchInput) searchInput.value = stripHtml(loc.name);
           
-          const target = allRooms.find(r => (r.Room_ID || r.Room_Number) === loc.id);
+          const target = allRooms.find(r => (r.Room_ID || r.Room_Number || r.Room_Name) === loc.id);
           performSearch(false, target || null);
         } else {
           clearMarkers();
@@ -1702,8 +1757,9 @@
 
           const isSaved = isLocationSaved(loc.id);
 
-          const safeDetailsForAttr = (loc.details || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-          const safeNameForAttr = (loc.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          const safeDetailsForAttr = escapeJsAttr(loc.details);
+          const safeNameForAttr = escapeJsAttr(loc.name);
+          const safeFloorForAttr = escapeJsAttr(loc.floor);
           
           const popupContent = `
             <div>
@@ -1719,7 +1775,7 @@
                   Directions
                 </a>
                 
-                <button id="heartBtn_${loc.id}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.id}', type:'NEAR_ME', name:'${safeNameForAttr}', category:'${loc.category}', floor:'${loc.floor}', details:'${safeDetailsForAttr}', lat:${loc.lat}, lng:${loc.lng}})" title="Save Location">
+                <button id="heartBtn_${loc.id}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.id}', type:'NEAR_ME', name:'${safeNameForAttr}', category:'${loc.category}', floor:'${safeFloorForAttr}', details:'${safeDetailsForAttr}', lat:${loc.lat}, lng:${loc.lng}})" title="Save Location">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                   </svg>
@@ -2142,17 +2198,6 @@
     }
   });
 
-  // HIDE REVERSED TILE LABELS DURING MAP ROTATION (>15 deg)
-  map.on('rotate', function() {
-    const bearing = typeof map.getBearing === 'function' ? map.getBearing() : (map.getAngle ? map.getAngle() : (map._bearing || 0));
-    const normalizedBearing = Math.abs((bearing % 360 + 540) % 360 - 180);
-    if (normalizedBearing > 15) {
-      if (map.hasLayer(googleHybridNoPOI)) map.removeLayer(googleHybridNoPOI);
-    } else {
-      if (!map.hasLayer(googleHybridNoPOI)) map.addLayer(googleHybridNoPOI);
-    }
-  });
-
   function handleLocateButtonClick(btnElement) {
     // STATE 1: Map is Uncentered -> Snap map back to current location
     if (!isMapCentered) {
@@ -2293,10 +2338,9 @@
     updateWhenZooming: true
   };
 
+  // PURE SATELLITE IMAGERY (NO GOOGLE LABELS / OVERLAYS)
   const googleSat = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', tileOptions);
-  const googleHybridNoPOI = L.tileLayer('https://{s}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x={x}&y={y}&z={z}', tileOptions);
   googleSat.addTo(map);
-  googleHybridNoPOI.addTo(map);
 
   function preloadCampusTiles() {
     const centerLat = 22.444948;
@@ -2325,8 +2369,6 @@
           const sub = subdomains[(x + y) % subdomains.length];
           const img1 = new Image();
           img1.src = `https://${sub}.google.com/vt/lyrs=s&x=${x}&y=${y}&z=${z}`;
-          const img2 = new Image();
-          img2.src = `https://${sub}.google.com/vt/lyrs=h&apistyle=s.t:3|p.v:off&x=${x}&y=${y}&z=${z}`;
         }
       }
     });
@@ -2345,6 +2387,7 @@
   ];
 
   let allRooms = [];
+  let placeLabelMarkers = [];
   let allNearMeItems = [];
   let activeNearMeCategory = NEAR_ME_CATEGORIES[0];
   let activeMarkers = [];
@@ -2359,6 +2402,74 @@
   const IIM_MAIN_GATE = [22.444902, 88.297164]; 
   const IIM_CENTRE = [22.444948, 88.302142]; 
 
+  // --- CUSTOM "PLACE" BUILDING LABELS ENGINE ---
+  const BASE_PLACE_ZOOM = 19;
+  const MIN_PLACE_ZOOM = 17.5; // Hide place labels when zoomed out to high overview
+
+  function updatePlaceLabelsStyle(targetZoom) {
+    const z = (typeof targetZoom === 'number') ? targetZoom : map.getZoom();
+    const bearing = typeof map.getBearing === 'function' ? map.getBearing() : 0;
+    const isVisible = z >= MIN_PLACE_ZOOM;
+    const scale = Math.pow(2, z - BASE_PLACE_ZOOM);
+
+    document.querySelectorAll('.place-label-text').forEach(el => {
+      if (!isVisible) {
+        el.style.opacity = '0';
+        el.style.pointerEvents = 'none';
+      } else {
+        el.style.opacity = '1';
+        el.style.pointerEvents = 'auto';
+        el.style.transform = `translate(-50%, -50%) rotate(${bearing}deg) scale(${scale})`;
+      }
+    });
+  }
+
+  map.on('zoom zoomend rotate viewreset', () => updatePlaceLabelsStyle());
+  map.on('zoomanim', (e) => {
+    if (e && typeof e.zoom === 'number') {
+      updatePlaceLabelsStyle(e.zoom);
+    }
+  });
+
+  function renderPlaceLabels() {
+    placeLabelMarkers.forEach(m => map.removeLayer(m));
+    placeLabelMarkers = [];
+
+    const placeRows = allRooms.filter(r => isPlaceCategory(r));
+    placeRows.forEach(place => {
+      const lat = parseFloat(place.Latitude);
+      const lng = parseFloat(place.Longitude);
+      const labelTitle = (place.Room_Name || place.Room_Number || place.Room_ID || '').trim();
+
+      if (!isNaN(lat) && !isNaN(lng) && labelTitle) {
+        const labelIcon = L.divIcon({
+          className: 'place-label-marker',
+          html: `<div class="place-label-text">${labelTitle}</div>`,
+          iconSize: [0, 0],
+          iconAnchor: [0, 0]
+        });
+
+        const marker = L.marker([lat, lng], {
+          icon: labelIcon,
+          interactive: true,
+          zIndexOffset: -500
+        });
+
+        marker.on('click', (e) => {
+          L.DomEvent.stopPropagation(e);
+          if (isTourActive) return;
+          switchTab('home');
+          openLocationMarkerAndPopup(place, false);
+        });
+
+        marker.addTo(map);
+        placeLabelMarkers.push(marker);
+      }
+    });
+
+    updatePlaceLabelsStyle();
+  }
+
   Papa.parse(sheetCsvUrl, {
     download: true,
     header: true,
@@ -2366,6 +2477,7 @@
     complete: function(results) {
       allRooms = results.data;
       populateBuildingDropdown();
+      renderPlaceLabels();
       clearMarkers();
       checkUrlSearchParam();
     }
@@ -2539,8 +2651,9 @@
 
         const isSaved = isLocationSaved(loc.Loc_ID);
 
-        const safeDetailsForAttr = (loc.Details || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-        const safeNameForAttr = (loc.Room_Name || loc.Loc_ID).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeDetailsForAttr = escapeJsAttr(loc.Details);
+        const safeNameForAttr = escapeJsAttr(loc.Room_Name || loc.Loc_ID);
+        const safeFloorForAttr = escapeJsAttr(loc.Floor || 'Ground Floor');
         
         const popupContent = `
           <div>
@@ -2556,7 +2669,7 @@
                 Directions
               </a>
               
-              <button id="heartBtn_${loc.Loc_ID}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.Loc_ID}', type:'NEAR_ME', name:'${safeNameForAttr}', category:'${loc.Category||category}', floor:'${loc.Floor||'Ground Floor'}', details:'${safeDetailsForAttr}', lat:${lat}, lng:${lng}})" title="Save Location">
+              <button id="heartBtn_${loc.Loc_ID}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${loc.Loc_ID}', type:'NEAR_ME', name:'${safeNameForAttr}', category:'${loc.Category||category}', floor:'${safeFloorForAttr}', details:'${safeDetailsForAttr}', lat:${lat}, lng:${lng}})" title="Save Location">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
@@ -2675,7 +2788,8 @@
       const cleanParam = normalizeText(roomParam);
       const matchedRoom = allRooms.find(r => 
         normalizeText(r.Room_ID) === cleanParam || 
-        normalizeText(r.Room_Number || r['Room Number']) === cleanParam
+        normalizeText(r.Room_Number || r['Room Number']) === cleanParam ||
+        normalizeText(r.Room_Name) === cleanParam
       );
       performSearch(true, matchedRoom);
     }
@@ -2684,7 +2798,12 @@
   function populateBuildingDropdown() {
     const select = document.getElementById('buildingFilter');
     select.innerHTML = '<option value="ALL">All Buildings</option>';
-    const buildings = [...new Set(allRooms.map(r => r.Building ? r.Building.trim() : '').filter(Boolean))];
+    const buildings = [...new Set(
+      allRooms
+        .filter(r => !isPlaceCategory(r) && r.Building)
+        .map(r => r.Building.trim())
+        .filter(Boolean)
+    )];
     buildings.forEach(b => {
       const opt = document.createElement('option');
       opt.value = b;
@@ -2781,10 +2900,11 @@
         
         const matchedRoom = allRooms.find(r => 
           normalizeText(r.Room_ID) === cleanParam || 
-          normalizeText(r.Room_Number || r['Room Number']) === cleanParam
+          normalizeText(r.Room_Number || r['Room Number']) === cleanParam ||
+          normalizeText(r.Room_Name) === cleanParam
         );
         if (matchedRoom) {
-          searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || roomParam;
+          searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || matchedRoom.Room_Name || roomParam;
           performSearch(false, matchedRoom);
         } else {
           searchInput.value = roomParam;
@@ -2805,7 +2925,8 @@
       skipEmptyLines: true,
       step: function(row) {
         const room = row.data;
-        if (selectedBuilding === "ALL" || room.Building === selectedBuilding) {
+        const isPlace = isPlaceCategory(room);
+        if (selectedBuilding === "ALL" || (!isPlace && room.Building === selectedBuilding)) {
           const lat = parseFloat(room.Latitude);
           const lng = parseFloat(room.Longitude);
           if (!isNaN(lat) && !isNaN(lng)) {
@@ -2831,10 +2952,15 @@
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
     const box = document.getElementById('suggestionsBox');
+    
     const buildingRooms = allRooms.filter(r => {
+      if (isPlaceCategory(r)) {
+        return selectedBuilding === 'ALL';
+      }
       if (!r.Building) return false;
       return selectedBuilding === 'ALL' || r.Building.trim() === selectedBuilding;
     });  
+
     const matches = buildingRooms.filter(r => {
       if (!cleanQuery) return true;
       const roomNum = normalizeText(r.Room_Number || r['Room Number']);
@@ -2842,26 +2968,36 @@
       const roomId = normalizeText(r.Room_ID);
       return roomNum.includes(cleanQuery) || roomName.includes(cleanQuery) || roomId.includes(cleanQuery);
     });
+
     if (matches.length === 0) {
       hideSuggestions();
       return;
     }
+
     box.innerHTML = '';
     matches.forEach(room => {
       const item = document.createElement('div');
       item.className = 'suggestion-item';
       
+      const isPlace = isPlaceCategory(room);
       const buildingName = room.Building ? room.Building.trim() : '';
       const displayRoomNum = room.Room_Number || room['Room Number'] || '';
+      const primaryLabel = isPlace
+        ? (room.Room_Name || displayRoomNum || room.Room_ID || '')
+        : (displayRoomNum || room.Room_Name || '');
+      const subtextLabel = isPlace
+        ? (stripHtml(room.Floor) || 'Place')
+        : buildingName;
+
       item.innerHTML = `
-        <span><b>${displayRoomNum}</b></span>
-        ${buildingName ? `<span class="room-subtext">${buildingName}</span>` : ''}
+        <span><b>${primaryLabel}</b></span>
+        ${subtextLabel ? `<span class="room-subtext">${subtextLabel}</span>` : ''}
       `;
       
       item.addEventListener('mousedown', (e) => {
         e.preventDefault();
         const searchInput = document.getElementById('search');
-        searchInput.value = displayRoomNum;
+        searchInput.value = primaryLabel;
         searchInput.blur();
         hideSuggestions();
         performSearch(false, room);
@@ -2888,6 +3024,106 @@
     }
   }
 
+  function buildLocationMarkerAndPopup(room) {
+    const lat = parseFloat(room.Latitude);
+    const lng = parseFloat(room.Longitude);
+    if (isNaN(lat) || isNaN(lng)) return null;
+
+    const isPlace = isPlaceCategory(room);
+    const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
+    const titleText = room.Room_Name || roomNo || room.Room_ID || 'Location';
+    const roomId = room.Room_ID || roomNo || titleText;
+    const categoryLabel = room.Category || 'Location';
+    const buildingName = room.Building ? room.Building.trim() : '';
+    const floorHtml = room.Floor ? room.Floor.trim() : '';
+    const detailsHtml = room.Details ? room.Details.trim() : '';
+
+    // Subtitle supports raw HTML markup from Floor / Details columns
+    let subtitleHtml = '';
+    if (isPlace) {
+      const parts = [];
+      if (floorHtml) parts.push(floorHtml);
+      if (detailsHtml) parts.push(detailsHtml);
+      subtitleHtml = parts.length > 0 ? parts.join(' • ') : 'Campus Building';
+    } else {
+      const parts = [];
+      parts.push(buildingName || 'N/A');
+      parts.push(floorHtml || 'N/A');
+      if (detailsHtml) parts.push(detailsHtml);
+      subtitleHtml = parts.join(' • ');
+    }
+
+    const safeNameAttr = escapeJsAttr(titleText);
+    const safeCatAttr = escapeJsAttr(categoryLabel);
+    const safeBuildingAttr = escapeJsAttr(isPlace ? '' : (buildingName || 'N/A'));
+    const safeFloorAttr = escapeJsAttr(floorHtml || (isPlace ? 'Campus Building' : 'N/A'));
+    const safeDetailsAttr = escapeJsAttr(detailsHtml);
+
+    const marker = L.marker([lat, lng], { interactive: true });
+    const isSaved = isLocationSaved(roomId);
+
+    const popupContent = `
+      <div>
+        <div class="popup-header">
+          <span class="badge-location"><span class="badge-dot"></span> ${categoryLabel}</span>
+        </div>
+        
+        <h2 class="popup-title">${titleText}</h2>
+        <div class="popup-subtitle">${subtitleHtml}</div>
+        <div class="popup-actions">
+          <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
+            Directions
+          </a>
+          
+          <button id="heartBtn_${roomId}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${escapeJsAttr(roomId)}', type:'ROOM', name:'${safeNameAttr}', category:'${safeCatAttr}', building:'${safeBuildingAttr}', floor:'${safeFloorAttr}', details:'${safeDetailsAttr}', lat:${lat}, lng:${lng}})" title="Save Location">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </button>
+
+          <button class="btn-square" onclick="copyRoomUrl(this, '${escapeJsAttr(roomId)}')" title="Share Link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+    `;
+
+    marker.bindPopup(popupContent, { autoPan: false });
+    marker.addTo(map);
+    activeMarkers.push(marker);
+    return { marker, latLng: [lat, lng], roomId };
+  }
+
+  function openLocationMarkerAndPopup(room, fromUrl = false) {
+    clearMarkers();
+    hideSuggestions();
+    const created = buildLocationMarkerAndPopup(room);
+    if (!created) return;
+
+    const zoomLevel = Math.max(map.getZoom(), 19);
+    created.marker.openPopup();
+
+    const targetPoint = map.project(created.latLng, zoomLevel);
+    const offsetPoint = L.point(targetPoint.x, targetPoint.y - 100);
+    const offsetLatLng = map.unproject(offsetPoint, zoomLevel);
+    map.flyTo(offsetLatLng, zoomLevel, {
+      animate: true,
+      duration: 0.9,
+      easeLinearity: 0.25
+    });
+
+    const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(created.roomId)}`;
+    if (!fromUrl) {
+      window.history.pushState({ path: newUrl }, '', newUrl);
+    }
+  }
+
   function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
@@ -2908,11 +3144,14 @@
         return;
       }
       filtered = allRooms.filter(room => {
+        const isPlace = isPlaceCategory(room);
         const cleanRoomNum = normalizeText(room.Room_Number || room['Room Number']);
         const cleanRoomName = normalizeText(room.Room_Name);
         const cleanRoomId = normalizeText(room.Room_ID);
         const building = room.Building ? room.Building.trim() : '';
-        const matchBuilding = (selectedBuilding === 'ALL' || building === selectedBuilding);
+        const matchBuilding = isPlace
+          ? (selectedBuilding === 'ALL')
+          : (selectedBuilding === 'ALL' || building === selectedBuilding);
         const matchQuery = cleanRoomNum === cleanQuery || cleanRoomName.includes(cleanQuery) || cleanRoomId === cleanQuery;
         return matchBuilding && matchQuery;
       });
@@ -2924,51 +3163,9 @@
     }
     const bounds = [];
     filtered.forEach(room => {
-      const lat = parseFloat(room.Latitude);
-      const lng = parseFloat(room.Longitude);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const roomNo = room.Room_Number || room['Room Number'] || room.Room_No || room.Room || '';
-        const roomId = room.Room_ID || roomNo;
-        const buildingName = room.Building || 'N/A';
-        const floorName = room.Floor || 'N/A';
-        const marker = L.marker([lat, lng], { interactive: true });
-
-        const isSaved = isLocationSaved(roomId);
-        const popupContent = `
-          <div>
-            <div class="popup-header">
-              <span class="badge-location"><span class="badge-dot"></span> ${room.Category}</span>
-            </div>
-            
-            <h2 class="popup-title">${room.Room_Name}</h2>
-            <div class="popup-subtitle">${buildingName} •  ${floorName}</div>
-            <div class="popup-actions">
-              <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
-                Directions
-              </a>
-              
-              <button id="heartBtn_${roomId}" class="btn-square btn-heart ${isSaved ? 'saved' : ''}" onclick="toggleSaveLocation({id:'${roomId}', type:'ROOM', name:'${room.Room_Name.replace(/'/g, "\\'")}', category:'${room.Category}', building:'${buildingName}', floor:'${floorName}', lat:${lat}, lng:${lng}})" title="Save Location">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-              </button>
-
-              <button class="btn-square" onclick="copyRoomUrl(this, '${roomId}')" title="Share Link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="18" cy="5" r="3"></circle>
-                  <circle cx="6" cy="12" r="3"></circle>
-                  <circle cx="18" cy="19" r="3"></circle>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                </svg>
-              </button>
-            </div>
-          </div>
-        `;
-        marker.bindPopup(popupContent, { autoPan: false });
-        marker.addTo(map);
-        activeMarkers.push(marker);
-        bounds.push([lat, lng]);
+      const created = buildLocationMarkerAndPopup(room);
+      if (created) {
+        bounds.push(created.latLng);
       }
     });
     if (bounds.length === 1) {
@@ -2988,7 +3185,7 @@
     } else if (bounds.length > 1) {
       map.fitBounds(bounds, { padding: [60, 60] });
     }
-    const targetRoomId = filtered[0].Room_ID || rawQuery;
+    const targetRoomId = filtered[0].Room_ID || filtered[0].Room_Number || filtered[0].Room_Name || rawQuery;
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
     
     if (!fromUrl) {
