@@ -1192,28 +1192,40 @@
       gap: 8px;
     }
 
+    /* 2-ROW HORIZONTALLY SCROLLABLE DYNAMIC WIDTH GRID */
     .nearme-pills-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: max-content;
       gap: 8px;
       width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .nearme-pills-grid::-webkit-scrollbar {
+      display: none;
     }
 
     .nearme-pill {
       border: 1.5px solid #334155;
       background: #ffffff;
       color: #0f172a;
-      padding: 10px 8px;
+      padding: 9px 18px;
       border-radius: 12px;
       font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s ease;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
       width: 100%;
+      white-space: nowrap;
     }
 
     .nearme-pill.active {
@@ -1221,12 +1233,6 @@
       border-color: #2563eb;
       color: #ffffff;
       box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-    }
-
-    @media (min-width: 600px) {
-      .nearme-pill {
-        padding: 8px 14px;
-      }
     }
 
     .custom-poi-icon {
@@ -1327,12 +1333,7 @@
     <h1><span class="compass-icon">🧭</span> Joka Compass</h1>
     <p class="author-tag">By <a href="https://www.linkedin.com/in/r-siva-sanjay/" target="_blank" rel="noopener noreferrer">Siva Sanjay</a></p>
   </div>
-  <div class="nearme-pills-grid">
-    <button class="nearme-pill active" id="pillEateries" onclick="filterNearMe('Eateries')">🍔 Eateries</button>
-    <button class="nearme-pill" id="pillWashrooms" onclick="filterNearMe('Washrooms')">🚽 Washrooms</button>
-    <button class="nearme-pill" id="pillClickable" onclick="filterNearMe('Clickable Locations')">📸 Iconic Spots</button>
-    <button class="nearme-pill" id="pillStores" onclick="filterNearMe('Stores')">🛒 Convenience</button>
-  </div>
+  <div class="nearme-pills-grid" id="nearMePillsGrid"></div>
 </div>
 
 <!-- PWA INSTALL TOAST HTML -->
@@ -1638,6 +1639,10 @@
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 22h6V12H9v10zm3-19a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm-5 7h10c.55 0 1 .45 1 1v6h-2v6h-2v-6h-2v6H9v-6H7v-6c0-.55.45-1 1-1z"/></svg>`;
     } else if (cat.includes('eateries') || cat.includes('canteen') || cat.includes('food')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.55 3.89 3.54 4.26V22h2.92v-8.74C11.45 12.89 13 11.12 13 9V2h-2v7zm7-7v7h2V2h-2zm1 9.2c-1.66 0-3 1.34-3 3v8.8h6V15.2c0-1.66-1.34-3-3-3z"/></svg>`;
+    } else if (cat.includes('fest') || cat.includes('venue') || cat.includes('stage') || cat.includes('event')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/></svg>`;
+    } else if (cat.includes('parking')) {
+      return `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>`;
     } else if (cat.includes('sports') || cat.includes('facility')) {
       return `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/><path d="M2 12h20"/></svg>`;
     } else if (cat.includes('clickable') || cat.includes('iconic') || cat.includes('photo')) {
@@ -1697,7 +1702,7 @@
 
           const isSaved = isLocationSaved(loc.id);
 
-         const safeDetailsForAttr = (loc.details || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          const safeDetailsForAttr = (loc.details || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
           const safeNameForAttr = (loc.name || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
           
           const popupContent = `
@@ -2331,7 +2336,7 @@
 
   let allRooms = [];
   let allNearMeItems = [];
-  let activeNearMeCategory = 'Eateries';
+  let activeNearMeCategory = '';
   let activeMarkers = [];
   let etaMarker = null;
   
@@ -2362,8 +2367,52 @@
     skipEmptyLines: true,
     complete: function(results) {
       allNearMeItems = results.data;
+      renderNearMePills();
     }
   });
+
+  function renderNearMePills() {
+    const grid = document.getElementById('nearMePillsGrid');
+    if (!grid) return;
+
+    // Extract unique categories directly from the Excel sheet (with emojis intact)
+    const sheetCategories = [...new Set(
+      allNearMeItems
+        .map(item => (item.Category || '').trim())
+        .filter(Boolean)
+    )];
+
+    // Append the 2 dummy pills
+    const dummyCategories = ['🎉 Fest venues', '🅿️ Parking'];
+    const allCategories = [...sheetCategories];
+    dummyCategories.forEach(dummy => {
+      if (!allCategories.some(c => c.toLowerCase().includes(dummy.replace(/^[^\w]+/, '').toLowerCase()))) {
+        allCategories.push(dummy);
+      }
+    });
+
+    if (allCategories.length === 0) return;
+
+    if (!activeNearMeCategory || !allCategories.includes(activeNearMeCategory)) {
+      activeNearMeCategory = allCategories[0];
+    }
+
+    grid.innerHTML = '';
+    allCategories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = `nearme-pill ${cat === activeNearMeCategory ? 'active' : ''}`;
+      btn.dataset.category = cat;
+      btn.textContent = cat;
+      btn.onclick = () => filterNearMe(cat);
+      grid.appendChild(btn);
+    });
+
+    // If user is already on the Near Me tab when data finishes loading, render pins immediately
+    const nearMeBar = document.getElementById('nearMeBar');
+    if (nearMeBar && nearMeBar.style.display === 'flex') {
+      filterNearMe(activeNearMeCategory);
+    }
+  }
 
   Papa.parse(pathsCsvUrl, {
     download: true,
@@ -2410,6 +2459,12 @@
     } else if (cat.includes('store') || cat.includes('convenience')) {
       bgColor = '#10b981';
       svgIcon = `<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1.003 1.003 0 0 0 20 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>`;
+    } else if (cat.includes('fest') || cat.includes('venue') || cat.includes('stage') || cat.includes('event')) {
+      bgColor = '#f59e0b';
+      svgIcon = `<path d="M12 2l2.9 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l7.1-1.01L12 2z"/>`;
+    } else if (cat.includes('parking')) {
+      bgColor = '#4f46e5';
+      svgIcon = `<path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/>`;
     }
 
     const html = `
@@ -2437,15 +2492,10 @@
     activeNearMeCategory = category;
     clearMarkers();
 
-    const pillE = document.getElementById('pillEateries');
-    const pillW = document.getElementById('pillWashrooms');
-    const pillC = document.getElementById('pillClickable');
-    const pillS = document.getElementById('pillStores');
-
-    if (pillE) pillE.classList.toggle('active', category === 'Eateries');
-    if (pillW) pillW.classList.toggle('active', category === 'Washrooms');
-    if (pillC) pillC.classList.toggle('active', category === 'Clickable Locations');
-    if (pillS) pillS.classList.toggle('active', category === 'Stores');
+    // Highlight active pill dynamically
+    document.querySelectorAll('#nearMePillsGrid .nearme-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.category === category);
+    });
 
     function applyUserPosition(uLat, uLng) {
       if (userLocationMarker) map.removeLayer(userLocationMarker);
@@ -2483,13 +2533,7 @@
     }
 
     const items = allNearMeItems.filter(item => {
-      const c = (item.Category || '').toLowerCase().trim();
-      const target = category.toLowerCase().trim();
-      if (target.includes('eateries')) return c.includes('eateries') || c.includes('canteen');
-      if (target.includes('washrooms')) return c.includes('washroom');
-      if (target.includes('stores')) return c.includes('store') || c.includes('convenience');
-      if (target.includes('clickable')) return c.includes('clickable') || c.includes('iconic');
-      return c === target;
+      return (item.Category || '').trim().toLowerCase() === category.trim().toLowerCase();
     });
 
     items.forEach(loc => {
