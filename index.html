@@ -2125,7 +2125,7 @@
     rotate: true,
     touchRotate: false, // Disables 2-finger gesture rotation lag
     rotateControl: false
-  }).setView([22.444948, 88.302142], 17);
+  }).setView([22.444948, 88.302142], 18);
 
   // Campus Boundary Wall Layer
   const campusBorderLayer = L.polygon(campusBounds, {
@@ -2386,7 +2386,7 @@
   preloadCampusTiles();
 
   const NEAR_ME_CATEGORIES = [
-    '🎉 Fest venues',
+    '🎉 7LF Venues',
     '🍔 Eateries',
     '🚻 Washrooms',    
     '🏪 Stores',
@@ -2399,7 +2399,7 @@
   let placeLabelMarkers = [];
   let allNearMeItems = [];
   let isNearMeLoaded = false; // Tracks whether nearMeCsvUrl has finished fetching
-  let activeNearMeCategory = NEAR_ME_CATEGORIES[1];
+  let activeNearMeCategory = NEAR_ME_CATEGORIES[0];
   let activeMarkers = [];
   let etaMarker = null;
   
@@ -2634,63 +2634,32 @@ Papa.parse(nearMeCsvUrl, {
       pill.classList.toggle('active', pill.dataset.category === category);
     });
 
-    if (!isNearMeLoaded) {
+    if (typeof isNearMeLoaded !== 'undefined' && !isNearMeLoaded) {
       showScreenLoader();
       return;
-     }
-
-    function applyUserPosition(uLat, uLng) {
-      if (userLocationMarker) map.removeLayer(userLocationMarker);
-      userLocationMarker = L.marker([uLat, uLng], {
-        icon: L.divIcon({
-          className: 'user-dot',
-          html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
-        })
-      }).addTo(map);
-
-      map.flyTo([uLat, uLng], 18, { animate: true, duration: 1 });
-    }
-
-    if (cachedUserLocation) {
-      applyUserPosition(cachedUserLocation[0], cachedUserLocation[1]);
-    } else if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        let uLat = pos.coords.latitude;
-        let uLng = pos.coords.longitude;
-
-        const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
-        if (distanceToCentre > 600) {
-          uLat = IIM_MAIN_GATE[0];
-          uLng = IIM_MAIN_GATE[1];
-        }
-
-        cachedUserLocation = [uLat, uLng];
-        initLocationTrackingIfGranted();
-        applyUserPosition(uLat, uLng);
-      }, () => {
-        applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
-      });
-    } else {
-      applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
     }
 
     const items = allNearMeItems.filter(item => {
       return (item.Category || '').trim().toLowerCase() === category.trim().toLowerCase();
     });
 
+    const boundsPoints = [];
+
     items.forEach(loc => {
       const lat = parseFloat(loc.Latitude);
       const lng = parseFloat(loc.Longitude);
 
       if (!isNaN(lat) && !isNaN(lng)) {
+        boundsPoints.push([lat, lng]);
+
         const poiIcon = createCustomPoiMarker(loc.Category || category);
         const marker = L.marker([lat, lng], { icon: poiIcon, interactive: true });
 
         const isSaved = isLocationSaved(loc.Loc_ID);
 
-        const safeDetailsForAttr = escapeJsAttr(loc.Details);
-        const safeNameForAttr = escapeJsAttr(loc.Room_Name || loc.Loc_ID);
-        const safeFloorForAttr = escapeJsAttr(loc.Floor || 'Ground Floor');
+        const safeDetailsForAttr = (loc.Details || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeNameForAttr = (loc.Room_Name || loc.Loc_ID || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeFloorForAttr = (loc.Floor || 'Ground Floor').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
         const popupContent = `
           <div>
@@ -2729,6 +2698,51 @@ Papa.parse(nearMeCsvUrl, {
         activeMarkers.push(marker);
       }
     });
+
+    function applyUserPosition(uLat, uLng) {
+      if (userLocationMarker) map.removeLayer(userLocationMarker);
+      userLocationMarker = L.marker([uLat, uLng], {
+        icon: L.divIcon({
+          className: 'user-dot',
+          html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
+        })
+      }).addTo(map);
+
+      // Combine all category pins + your current location blue dot into one bounding box
+      const allPoints = [...boundsPoints, [uLat, uLng]];
+      const bounds = L.latLngBounds(allPoints);
+
+      map.flyToBounds(bounds, {
+        paddingTopLeft: [40, 155],    // Prevents top pins from hiding under #nearMeBar
+        paddingBottomRight: [40, 90], // Prevents bottom pins from hiding under #bottomNav
+        maxZoom: 19,
+        animate: true,
+        duration: 1
+      });
+    }
+
+    if (cachedUserLocation) {
+      applyUserPosition(cachedUserLocation[0], cachedUserLocation[1]);
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        let uLat = pos.coords.latitude;
+        let uLng = pos.coords.longitude;
+
+        const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
+        if (distanceToCentre > 600) {
+          uLat = IIM_MAIN_GATE[0];
+          uLng = IIM_MAIN_GATE[1];
+        }
+
+        cachedUserLocation = [uLat, uLng];
+        initLocationTrackingIfGranted();
+        applyUserPosition(uLat, uLng);
+      }, () => {
+        applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
+      });
+    } else {
+      applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
+    }
   }
 
   /* MATH UTILITIES FOR ROUTING */
