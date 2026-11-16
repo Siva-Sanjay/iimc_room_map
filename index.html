@@ -3286,16 +3286,19 @@ l<!DOCTYPE html>
 
   function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
-    if (searchInput) {
-      searchInput.value ='';
-      searchInput.blur();
-    }
+    
     clearMarkers();
     hideSuggestions();
     const rawQuery = document.getElementById('search').value.trim();
     const cleanQuery = normalizeText(rawQuery);
     const selectedBuilding = document.getElementById('buildingFilter').value;
     let filtered = [];
+
+    if (searchInput) {
+      searchInput.value ='';
+      searchInput.blur();
+    }
+
     if (targetRoom) {
       filtered = [targetRoom];
     } else {
