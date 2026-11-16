@@ -2049,7 +2049,11 @@ l<!DOCTYPE html>
     const controls = document.getElementById('controls');
     const nearMeBar = document.getElementById('nearMeBar');
 
-    if (controls) controls.style.display = (tabName === 'home') ? 'block' : 'none';
+    if (controls){ 
+       controls.style.display = (tabName === 'home') ? 'block' : 'none';
+       if (tabName === 'home') document.getElementById('search').value = '';
+      
+  };
     if (nearMeBar) {
       nearMeBar.style.display = (tabName === 'nearme') ? 'flex' : 'none';
     }
@@ -2955,6 +2959,7 @@ l<!DOCTYPE html>
       filterBtn.title = isFiltered ? `Building: ${buildingValue}` : 'Pick a building';
     }
     if (searchInput) {
+      searchInput.value = '';
       searchInput.placeholder = isFiltered ? `Search in ${buildingValue}...` : 'Search your room no/name...';
     }
 
@@ -3282,6 +3287,7 @@ l<!DOCTYPE html>
   function performSearch(fromUrl = false, targetRoom = null) {
     const searchInput = document.getElementById('search');
     if (searchInput) {
+      searchInput.value ='';
       searchInput.blur();
     }
     clearMarkers();
