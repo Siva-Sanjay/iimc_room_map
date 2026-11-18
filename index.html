@@ -1619,8 +1619,67 @@
     return sid;
   }
 
+  // Persistent anonymous Device ID (survives tab closes & app restarts)
+  function getOrCreateDeviceId() {
+    let did = localStorage.getItem('joka_device_id');
+    if (!did) {
+      did = 'DEV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+      localStorage.setItem('joka_device_id', did);
+    }
+    return did;
+  }
+
+  function formatCurrentISTTime() {
+    return new Date().toLocaleTimeString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  }
+
+  function getActivePageName() {
+    const path = window.location.pathname.replace('/', '').toLowerCase();
+    if (path === 'nearme') return 'Near Me';
+    if (path === 'tour') return 'Tour';
+    if (path === 'saved') return 'Saved';
+    if (path === 'about') return 'About';
+    return 'Home';
+  }
+
+  // Unified behavioral event logger -> sends to Events_Log tab
+  function logBehaviorEvent(eventType, targetName, metadata = '', sourcePage = null, useBeacon = false) {
+    const payload = JSON.stringify({
+      type: 'EVENT',
+      deviceId: getOrCreateDeviceId(),
+      sessionId: getOrCreateSessionId(),
+      eventType: eventType,
+      targetName: stripHtml(targetName),
+      metadata: metadata,
+      sourcePage: sourcePage || getActivePageName()
+    });
+
+    if (useBeacon && navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
+      navigator.sendBeacon(ANALYTICS_WEBHOOK_URL, blob);
+      return;
+    }
+
+    try {
+      fetch(ANALYTICS_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: useBeacon,
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: payload
+      });
+    } catch (_) {}
+  }
+
   async function logCustomAnalytics(eventType) {
     const sessionId = getOrCreateSessionId();
+    const deviceId = getOrCreateDeviceId();
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const appMode = isStandalone ? 'PWA Standalone' : 'Web Browser';
 
@@ -1673,6 +1732,7 @@
     // 3. Send payload to Google Apps Script
     const payload = {
       type: 'ANALYTICS',
+      deviceId: deviceId,
       sessionId: sessionId,
       event: eventType,
       ip: ip,
@@ -1728,9 +1788,12 @@
     }
   });
 
-  // Trigger SESSION_END when user leaves/hides the app
+  // Trigger SESSION_END (and tour drop-off if active) when user leaves/hides the app
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
+      if (typeof isTourActive !== 'undefined' && isTourActive && typeof activeTourTracker !== 'undefined' && activeTourTracker) {
+        finalizeTourAnalytics('Dropped Off (Tab Hidden)');
+      }
       sendSessionEndBeacon();
     }
   });
@@ -1952,7 +2015,7 @@
               <div class="popup-subtitle">${loc.floor} ${loc.details ? `• ${loc.details}` : ''}</div>
           
               <div class="popup-actions">
-                <a href="javascript:void(0)" onclick="getDirections(${loc.lat}, ${loc.lng})" class="btn-open-maps">
+                <a href="javascript:void(0)" onclick="getDirections(${loc.lat}, ${loc.lng}, '${safeNameForAttr}', 'Saved')" class="btn-open-maps">
                   Directions
                 </a>
                 
@@ -1990,6 +2053,18 @@
   let currentTourStops = [];
   let currentTourIndex = 0;
   let isTourActive = false;
+  let activeTourTracker = null;
+
+  function finalizeTourAnalytics(status) {
+    if (!activeTourTracker) return;
+    const endTimeStr = formatCurrentISTTime();
+    const durationSec = Math.max(1, Math.round((Date.now() - activeTourTracker.startMs) / 1000));
+    const stepLabel = `${activeTourTracker.furthestStep}/${activeTourTracker.totalSteps}`;
+
+    const meta = `Status: ${status} | Step: ${stepLabel} | Start: ${activeTourTracker.startTime} | End: ${endTimeStr} | Duration: ${durationSec}s`;
+    logBehaviorEvent('TOUR_ENDED', activeTourTracker.category, meta, 'Tour', true);
+    activeTourTracker = null;
+  }
 
   // SEQUENTIAL IMAGES CYCLING FOR TOUR PILLS
   const tourImages = [
@@ -2072,6 +2147,13 @@
 
     currentTourIndex = 0;
     isTourActive = true;
+    activeTourTracker = {
+      category: categoryName,
+      totalSteps: currentTourStops.length,
+      furthestStep: 1,
+      startMs: Date.now(),
+      startTime: formatCurrentISTTime()
+    };
 
     // Push history state to capture back-button during active tour
     window.history.pushState({ inActiveTour: true }, '', window.location.href);
@@ -2095,6 +2177,10 @@
     const textGroup = document.querySelector('.tour-modal-text-group');
 
     if (currentTourIndex >= currentTourStops.length) {
+      if (activeTourTracker) {
+        activeTourTracker.furthestStep = activeTourTracker.totalSteps;
+        finalizeTourAnalytics('Completed');
+      }
       document.getElementById('tourStepBadge').innerText = "Thank You!";
       document.getElementById('tourModalTitle').innerText = "🎉 Hope you enjoyed the tour!";
       document.getElementById('tourModalDesc').innerHTML = `
@@ -2114,6 +2200,10 @@
     const nextBtn = document.getElementById('btnTourNext');
     if (prevBtn) prevBtn.style.display = 'flex';
     if (nextBtn) nextBtn.style.display = 'flex';
+
+    if (activeTourTracker) {
+      activeTourTracker.furthestStep = Math.max(activeTourTracker.furthestStep, currentTourIndex + 1);
+    }
 
     const stop = currentTourStops[currentTourIndex];
     const bName = stop['Building Name'] || stop.BuildingName || stop.Loc_ID;
@@ -2156,6 +2246,9 @@
   }
 
   function exitCampusTour() {
+    if (activeTourTracker) {
+      finalizeTourAnalytics('Dropped Off');
+    }
     isTourActive = false;
     document.getElementById('tourFloatingModal').style.display = 'none';
     
@@ -2223,7 +2316,7 @@
       if (!isNearMeLoaded) {
         showScreenLoader();
       } else if (activeNearMeCategory) {
-        filterNearMe(activeNearMeCategory);
+        filterNearMe(activeNearMeCategory, true);
       }
     } else if (!isNearMeLoaded) {
       // Hide loader if the user switches away before the sheet finishes loading
@@ -2720,7 +2813,7 @@
       if (nearMeBar && nearMeBar.style.display === 'flex') {
         hideScreenLoader();
         if (activeNearMeCategory) {
-          filterNearMe(activeNearMeCategory);
+          filterNearMe(activeNearMeCategory, true);
         }
       }
     },
@@ -2809,9 +2902,13 @@
     });
   }
 
-  function filterNearMe(category) {
+  function filterNearMe(category, isInitialAutoLoad = false) {
     activeNearMeCategory = category;
     clearMarkers();
+
+    if (!isInitialAutoLoad) {
+      logBehaviorEvent('NEAR_ME_PILL', category, '', 'Near Me');
+    }
 
     // Highlight active pill dynamically
     document.querySelectorAll('#nearMePillsGrid .nearme-pill').forEach(pill => {
@@ -2855,7 +2952,7 @@
             <div class="popup-subtitle">${loc.Floor || 'Ground Floor'} ${loc.Details ? `• ${loc.Details}` : ''}</div>
         
             <div class="popup-actions">
-              <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
+              <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng}, '${safeNameForAttr}', 'Near Me')" class="btn-open-maps">
                 Directions
               </a>
               
@@ -3366,7 +3463,7 @@
         <h2 class="popup-title">${titleText}</h2>
         <div class="popup-subtitle">${subtitleHtml}</div>
         <div class="popup-actions">
-          <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng})" class="btn-open-maps">
+          <a href="javascript:void(0)" onclick="getDirections(${lat}, ${lng}, '${safeNameAttr}', 'Home')" class="btn-open-maps">
             Directions
           </a>
           
@@ -3456,6 +3553,7 @@
       });
     }
     if (filtered.length === 0) {
+      logBehaviorEvent('SEARCH_FAILED', rawQuery, `Building Filter: ${selectedBuilding}`, 'Home');
       alert("No matching room found.");
       resetUrlToHome();
       return;
@@ -3488,6 +3586,9 @@
     const newUrl = `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(targetRoomId)}`;
     
     if (!fromUrl) {
+      const destLabel = filtered[0].Room_Name || filtered[0].Room_Number || filtered[0].Room_ID || rawQuery;
+      const method = targetRoom ? 'Dropdown/Saved' : 'Enter Key';
+      logBehaviorEvent('SEARCH_MATCHED', destLabel, `Room_ID: ${targetRoomId} | Filter: ${selectedBuilding} | Method: ${method}`, 'Home');
       window.history.pushState({ path: newUrl }, '', newUrl);
     }
   }
@@ -3505,7 +3606,9 @@
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
 
-  function getDirections(destLat, destLng) {
+  function getDirections(destLat, destLng, destName = 'Unknown Destination', sourcePage = null) {
+    logBehaviorEvent('DIRECTIONS_CLICKED', destName, `${destLat.toFixed(6)}, ${destLng.toFixed(6)}`, sourcePage || getActivePageName());
+
     if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
       alert("Campus paths are still loading. Please try again in a few seconds.");
       return;
