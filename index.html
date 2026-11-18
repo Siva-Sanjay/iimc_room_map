@@ -1603,6 +1603,140 @@ l<!DOCTYPE html>
     }
   }
 
+
+  // ==========================================
+  // 📊 CUSTOM GOOGLE SHEETS ANALYTICS LOGGER
+  // ==========================================
+  const ANALYTICS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyWa1KFB_GYx5eEfOU7MwgNIGjffYc8gAFItINk1czves7vJMT0tIXd5REntF02tiCPBw/exec';
+
+  // Generate or retrieve unique Session ID for this browser/PWA visit
+  function getOrCreateSessionId() {
+    let sid = sessionStorage.getItem('joka_session_id');
+    if (!sid) {
+      sid = 'SES-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
+      sessionStorage.setItem('joka_session_id', sid);
+    }
+    return sid;
+  }
+
+  async function logCustomAnalytics(eventType) {
+    const sessionId = getOrCreateSessionId();
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const appMode = isStandalone ? 'PWA Standalone' : 'Web Browser';
+
+    let ip = 'Unavailable';
+    let city = 'Unknown';
+    let regionIsp = 'N/A';
+
+    // 1. Fetch public IP, City, and Region/ISP
+    try {
+      const ipRes = await fetch('https://ipapi.co/json/');
+      if (ipRes.ok) {
+        const ipData = await ipRes.json();
+        ip = ipData.ip || 'Unavailable';
+        city = ipData.city || 'Unknown';
+        regionIsp = [ipData.region, ipData.org].filter(Boolean).join(', ') || 'N/A';
+      }
+    } catch (e) {
+      try {
+        const fallbackRes = await fetch('https://api.ipify.org?format=json');
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          ip = fallbackData.ip || 'Unavailable';
+        }
+      } catch (_) {}
+    }
+
+    // 2. Capture raw GPS coordinates (if already cached or permission granted)
+    let gpsCoords = 'Not Granted';
+
+    if (typeof cachedUserLocation !== 'undefined' && cachedUserLocation) {
+      gpsCoords = `${cachedUserLocation[0].toFixed(6)}, ${cachedUserLocation[1].toFixed(6)}`;
+    } else if ('permissions' in navigator && navigator.permissions.query) {
+      try {
+        const perm = await navigator.permissions.query({ name: 'geolocation' });
+        if (perm.state === 'granted') {
+          await new Promise((resolve) => {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                gpsCoords = `${pos.coords.latitude.toFixed(6)}, ${pos.coords.longitude.toFixed(6)}`;
+                resolve();
+              },
+              () => resolve(),
+              { enableHighAccuracy: false, timeout: 4000, maximumAge: 60000 }
+            );
+          });
+        }
+      } catch (_) {}
+    }
+
+    // 3. Send payload to Google Apps Script
+    const payload = {
+      type: 'ANALYTICS',
+      sessionId: sessionId,
+      event: eventType,
+      ip: ip,
+      city: city,
+      regionIsp: regionIsp,
+      gpsCoords: gpsCoords,
+      appMode: appMode,
+      userAgent: navigator.userAgent
+    };
+
+    try {
+      fetch(ANALYTICS_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      console.log('Analytics log failed silently:', err);
+    }
+  }
+  
+  // Send SESSION_END beacon when user closes tab, switches app, or locks screen
+  function sendSessionEndBeacon() {
+    const sessionId = sessionStorage.getItem('joka_session_id');
+    if (!sessionId) return;
+
+    const payload = JSON.stringify({
+      type: 'ANALYTICS',
+      sessionId: sessionId,
+      event: 'SESSION_END'
+    });
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
+      navigator.sendBeacon(ANALYTICS_WEBHOOK_URL, blob);
+    } else {
+      fetch(ANALYTICS_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: payload
+      });
+    }
+  }
+
+  // Trigger SESSION_START once when the app opens
+  window.addEventListener('load', () => {
+    if (!sessionStorage.getItem('joka_session_logged')) {
+      sessionStorage.setItem('joka_session_logged', 'true');
+      logCustomAnalytics('SESSION_START');
+    }
+  });
+
+  // Trigger SESSION_END when user leaves/hides the app
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      sendSessionEndBeacon();
+    }
+  });
+  window.addEventListener('pagehide', sendSessionEndBeacon);
+
+
   // SAFE STRING HELPERS FOR HTML ATTRIBUTES & SAVED LIST
   function stripHtml(html) {
     if (!html) return '';
@@ -2159,6 +2293,7 @@ l<!DOCTYPE html>
   }
   window.addEventListener('appinstalled', () => {
     trackEvent('pwa_installed');
+    logCustomAnalytics('PWA_INSTALLED');
   });
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
     trackEvent('app_opened_as_pwa');
