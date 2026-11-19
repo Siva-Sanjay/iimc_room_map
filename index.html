@@ -2952,16 +2952,22 @@
 
       // Combine all category pins + your current location blue dot into one bounding box
       const allPoints = [...boundsPoints, [uLat, uLng]];
-      const bounds = L.latLngBounds(allPoints);
+      // const bounds = L.latLngBounds(allPoints);
 
-      map.flyToBounds(bounds, {
-        paddingTopLeft: [40, 50],    // Prevents top pins from hiding under #nearMeBar
-        paddingBottomRight: [40,50], // Prevents bottom pins from hiding under #bottomNav
-        maxZoom: 19,
-        minZoom: 17,
+      // map.flyToBounds(bounds, {
+      //   paddingTopLeft: [40, 50],    // Prevents top pins from hiding under #nearMeBar
+      //   paddingBottomRight: [40,50], // Prevents bottom pins from hiding under #bottomNav
+      //   maxZoom: 19,
+      //   minZoom: 17,
+      //   animate: true,
+      //   duration: 0.7
+      // });
+
+      map.flyTo( [uLat, uLng], 17, {
         animate: true,
-        duration: 1
+        duration: 0.6
       });
+
     }
 
     if (cachedUserLocation) {
