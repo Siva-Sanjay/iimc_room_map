@@ -1619,16 +1619,6 @@
     return sid;
   }
 
-  // Persistent anonymous Device ID (survives tab closes & app restarts)
-  function getOrCreateDeviceId() {
-    let did = localStorage.getItem('joka_device_id');
-    if (!did) {
-      did = 'DEV-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-      localStorage.setItem('joka_device_id', did);
-    }
-    return did;
-  }
-
   function formatCurrentISTTime() {
     return new Date().toLocaleTimeString('en-IN', {
       timeZone: 'Asia/Kolkata',
@@ -1652,7 +1642,6 @@
   function logBehaviorEvent(eventType, targetName, metadata = '', sourcePage = null, useBeacon = false) {
     const payload = JSON.stringify({
       type: 'EVENT',
-      deviceId: getOrCreateDeviceId(),
       sessionId: getOrCreateSessionId(),
       eventType: eventType,
       targetName: stripHtml(targetName),
@@ -1679,34 +1668,10 @@
 
   async function logCustomAnalytics(eventType) {
     const sessionId = getOrCreateSessionId();
-    const deviceId = getOrCreateDeviceId();
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const appMode = isStandalone ? 'PWA Standalone' : 'Web Browser';
 
-    let ip = 'Unavailable';
-    let city = 'Unknown';
-    let regionIsp = 'N/A';
-
-    // 1. Fetch public IP, City, and Region/ISP
-    try {
-      const ipRes = await fetch('https://ipapi.co/json/');
-      if (ipRes.ok) {
-        const ipData = await ipRes.json();
-        ip = ipData.ip || 'Unavailable';
-        city = ipData.city || 'Unknown';
-        regionIsp = [ipData.region, ipData.org].filter(Boolean).join(', ') || 'N/A';
-      }
-    } catch (e) {
-      try {
-        const fallbackRes = await fetch('https://api.ipify.org?format=json');
-        if (fallbackRes.ok) {
-          const fallbackData = await fallbackRes.json();
-          ip = fallbackData.ip || 'Unavailable';
-        }
-      } catch (_) {}
-    }
-
-    // 2. Capture raw GPS coordinates (if already cached or permission granted)
+    // Capture raw GPS coordinates (if already cached or permission granted)
     let gpsCoords = 'Not Granted';
 
     if (typeof cachedUserLocation !== 'undefined' && cachedUserLocation) {
@@ -1729,15 +1694,11 @@
       } catch (_) {}
     }
 
-    // 3. Send payload to Google Apps Script
+    // Send payload to Google Apps Script
     const payload = {
       type: 'ANALYTICS',
-      deviceId: deviceId,
       sessionId: sessionId,
       event: eventType,
-      ip: ip,
-      city: city,
-      regionIsp: regionIsp,
       gpsCoords: gpsCoords,
       appMode: appMode,
       userAgent: navigator.userAgent
@@ -3799,3 +3760,4 @@
 </script>
 </body>
 </html>
+
