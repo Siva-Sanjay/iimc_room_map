@@ -1810,9 +1810,13 @@
             if (!bgLocationInterval) {
               bgLocationInterval = setInterval(updateBackgroundLocation, 60000);
             }
-          } else if (bgLocationInterval) {
-            clearInterval(bgLocationInterval);
-            bgLocationInterval = null;
+          } else {
+            cachedUserLocation = null;
+            rawUserLocation = null;
+            if (bgLocationInterval) {
+              clearInterval(bgLocationInterval);
+              bgLocationInterval = null;
+            }
           }
         };
       }).catch(() => {});
@@ -1820,6 +1824,81 @@
   }
 
   initLocationTrackingIfGranted();
+
+  // Helper: Resolve user start coordinates based on permission state
+  // - 'granted' -> live GPS (or Main Gate if > 600m outside campus)
+  // - 'prompt'  -> triggers browser permission dialog; falls back to IIM_CENTRE if user denies
+  // - 'denied'  -> immediately uses IIM_CENTRE
+  async function resolveStartLocation({ showLoader = false, alertOnOutside = false } = {}) {
+    const loader = document.getElementById('routeLoader');
+    const loaderText = document.getElementById('loaderText');
+
+    const revealLoader = () => {
+      if (showLoader && loader && loaderText) {
+        loaderText.innerText = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
+        loader.style.display = 'flex';
+      }
+    };
+
+    if (!navigator.geolocation) {
+      return { coords: IIM_CENTRE, usedFallback: true };
+    }
+
+    let permState = 'prompt';
+    if (navigator.permissions && navigator.permissions.query) {
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' });
+        permState = status.state; // 'granted' | 'prompt' | 'denied'
+      } catch (_) {
+        permState = 'prompt';
+      }
+    }
+
+    // If explicitly denied, do NOT hang or show error — immediately use IIM_CENTRE
+    if (permState === 'denied') {
+      cachedUserLocation = null;
+      return { coords: IIM_CENTRE, usedFallback: true };
+    }
+
+    // If 'prompt' or 'granted', request current position (triggers native prompt when 'prompt')
+    revealLoader();
+
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          let uLat = position.coords.latitude;
+          let uLng = position.coords.longitude;
+          rawUserLocation = [uLat, uLng];
+
+          const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
+          let outsideCampus = false;
+
+          if (distanceToCentre > 600) {
+            outsideCampus = true;
+            if (alertOnOutside) {
+              alert("You are outside the IIM Calcutta campus. Starting navigation from the Main Gate.");
+            }
+            uLat = IIM_MAIN_GATE[0];
+            uLng = IIM_MAIN_GATE[1];
+          }
+
+          cachedUserLocation = [uLat, uLng];
+          initLocationTrackingIfGranted();
+          resolve({ coords: [uLat, uLng], usedFallback: false, outsideCampus });
+        },
+        (error) => {
+          // User clicked "Block" / "Deny" on the prompt, or GPS timed out -> fall back to IIM_CENTRE
+          cachedUserLocation = null;
+          resolve({ coords: IIM_CENTRE, usedFallback: true });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: permState === 'granted' ? 15000 : 0
+        }
+      );
+    });
+  }
 
   // CSV URL DATA SOURCES
   const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTMqGQWWtVef47JkjW_yzDHMGSDHibCGHl1alPbr3G_1pzqoY5ojKvxB2Zov8cj2-34BW7I8gGYX4zK/pub?gid=956140635&single=true&output=csv';
@@ -2518,6 +2597,7 @@
         }
 
         cachedUserLocation = [uLat, uLng];
+        initLocationTrackingIfGranted();
 
         if (userLocationMarker) map.removeLayer(userLocationMarker);
 
@@ -2906,12 +2986,12 @@
       }
     });
 
-    function applyUserPosition(uLat, uLng) {
+    function applyUserPosition(uLat, uLng, isFallback = false) {
       if (userLocationMarker) map.removeLayer(userLocationMarker);
       userLocationMarker = L.marker([uLat, uLng], {
         icon: L.divIcon({
           className: 'user-dot',
-          html: `<div style="background:#2563eb; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
+          html: `<div style="background:${isFallback ? '#64748b' : '#2563eb'}; width:16px; height:16px; border-radius:50%; border:3px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);"></div>`
         })
       }).addTo(map);
 
@@ -2921,29 +3001,9 @@
       });
     }
 
-    if (cachedUserLocation) {
-      applyUserPosition(cachedUserLocation[0], cachedUserLocation[1]);
-    } else if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(pos => {
-        let uLat = pos.coords.latitude;
-        let uLng = pos.coords.longitude;
-        rawUserLocation = [uLat, uLng];
-
-        const distanceToCentre = getHaversineDistance(uLat, uLng, IIM_CENTRE[0], IIM_CENTRE[1]);
-        if (distanceToCentre > 600) {
-          uLat = IIM_MAIN_GATE[0];
-          uLng = IIM_MAIN_GATE[1];
-        }
-
-        cachedUserLocation = [uLat, uLng];
-        initLocationTrackingIfGranted();
-        applyUserPosition(uLat, uLng);
-      }, () => {
-        applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
-      });
-    } else {
-      applyUserPosition(IIM_CENTRE[0], IIM_CENTRE[1]);
-    }
+    resolveStartLocation({ showLoader: false, alertOnOutside: false }).then(({ coords, usedFallback }) => {
+      applyUserPosition(coords[0], coords[1], usedFallback);
+    });
   }
 
   /* MATH UTILITIES FOR ROUTING */
@@ -3524,7 +3584,7 @@
     calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
   }
 
-  function getDirections(destLat, destLng, destName = 'Unknown Destination', sourcePage = null) {
+  async function getDirections(destLat, destLng, destName = 'Unknown Destination', sourcePage = null) {
     logBehaviorEvent('DIRECTIONS_CLICKED', destName, `${destLat.toFixed(6)}, ${destLng.toFixed(6)}`, sourcePage || getActivePageName());
 
     if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
@@ -3532,49 +3592,12 @@
       return;
     }
 
-    if (cachedUserLocation) {
-      calculateAndDrawRoute([cachedUserLocation[0], cachedUserLocation[1]], [destLat, destLng]);
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      return;
-    }
-
-    const loader = document.getElementById('routeLoader');
-    const loaderText = document.getElementById('loaderText');
-    if (loader && loaderText) {
-      const randomQuote = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
-      loaderText.innerText = randomQuote;
-      loader.style.display = 'flex';
-    }
-
-    navigator.geolocation.getCurrentPosition((position) => {
-      let userLat = position.coords.latitude;
-      let userLng = position.coords.longitude;
-      rawUserLocation = [userLat, userLng];
-      
-      const distanceToCentre = getHaversineDistance(userLat, userLng, IIM_CENTRE[0], IIM_CENTRE[1]);
-      
-      if (distanceToCentre > 600) {
-        alert("You are outside the IIM Calcutta campus. Starting navigation from the Main Gate.");
-        userLat = IIM_MAIN_GATE[0];
-        userLng = IIM_MAIN_GATE[1];
-      }
-
-      cachedUserLocation = [userLat, userLng];
-      initLocationTrackingIfGranted();
-      
-      calculateAndDrawRoute([userLat, userLng], [destLat, destLng]);
-    }, (error) => {
-      if (loader) loader.style.display = 'none';
-      alert("Could not get your location. Please ensure location permissions are granted.");
-    }, {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+    const { coords } = await resolveStartLocation({
+      showLoader: true,
+      alertOnOutside: true
     });
+
+    calculateAndDrawRoute(coords, [destLat, destLng]);
   }
 
   function calculateAndDrawRoute(userP, destP) {
