@@ -487,6 +487,10 @@
       text-align: center;
       width: calc(100% - 32px);
       max-width: 360px;
+      transition: bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body.nav-sheet-open #manualPickerUI {
+      bottom: 205px;
     }
     #manualPickerUI p {
       margin: 0;
@@ -525,20 +529,190 @@
       height: 4.5em;
       object-fit: contain;
     }
-    .route-eta-badge {
-      background: #3b82f6;
-      color: #ffffff;
-      padding: 6px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-      border: 1.5px solid #ffffff;
-      box-shadow: none;
-      transform: translate(-50%, -50%) scale(0.85);
-      transform-origin: center center;
-      display: inline-block;
+
+    /* ================================================= */
+    /* BOTTOM NAVIGATION ROUTE CARD (WALK & ROAD MODES)  */
+    /* ================================================= */
+    #routeNavSheet {
+      position: absolute;
+      bottom: 65px;
+      left: 0;
+      width: 100%;
+      z-index: 3600;
+      background: #ffffff;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.16);
+      border-top: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 14px 18px 16px 18px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      animation: slideUpNavSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    @keyframes slideUpNavSheet {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .nav-sheet-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .nav-sheet-dest {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      min-width: 0;
+      flex: 1;
+    }
+    .nav-sheet-dest span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-nav-sheet-close {
+      background: transparent;
+      border: none;
+      color: #0f172a;
+      font-size: 20px;
+      line-height: 1;
+      padding: 2px 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+    }
+    .btn-nav-sheet-close:hover {
+      background: #f1f5f9;
+    }
+    .nav-sheet-middle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 2px;
+    }
+    .nav-sheet-eta-group {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      min-width: 0;
+    }
+    .nav-sheet-eta {
+      font-size: 26px;
+      font-weight: 800;
+      color: #1d4ed8;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+    .nav-sheet-dist {
+      font-size: 16px;
+      font-weight: 600;
+      color: #64748b;
+    }
+    .nav-mode-toggles {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+    .nav-mode-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #9ca3af;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0;
+    }
+    .nav-mode-btn.active {
+      background: #2563eb;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+    .nav-mode-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .nav-sheet-bottom-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 30px;
+      margin-top: 2px;
+    }
+    .nav-sheet-mode-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+    }
+    .golf-cart-wrapper {
+      position: relative;
+      display: none;
+    }
+    .btn-call-golf-cart {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #dbeafe;
+      color: #1e3a8a;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .btn-call-golf-cart:hover {
+      background: #bfdbfe;
+    }
+    .golf-cart-popover {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      border-radius: 14px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 155px;
+      z-index: 3700;
+    }
+    .golf-cart-popover.show {
+      display: flex;
+    }
+    .golf-cart-call-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #2563eb;
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 12px;
+      border-radius: 10px;
+      transition: background 0.15s ease;
+    }
+    .golf-cart-call-link:hover {
+      background: #1d4ed8;
+    }
+
     #installToast {
       position: absolute;
       top: 118px;
@@ -654,6 +828,10 @@
 
     .leaflet-bottom {
       bottom: 75px !important;
+      transition: bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    body.nav-sheet-open .leaflet-bottom {
+      bottom: 198px !important;
     }
 
     /* ENHANCED ZOOM & LOCATION BUTTONS STYLING */
@@ -1553,6 +1731,61 @@
 
 <div id="map"></div>
 
+<!-- BOTTOM ROUTE NAVIGATION CARD (WALK / ROAD TOGGLE + CALL GOLF CART) -->
+<div id="routeNavSheet">
+  <div class="nav-sheet-top-row">
+    <div class="nav-sheet-dest">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="1.5" style="flex:0 0 16px;">
+        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+      </svg>
+      <span id="navSheetDestName">Destination</span>
+    </div>
+    <button type="button" class="btn-nav-sheet-close" onclick="closeRouteNavigation()" aria-label="Close directions" title="Close directions">✕</button>
+  </div>
+
+  <div class="nav-sheet-middle-row">
+    <div class="nav-sheet-eta-group">
+      <span id="navSheetEta" class="nav-sheet-eta">-- Min</span>
+      <span id="navSheetDist" class="nav-sheet-dist">(--Km)</span>
+    </div>
+    <div class="nav-mode-toggles">
+      <button type="button" id="btnModeWalk" class="nav-mode-btn active" onclick="switchTravelMode('walk')" aria-label="Walk mode" title="By Walk">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="13.5" cy="4.5" r="2"/>
+          <path d="M14.1 8.5c-.4-.6-1.1-1-1.9-1-.5 0-.9.1-1.3.4L7.5 10v4.5h2V11.2l1.8-1.1-1.3 5.4-3.5 5.5h2.3l2.9-4.5 2.3 2v2.5h2v-3.5l-2.6-2.2.8-3.3 1.7 1.7H19v-2h-2.5l-2.4-2.2z"/>
+        </svg>
+      </button>
+      <button type="button" id="btnModeRoad" class="nav-mode-btn" onclick="switchTravelMode('road')" aria-label="Road / Vehicle mode" title="By Road">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.08 3.11H5.77L6.85 7zM19 17H5v-5h14v5z"/>
+          <circle cx="7.5" cy="14.5" r="1.5"/>
+          <circle cx="16.5" cy="14.5" r="1.5"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-sheet-bottom-row">
+    <span id="navSheetModeLabel" class="nav-sheet-mode-label">By Walk</span>
+    <div id="golfCartWrapper" class="golf-cart-wrapper">
+      <div id="golfCartPopover" class="golf-cart-popover">
+        <a href="tel:+919876543210" class="golf-cart-call-link" onclick="logBehaviorEvent('GOLF_CART_CALL', 'Cart 1', '+919876543210')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          Call Cart 1
+        </a>
+        <a href="tel:+919876543211" class="golf-cart-call-link" onclick="logBehaviorEvent('GOLF_CART_CALL', 'Cart 2', '+919876543211')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+          Call Cart 2
+        </a>
+      </div>
+      <button type="button" class="btn-call-golf-cart" onclick="toggleGolfCartPopover(event)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        Call golf cart
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- 5-TAB BOTTOM NAVIGATION BAR -->
 <nav id="bottomNav">
   <button class="nav-tab active" id="tabHome" onclick="switchTab('home')">
@@ -1825,10 +2058,6 @@
 
   initLocationTrackingIfGranted();
 
-  // Helper: Resolve user start coordinates based on permission state
-  // - 'granted' -> live GPS (or Main Gate if > 600m outside campus)
-  // - 'prompt'  -> triggers browser permission dialog; falls back to IIM_CENTRE if user denies
-  // - 'denied'  -> immediately uses IIM_CENTRE
   async function resolveStartLocation({ showLoader = false, alertOnOutside = false } = {}) {
     const loader = document.getElementById('routeLoader');
     const loaderText = document.getElementById('loaderText');
@@ -1848,19 +2077,17 @@
     if (navigator.permissions && navigator.permissions.query) {
       try {
         const status = await navigator.permissions.query({ name: 'geolocation' });
-        permState = status.state; // 'granted' | 'prompt' | 'denied'
+        permState = status.state;
       } catch (_) {
         permState = 'prompt';
       }
     }
 
-    // If explicitly denied, do NOT hang or show error — immediately use IIM_CENTRE
     if (permState === 'denied') {
       cachedUserLocation = null;
       return { coords: IIM_CENTRE, usedFallback: true };
     }
 
-    // If 'prompt' or 'granted', request current position (triggers native prompt when 'prompt')
     revealLoader();
 
     return new Promise((resolve) => {
@@ -1887,7 +2114,6 @@
           resolve({ coords: [uLat, uLng], usedFallback: false, outsideCampus });
         },
         (error) => {
-          // User clicked "Block" / "Deny" on the prompt, or GPS timed out -> fall back to IIM_CENTRE
           cachedUserLocation = null;
           resolve({ coords: IIM_CENTRE, usedFallback: true });
         },
@@ -2192,6 +2418,7 @@
 
     document.getElementById('bottomNav').classList.add('tour-hidden');
     document.getElementById('nearMeBar').style.display = 'none';
+    closeRouteNavigation(false);
 
     const controls = document.getElementById('controls');
     controls.style.display = 'block';
@@ -2317,6 +2544,8 @@
 
     if (tabName !== 'nearme') {
       clearMarkers();
+    } else {
+      closeRouteNavigation(false);
     }
 
     const panelTour = document.getElementById('panelTour');
@@ -2602,7 +2831,7 @@
         if (userLocationMarker) map.removeLayer(userLocationMarker);
 
         if (activeDestination) {
-          calculateAndDrawRoute([uLat, uLng], [activeDestination.lat, activeDestination.lng]);
+          calculateAndDrawRoute([uLat, uLng], [activeDestination.lat, activeDestination.lng], activeDestination.name);
         } else {
           userLocationMarker = L.marker([uLat, uLng], {
             icon: L.divIcon({
@@ -2676,7 +2905,6 @@
   preloadCampusTiles();
 
   const NEAR_ME_CATEGORIES = [
-   // '🎉 7LF Venues',
     '🍔 Eateries',
     '🚻 Washrooms',    
     '🏪 Stores',
@@ -2691,13 +2919,22 @@
   let isNearMeLoaded = false;
   let activeNearMeCategory = NEAR_ME_CATEGORIES[0];
   let activeMarkers = [];
-  let etaMarker = null;
   
-  let routeGraph = {}; 
-  let allPathSegments = []; 
+  // DUAL-GRAPH ROUTING ENGINE STATE (WALKWAY vs ROAD)
+  let walkGraph = {};
+  let mixedGraph = {};
+  let walkwaySegments = [];
+  let roadSegments = [];
+  let allPathSegments = [];
   let currentRouteLayer = null;
   let userLocationMarker = null;
   let activeDestination = null;
+
+  let calculatedRoutes = {
+    walk: null,
+    road: null
+  };
+  let currentTravelMode = 'walk';
 
   const IIM_MAIN_GATE = [22.444902, 88.297164]; 
   const IIM_CENTRE = [22.444948, 88.302142]; 
@@ -2836,33 +3073,79 @@
     }
   });
 
+  // PARSE PATHWAYS SHEET (Path_Type: 'walkway' | 'road')
   Papa.parse(pathsCsvUrl, {
     download: true,
     header: true,
     skipEmptyLines: true,
     complete: function(results) {
+      walkGraph = {};
+      mixedGraph = {};
+      walkwaySegments = [];
+      roadSegments = [];
+      allPathSegments = [];
+
+      const roadVertices = new Map();
+      const walkVertices = new Map();
+      const WALK_PENALTY_IN_ROAD_MODE = 18.0;
+
       results.data.forEach(row => {
-        if (row.Coordinates_JSON) {
-          try {
-            const coords = JSON.parse(row.Coordinates_JSON);
-            for (let i = 0; i < coords.length - 1; i++) {
-              const p1 = coords[i];
-              const p2 = coords[i+1];
-              
-              const key1 = p1[0] + "," + p1[1];
-              const key2 = p2[0] + "," + p2[1];
-              const dist = getHaversineDistance(p1[0], p1[1], p2[0], p2[1]);
-              
-              if(!routeGraph[key1]) routeGraph[key1] = [];
-              if(!routeGraph[key2]) routeGraph[key2] = [];
-              
-              routeGraph[key1].push({ node: key2, dist: dist });
-              routeGraph[key2].push({ node: key1, dist: dist });
-              
-              allPathSegments.push({ A: p1, B: p2, keyA: key1, keyB: key2 });
+        if (!row.Coordinates_JSON) return;
+        try {
+          const coords = JSON.parse(row.Coordinates_JSON);
+          const rawType = (row.Path_Type || row['Path_Type'] || 'walkway').trim().toLowerCase();
+          const pathType = (rawType === 'road') ? 'road' : 'walkway';
+
+          for (let i = 0; i < coords.length - 1; i++) {
+            const p1 = coords[i];
+            const p2 = coords[i + 1];
+
+            const key1 = p1[0] + "," + p1[1];
+            const key2 = p2[0] + "," + p2[1];
+            const dist = getHaversineDistance(p1[0], p1[1], p2[0], p2[1]);
+
+            if (!mixedGraph[key1]) mixedGraph[key1] = [];
+            if (!mixedGraph[key2]) mixedGraph[key2] = [];
+
+            const weightedCost = (pathType === 'road') ? dist : dist * WALK_PENALTY_IN_ROAD_MODE;
+            mixedGraph[key1].push({ node: key2, cost: weightedCost, dist: dist, type: pathType });
+            mixedGraph[key2].push({ node: key1, cost: weightedCost, dist: dist, type: pathType });
+
+            const segObj = { A: p1, B: p2, keyA: key1, keyB: key2, type: pathType };
+            allPathSegments.push(segObj);
+
+            if (pathType === 'walkway') {
+              if (!walkGraph[key1]) walkGraph[key1] = [];
+              if (!walkGraph[key2]) walkGraph[key2] = [];
+              walkGraph[key1].push({ node: key2, cost: dist, dist: dist, type: 'walkway' });
+              walkGraph[key2].push({ node: key1, cost: dist, dist: dist, type: 'walkway' });
+
+              walkwaySegments.push(segObj);
+              walkVertices.set(key1, p1);
+              walkVertices.set(key2, p2);
+            } else {
+              roadSegments.push(segObj);
+              roadVertices.set(key1, p1);
+              roadVertices.set(key2, p2);
             }
-          } catch(e) { console.error("Error parsing path JSON", e); }
+          }
+        } catch (e) {
+          console.error("Error parsing path JSON", e);
         }
+      });
+
+      // Auto-bridge road & walkway vertices within 6 meters so vehicle mode transitions smoothly into hostels/buildings
+      roadVertices.forEach((rPt, rKey) => {
+        walkVertices.forEach((wPt, wKey) => {
+          if (rKey === wKey) return;
+          const d = getHaversineDistance(rPt[0], rPt[1], wPt[0], wPt[1]);
+          if (d <= 6) {
+            if (!mixedGraph[rKey]) mixedGraph[rKey] = [];
+            if (!mixedGraph[wKey]) mixedGraph[wKey] = [];
+            mixedGraph[rKey].push({ node: wKey, cost: d * WALK_PENALTY_IN_ROAD_MODE, dist: d, type: 'walkway' });
+            mixedGraph[wKey].push({ node: rKey, cost: d * WALK_PENALTY_IN_ROAD_MODE, dist: d, type: 'walkway' });
+          }
+        });
       });
     }
   });
@@ -3017,6 +3300,7 @@
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
   }
+
   function snapPointToSegment(P, A, B) {
     const lat0 = A[0] * Math.PI / 180;
     const kx = Math.cos(lat0) * 111320; 
@@ -3036,40 +3320,385 @@
     const dist = getHaversineDistance(P[0], P[1], projY, projX);
     return { point: [projY, projX], dist: dist, u: u };
   }
-  function runDijkstra(startKey, endKey, graph) {
-    const distances = {};
+
+  function findBestSnap(point, segments) {
+    let best = null;
+    let minDist = Infinity;
+    segments.forEach(seg => {
+      const res = snapPointToSegment(point, seg.A, seg.B);
+      if (res.dist < minDist) {
+        minDist = res.dist;
+        best = { ...res, seg: seg };
+      }
+    });
+    return best;
+  }
+
+  function runDijkstraTyped(startKey, endKey, graph) {
+    const costs = {};
     const prev = {};
+    const prevEdge = {};
     const queue = [];
+
     for (let v in graph) {
-      distances[v] = Infinity;
+      costs[v] = Infinity;
       prev[v] = null;
+      prevEdge[v] = null;
     }
-    distances[startKey] = 0;
-    queue.push({ id: startKey, dist: 0 });
+    costs[startKey] = 0;
+    queue.push({ id: startKey, cost: 0 });
+
     while (queue.length > 0) {
-      queue.sort((a, b) => a.dist - b.dist);
+      queue.sort((a, b) => a.cost - b.cost);
       const current = queue.shift();
       const u = current.id;
       if (u === endKey) break;
-      if (current.dist > distances[u]) continue;
-      if(graph[u]) {
+      if (current.cost > costs[u]) continue;
+
+      if (graph[u]) {
         for (let neighbor of graph[u]) {
-          const alt = distances[u] + neighbor.dist;
-          if (alt < distances[neighbor.node]) {
-            distances[neighbor.node] = alt;
+          const edgeCost = (typeof neighbor.cost === 'number') ? neighbor.cost : neighbor.dist;
+          const alt = costs[u] + edgeCost;
+          if (alt < costs[neighbor.node]) {
+            costs[neighbor.node] = alt;
             prev[neighbor.node] = u;
-            queue.push({ id: neighbor.node, dist: alt });
+            prevEdge[neighbor.node] = neighbor;
+            queue.push({ id: neighbor.node, cost: alt });
           }
         }
       }
     }
-    const path = [];
+
+    const nodes = [];
+    const edges = [];
     let curr = endKey;
     while (curr) {
-      path.unshift(curr);
+      nodes.unshift(curr);
+      if (prevEdge[curr]) {
+        edges.unshift(prevEdge[curr]);
+      }
       curr = prev[curr];
     }
-    return (path.length > 1 || startKey === endKey) ? path : null;
+
+    return (nodes.length > 1 || startKey === endKey) ? { nodes, edges } : null;
+  }
+
+  function computeSingleRoute(userP, destP, mode) {
+    const isRoadMode = (mode === 'road');
+    const baseGraph = isRoadMode ? mixedGraph : walkGraph;
+    const primarySegments = isRoadMode
+      ? (roadSegments.length > 0 ? roadSegments : allPathSegments)
+      : (walkwaySegments.length > 0 ? walkwaySegments : allPathSegments);
+
+    if (Object.keys(baseGraph).length === 0 || primarySegments.length === 0) return null;
+
+    let bestS = findBestSnap(userP, primarySegments);
+    if (isRoadMode && bestS && bestS.dist > 45 && allPathSegments.length > 0) {
+      const anyS = findBestSnap(userP, allPathSegments);
+      if (anyS && anyS.dist < bestS.dist) bestS = anyS;
+    }
+
+    let bestE = findBestSnap(destP, primarySegments);
+    if (isRoadMode && bestE && bestE.dist > 35 && allPathSegments.length > 0) {
+      const anyE = findBestSnap(destP, allPathSegments);
+      if (anyE && anyE.dist < bestE.dist) bestE = anyE;
+    }
+
+    if (!bestS || !bestE) return null;
+
+    const tg = {};
+    for (let k in baseGraph) {
+      tg[k] = [...baseGraph[k]];
+    }
+
+    const kS = bestS.point[0] + "," + bestS.point[1];
+    const kE = bestE.point[0] + "," + bestE.point[1];
+    if (!tg[kS]) tg[kS] = [];
+    if (!tg[kE]) tg[kE] = [];
+
+    const penaltyMultS = (isRoadMode && bestS.seg.type !== 'road') ? 18.0 : 1.0;
+    const dSA = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.A[0], bestS.seg.A[1]);
+    const dSB = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.B[0], bestS.seg.B[1]);
+    tg[kS].push(
+      { node: bestS.seg.keyA, cost: dSA * penaltyMultS, dist: dSA, type: bestS.seg.type },
+      { node: bestS.seg.keyB, cost: dSB * penaltyMultS, dist: dSB, type: bestS.seg.type }
+    );
+    tg[bestS.seg.keyA].push({ node: kS, cost: dSA * penaltyMultS, dist: dSA, type: bestS.seg.type });
+    tg[bestS.seg.keyB].push({ node: kS, cost: dSB * penaltyMultS, dist: dSB, type: bestS.seg.type });
+
+    const penaltyMultE = (isRoadMode && bestE.seg.type !== 'road') ? 18.0 : 1.0;
+    const dEA = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.A[0], bestE.seg.A[1]);
+    const dEB = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.B[0], bestE.seg.B[1]);
+    tg[kE].push(
+      { node: bestE.seg.keyA, cost: dEA * penaltyMultE, dist: dEA, type: bestE.seg.type },
+      { node: bestE.seg.keyB, cost: dEB * penaltyMultE, dist: dEB, type: bestE.seg.type }
+    );
+    tg[bestE.seg.keyA].push({ node: kE, cost: dEA * penaltyMultE, dist: dEA, type: bestE.seg.type });
+    tg[bestE.seg.keyB].push({ node: kE, cost: dEB * penaltyMultE, dist: dEB, type: bestE.seg.type });
+
+    if (bestS.seg.keyA === bestE.seg.keyA && bestS.seg.keyB === bestE.seg.keyB) {
+      const dSE = getHaversineDistance(bestS.point[0], bestS.point[1], bestE.point[0], bestE.point[1]);
+      tg[kS].push({ node: kE, cost: dSE * penaltyMultS, dist: dSE, type: bestS.seg.type });
+      tg[kE].push({ node: kS, cost: dSE * penaltyMultS, dist: dSE, type: bestS.seg.type });
+    }
+
+    const result = runDijkstraTyped(kS, kE, tg);
+    if (!result) return null;
+
+    const coords = result.nodes.map(k => {
+      const pts = k.split(',');
+      return [parseFloat(pts[0]), parseFloat(pts[1])];
+    });
+
+    const typedSegments = [];
+    const startConnectorDist = getHaversineDistance(userP[0], userP[1], coords[0][0], coords[0][1]);
+    if (startConnectorDist > 0.5) {
+      typedSegments.push({
+        coords: [userP, coords[0]],
+        type: 'walkway',
+        dist: startConnectorDist
+      });
+    }
+
+    for (let i = 0; i < result.edges.length; i++) {
+      const edge = result.edges[i];
+      const pStart = coords[i];
+      const pEnd = coords[i + 1];
+      const segType = isRoadMode ? (edge.type || 'walkway') : 'walkway';
+      typedSegments.push({
+        coords: [pStart, pEnd],
+        type: segType,
+        dist: edge.dist
+      });
+    }
+
+    const lastNode = coords[coords.length - 1];
+    const endConnectorDist = getHaversineDistance(lastNode[0], lastNode[1], destP[0], destP[1]);
+    if (endConnectorDist > 0.5) {
+      typedSegments.push({
+        coords: [lastNode, destP],
+        type: 'walkway',
+        dist: endConnectorDist
+      });
+    }
+
+    let totalMeters = 0;
+    let roadMeters = 0;
+    let walkMeters = 0;
+
+    typedSegments.forEach(s => {
+      totalMeters += s.dist;
+      if (s.type === 'road') roadMeters += s.dist;
+      else walkMeters += s.dist;
+    });
+
+    let etaMinutes;
+    if (isRoadMode) {
+      // Campus vehicle speed ~25 km/h (~416 m/min) + walking speed (~83 m/min) for inner hostel stretch
+      etaMinutes = Math.max(1, Math.round((roadMeters / 416) + (walkMeters / 83)) + 1);
+    } else {
+      etaMinutes = Math.max(1, Math.round(totalMeters / 83) + 2);
+    }
+
+    const allLatLngs = [userP, ...coords, destP];
+
+    return {
+      mode,
+      typedSegments,
+      allLatLngs,
+      totalMeters,
+      roadMeters,
+      walkMeters,
+      etaMinutes
+    };
+  }
+
+  function renderSelectedRouteMode(mode, shouldFitBounds = false) {
+    const routeData = calculatedRoutes[mode];
+    if (!routeData) return;
+
+    currentTravelMode = mode;
+
+    if (currentRouteLayer) {
+      if (Array.isArray(currentRouteLayer)) {
+        currentRouteLayer.forEach(l => map.removeLayer(l));
+      } else {
+        map.removeLayer(currentRouteLayer);
+      }
+      currentRouteLayer = null;
+    }
+
+    // Group consecutive segments of identical type ('road' vs 'walkway') for clean rendering
+    const mergedGroups = [];
+    routeData.typedSegments.forEach(seg => {
+      const lastGroup = mergedGroups[mergedGroups.length - 1];
+      if (lastGroup && lastGroup.type === seg.type) {
+        lastGroup.coords.push(seg.coords[1]);
+      } else {
+        mergedGroups.push({
+          type: seg.type,
+          coords: [seg.coords[0], seg.coords[1]]
+        });
+      }
+    });
+
+    const layers = [];
+    mergedGroups.forEach(group => {
+      if (group.type === 'road') {
+        // Solid thin road line with subtle white border
+        const roadCasing = L.polyline(group.coords, {
+          color: '#ffffff',
+          weight: 7,
+          opacity: 0.95,
+          lineCap: 'round',
+          lineJoin: 'round',
+          renderer: canvasRenderer
+        });
+        const roadCore = L.polyline(group.coords, {
+          color: '#2563eb',
+          weight: 4.5,
+          opacity: 1,
+          lineCap: 'round',
+          lineJoin: 'round',
+          renderer: canvasRenderer
+        });
+        roadCasing.addTo(map);
+        roadCore.addTo(map);
+        layers.push(roadCasing, roadCore);
+      } else {
+        // Dotted walkway line
+        const dotWeight = 5;
+        const borderThickness = 1.5;
+        const whiteWeight = dotWeight + (borderThickness * 2);
+        const whiteBorderLayer = L.polyline(group.coords, {
+          color: '#ffffff',
+          weight: whiteWeight,
+          opacity: 1,
+          dashArray: '1, 10',
+          lineCap: 'round',
+          lineJoin: 'round',
+          renderer: canvasRenderer
+        });
+        const blueDotLayer = L.polyline(group.coords, {
+          color: '#3b82f6',
+          weight: dotWeight,
+          opacity: 1,
+          dashArray: '1, 10',
+          lineCap: 'round',
+          lineJoin: 'round',
+          renderer: canvasRenderer
+        });
+        whiteBorderLayer.addTo(map);
+        blueDotLayer.addTo(map);
+        layers.push(whiteBorderLayer, blueDotLayer);
+      }
+    });
+
+    currentRouteLayer = layers;
+
+    // Update Bottom Navigation Sheet UI
+    const destNameEl = document.getElementById('navSheetDestName');
+    const etaEl = document.getElementById('navSheetEta');
+    const distEl = document.getElementById('navSheetDist');
+    const modeLabelEl = document.getElementById('navSheetModeLabel');
+    const walkBtn = document.getElementById('btnModeWalk');
+    const roadBtn = document.getElementById('btnModeRoad');
+    const golfCartWrapper = document.getElementById('golfCartWrapper');
+    const golfCartPopover = document.getElementById('golfCartPopover');
+
+    if (destNameEl && activeDestination) {
+      destNameEl.textContent = stripHtml(activeDestination.name || 'Destination');
+    }
+    if (etaEl) {
+      etaEl.textContent = `${routeData.etaMinutes} Min`;
+    }
+    if (distEl) {
+      const kmVal = (routeData.totalMeters / 1000).toFixed(1);
+      distEl.textContent = `(${kmVal}Km)`;
+    }
+    if (modeLabelEl) {
+      modeLabelEl.textContent = (mode === 'road') ? 'By Road' : 'By Walk';
+    }
+    if (walkBtn) {
+      walkBtn.classList.toggle('active', mode === 'walk');
+      walkBtn.disabled = !calculatedRoutes.walk;
+    }
+    if (roadBtn) {
+      roadBtn.classList.toggle('active', mode === 'road');
+      roadBtn.disabled = !calculatedRoutes.road;
+    }
+    if (golfCartWrapper) {
+      golfCartWrapper.style.display = (mode === 'road') ? 'block' : 'none';
+    }
+    if (golfCartPopover) {
+      golfCartPopover.classList.remove('show');
+    }
+
+    const navSheet = document.getElementById('routeNavSheet');
+    if (navSheet) {
+      navSheet.style.display = 'flex';
+      document.body.classList.add('nav-sheet-open');
+    }
+
+    if (shouldFitBounds && routeData.allLatLngs.length > 0) {
+      const routeBounds = L.latLngBounds(routeData.allLatLngs);
+      map.fitBounds(routeBounds, {
+        paddingTopLeft: [45, 95],
+        paddingBottomRight: [45, 210]
+      });
+    }
+  }
+
+  function switchTravelMode(mode) {
+    if (!calculatedRoutes[mode]) return;
+    logBehaviorEvent('TRAVEL_MODE_SWITCHED', mode.toUpperCase(), activeDestination ? activeDestination.name : '', getActivePageName());
+    renderSelectedRouteMode(mode, false);
+  }
+
+  function toggleGolfCartPopover(event) {
+    if (event) event.stopPropagation();
+    const pop = document.getElementById('golfCartPopover');
+    if (pop) {
+      pop.classList.toggle('show');
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#golfCartWrapper')) {
+      const pop = document.getElementById('golfCartPopover');
+      if (pop) pop.classList.remove('show');
+    }
+  });
+
+  function closeRouteNavigation(resetDestination = true) {
+    if (currentRouteLayer) {
+      if (Array.isArray(currentRouteLayer)) {
+        currentRouteLayer.forEach(l => map.removeLayer(l));
+      } else {
+        map.removeLayer(currentRouteLayer);
+      }
+      currentRouteLayer = null;
+    }
+    if (userLocationMarker) {
+      map.removeLayer(userLocationMarker);
+      userLocationMarker = null;
+    }
+
+    const navSheet = document.getElementById('routeNavSheet');
+    if (navSheet) navSheet.style.display = 'none';
+    document.body.classList.remove('nav-sheet-open');
+
+    const pop = document.getElementById('golfCartPopover');
+    if (pop) pop.classList.remove('show');
+
+    document.getElementById('centerCrosshair').style.display = 'none';
+    document.getElementById('manualPickerUI').style.display = 'none';
+
+    calculatedRoutes = { walk: null, road: null };
+    currentTravelMode = 'walk';
+    if (resetDestination) {
+      activeDestination = null;
+    }
   }
 
   window.addEventListener('popstate', (event) => {
@@ -3182,25 +3811,7 @@
   function clearMarkers() {
     activeMarkers.forEach(m => map.removeLayer(m));
     activeMarkers = [];
-    
-    if (userLocationMarker) {
-      map.removeLayer(userLocationMarker);
-      userLocationMarker = null;
-    }
-    
-    if (etaMarker) {
-      map.removeLayer(etaMarker);
-      etaMarker = null;
-    }
-    if (currentRouteLayer) {
-      if (Array.isArray(currentRouteLayer)) {
-        currentRouteLayer.forEach(l => map.removeLayer(l));
-      } else {
-        map.removeLayer(currentRouteLayer);
-      }
-      currentRouteLayer = null;
-    }
-    activeDestination = null;
+    closeRouteNavigation(true);
   }
 
   function normalizeText(text) {
@@ -3581,13 +4192,16 @@
     if (!activeDestination) return;
     const centerLatLng = map.getCenter();
     
-    calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng]);
+    calculateAndDrawRoute([centerLatLng.lat, centerLatLng.lng], [activeDestination.lat, activeDestination.lng], activeDestination.name);
   }
 
   async function getDirections(destLat, destLng, destName = 'Unknown Destination', sourcePage = null) {
+    // Close the location popup while keeping the destination marker clickable
+    map.closePopup();
+
     logBehaviorEvent('DIRECTIONS_CLICKED', destName, `${destLat.toFixed(6)}, ${destLng.toFixed(6)}`, sourcePage || getActivePageName());
 
-    if (Object.keys(routeGraph).length === 0 || allPathSegments.length === 0) {
+    if (allPathSegments.length === 0) {
       alert("Campus paths are still loading. Please try again in a few seconds.");
       return;
     }
@@ -3597,11 +4211,13 @@
       alertOnOutside: true
     });
 
-    calculateAndDrawRoute(coords, [destLat, destLng]);
+    calculateAndDrawRoute(coords, [destLat, destLng], destName);
   }
 
-  function calculateAndDrawRoute(userP, destP) {
-    activeDestination = { lat: destP[0], lng: destP[1] };
+  function calculateAndDrawRoute(userP, destP, destName = null) {
+    const resolvedName = destName || (activeDestination && activeDestination.name) || 'Destination';
+    activeDestination = { lat: destP[0], lng: destP[1], name: resolvedName };
+
     const loader = document.getElementById('routeLoader');
     if (loader && loader.style.display !== 'flex') {
       loader.style.display = 'flex';
@@ -3610,19 +4226,26 @@
         loaderText.innerText = loadingQuotes[Math.floor(Math.random() * loadingQuotes.length)];
       }
     }
-    if (currentRouteLayer) {
-      if (Array.isArray(currentRouteLayer)) {
-        currentRouteLayer.forEach(l => map.removeLayer(l));
-      } else {
-        map.removeLayer(currentRouteLayer);
-      }
-      currentRouteLayer = null;
+
+    if (userLocationMarker) {
+      map.removeLayer(userLocationMarker);
+      userLocationMarker = null;
     }
-    if (etaMarker) {
-      map.removeLayer(etaMarker);
-      etaMarker = null;
+
+    // Calculate BOTH walk route (walkway-only) and road route (road preferred + walkway connector)
+    const walkRoute = computeSingleRoute(userP, destP, 'walk');
+    const roadRoute = computeSingleRoute(userP, destP, 'road');
+
+    if (!walkRoute && !roadRoute) {
+      if (loader) loader.style.display = 'none';
+      alert("Could not calculate a path. Make sure your paths network is fully connected.");
+      return;
     }
-    if (userLocationMarker) map.removeLayer(userLocationMarker);
+
+    calculatedRoutes = {
+      walk: walkRoute,
+      road: roadRoute
+    };
 
     const sourceIcon = L.divIcon({
       className: 'custom-source-marker',
@@ -3638,101 +4261,10 @@
       iconAnchor: [16, 16]
     });
     userLocationMarker = L.marker(userP, { icon: sourceIcon }).addTo(map);
-    let bestS = null, bestE = null;
-    let minDistS = Infinity, minDistE = Infinity;
-    allPathSegments.forEach(seg => {
-      const resS = snapPointToSegment(userP, seg.A, seg.B);
-      if (resS.dist < minDistS) { minDistS = resS.dist; bestS = { ...resS, seg: seg }; }
-      
-      const resE = snapPointToSegment(destP, seg.A, seg.B);
-      if (resE.dist < minDistE) { minDistE = resE.dist; bestE = { ...resE, seg: seg }; }
-    });
 
-    if (!bestS || !bestE) {
-      if (loader) loader.style.display = 'none';
-      alert("Unable to snap to campus path network.");
-      return;
-    }
+    const initialMode = walkRoute ? 'walk' : 'road';
+    renderSelectedRouteMode(initialMode, true);
 
-    const tg = {};
-    for(let k in routeGraph) { tg[k] = [...routeGraph[k]]; }
-    const kS = bestS.point[0]+","+bestS.point[1];
-    const kE = bestE.point[0]+","+bestE.point[1];
-    tg[kS] = [];
-    tg[kE] = [];
-    const dSA = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.A[0], bestS.seg.A[1]);
-    const dSB = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.B[0], bestS.seg.B[1]);
-    tg[kS].push({node: bestS.seg.keyA, dist: dSA}, {node: bestS.seg.keyB, dist: dSB});
-    tg[bestS.seg.keyA].push({node: kS, dist: dSA});
-    tg[bestS.seg.keyB].push({node: kS, dist: dSB});
-    const dEA = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.A[0], bestE.seg.A[1]);
-    const dEB = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.B[0], bestE.seg.B[1]);
-    tg[kE].push({node: bestE.seg.keyA, dist: dEA}, {node: bestE.seg.keyB, dist: dEB});
-    tg[bestE.seg.keyA].push({node: kE, dist: dEA});
-    tg[bestE.seg.keyB].push({node: kE, dist: dEB});
-    if (bestS.seg.keyA === bestE.seg.keyA && bestS.seg.keyB === bestE.seg.keyB) {
-      const dSE = getHaversineDistance(bestS.point[0], bestS.point[1], bestE.point[0], bestE.point[1]);
-      tg[kS].push({node: kE, dist: dSE});
-      tg[kE].push({node: kS, dist: dSE});
-    }
-    const pathKeys = runDijkstra(kS, kE, tg);
-    if(!pathKeys) {
-      if (loader) loader.style.display = 'none';
-      alert("Could not calculate a path. Make sure your paths network is fully connected.");
-      return;
-    }
-    const latlngs = [userP];
-    pathKeys.forEach(k => {
-      const pts = k.split(',');
-      latlngs.push([parseFloat(pts[0]), parseFloat(pts[1])]);
-    });
-    latlngs.push(destP);
-
-    const dotWeight = 5;
-    const borderThickness = 1.5;
-    const whiteWeight = dotWeight + (borderThickness * 2);
-    const whiteBorderLayer = L.polyline(latlngs, {
-      color: '#ffffff',
-      weight: whiteWeight,
-      opacity: 1,
-      dashArray: '1, 10', 
-      lineCap: 'round',    
-      lineJoin: 'round',
-      renderer: canvasRenderer
-    });
-    const blueDotLayer = L.polyline(latlngs, {
-      color: '#3b82f6',
-      weight: dotWeight,
-      opacity: 1,
-      dashArray: '1, 10', 
-      lineCap: 'round',    
-      lineJoin: 'round',
-      renderer: canvasRenderer
-    });
-    currentRouteLayer = [whiteBorderLayer, blueDotLayer];
-    whiteBorderLayer.addTo(map);
-    blueDotLayer.addTo(map);
-
-    let totalDistanceMeters = 0;
-    for (let i = 0; i < latlngs.length - 1; i++) {
-      totalDistanceMeters += getHaversineDistance(
-        latlngs[i][0], latlngs[i][1], 
-        latlngs[i+1][0], latlngs[i+1][1]
-      );
-    }
-    const walkingMinutes = Math.max(1, Math.round(totalDistanceMeters / 83)) + 2;
-    const midIndex = Math.floor(latlngs.length / 2);
-    const midPointCoord = latlngs[midIndex];
-    const etaIcon = L.divIcon({
-      className: 'eta-icon-wrapper',
-      html: `<div class="route-eta-badge">🚶‍♂️ ${walkingMinutes} min (${Math.round(totalDistanceMeters)} m)</div>`,
-      iconSize: [0, 0],
-      iconAnchor: [0, 0]
-    });
-    etaMarker = L.marker(midPointCoord, { icon: etaIcon }).addTo(map);
-
-    const routeBounds = L.latLngBounds(latlngs);
-    map.fitBounds(routeBounds, { padding: [50, 50] });
     if (loader) loader.style.display = 'none';
   }
 
