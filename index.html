@@ -3070,7 +3070,7 @@
 
       const roadVertices = new Map();
       const walkVertices = new Map();
-      const WALK_PENALTY_IN_ROAD_MODE = 18.0;
+      const WALK_PENALTY_IN_ROAD_MODE = 50.0;
 
       results.data.forEach(row => {
         if (!row.Coordinates_JSON) return;
@@ -3130,6 +3130,31 @@
           }
         });
       });
+
+      // Also bridge walkway vertices that touch the middle of a road segment (within 6m)
+      walkVertices.forEach((wPt, wKey) => {
+        roadSegments.forEach(rSeg => {
+          const snap = snapPointToSegment(wPt, rSeg.A, rSeg.B);
+          if (snap.dist <= 6 && snap.u > 0.01 && snap.u < 0.99) {
+            const bridgeKey = snap.point[0] + "," + snap.point[1];
+            if (!mixedGraph[bridgeKey]) mixedGraph[bridgeKey] = [];
+            if (!mixedGraph[wKey]) mixedGraph[wKey] = [];
+
+            const dA = getHaversineDistance(snap.point[0], snap.point[1], rSeg.A[0], rSeg.A[1]);
+            const dB = getHaversineDistance(snap.point[0], snap.point[1], rSeg.B[0], rSeg.B[1]);
+
+            mixedGraph[bridgeKey].push(
+              { node: rSeg.keyA, cost: dA, dist: dA, type: 'road' },
+              { node: rSeg.keyB, cost: dB, dist: dB, type: 'road' },
+              { node: wKey, cost: snap.dist * WALK_PENALTY_IN_ROAD_MODE, dist: snap.dist, type: 'walkway' }
+            );
+            mixedGraph[rSeg.keyA].push({ node: bridgeKey, cost: dA, dist: dA, type: 'road' });
+            mixedGraph[rSeg.keyB].push({ node: bridgeKey, cost: dB, dist: dB, type: 'road' });
+            mixedGraph[wKey].push({ node: bridgeKey, cost: snap.dist * WALK_PENALTY_IN_ROAD_MODE, dist: snap.dist, type: 'walkway' });
+          }
+        });
+      });
+      
     }
   });
 
@@ -3369,22 +3394,28 @@
   function computeSingleRoute(userP, destP, mode) {
     const isRoadMode = (mode === 'road');
     const baseGraph = isRoadMode ? mixedGraph : walkGraph;
-    const primarySegments = isRoadMode
+    const startSegments = isRoadMode
       ? (roadSegments.length > 0 ? roadSegments : allPathSegments)
       : (walkwaySegments.length > 0 ? walkwaySegments : allPathSegments);
 
-    if (Object.keys(baseGraph).length === 0 || primarySegments.length === 0) return null;
+    if (Object.keys(baseGraph).length === 0 || allPathSegments.length === 0) return null;
 
-    let bestS = findBestSnap(userP, primarySegments);
-    if (isRoadMode && bestS && bestS.dist > 45 && allPathSegments.length > 0) {
-      const anyS = findBestSnap(userP, allPathSegments);
-      if (anyS && anyS.dist < bestS.dist) bestS = anyS;
+    // 1. Snap Start: prefer roads in Road mode; fall back to walkways if starting in a pedestrian zone
+    let bestS = findBestSnap(userP, startSegments);
+    if (isRoadMode && (!bestS || bestS.dist > 45) && walkwaySegments.length > 0) {
+      const walkS = findBestSnap(userP, walkwaySegments);
+      if (walkS && (!bestS || walkS.dist < bestS.dist)) bestS = walkS;
     }
 
-    let bestE = findBestSnap(destP, primarySegments);
-    if (isRoadMode && bestE && bestE.dist > 35 && allPathSegments.length > 0) {
-      const anyE = findBestSnap(destP, allPathSegments);
-      if (anyE && anyE.dist < bestE.dist) bestE = anyE;
+    // 2. Snap Destination: ALWAYS prefer walkways first so roads never jump directly across buildings/lawns
+    let bestE = (walkwaySegments.length > 0)
+      ? findBestSnap(destP, walkwaySegments)
+      : findBestSnap(destP, allPathSegments);
+
+    // Only fall back to a road if no walkway exists within 50m of the destination
+    if ((!bestE || bestE.dist > 50) && roadSegments.length > 0) {
+      const roadE = findBestSnap(destP, roadSegments);
+      if (roadE && (!bestE || roadE.dist < bestE.dist)) bestE = roadE;
     }
 
     if (!bestS || !bestE) return null;
@@ -3399,7 +3430,7 @@
     if (!tg[kS]) tg[kS] = [];
     if (!tg[kE]) tg[kE] = [];
 
-    const penaltyMultS = (isRoadMode && bestS.seg.type !== 'road') ? 18.0 : 1.0;
+    const penaltyMultS = (isRoadMode && bestS.seg.type !== 'road') ? 50.0 : 1.0;
     const dSA = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.A[0], bestS.seg.A[1]);
     const dSB = getHaversineDistance(bestS.point[0], bestS.point[1], bestS.seg.B[0], bestS.seg.B[1]);
     tg[kS].push(
@@ -3409,7 +3440,7 @@
     tg[bestS.seg.keyA].push({ node: kS, cost: dSA * penaltyMultS, dist: dSA, type: bestS.seg.type });
     tg[bestS.seg.keyB].push({ node: kS, cost: dSB * penaltyMultS, dist: dSB, type: bestS.seg.type });
 
-    const penaltyMultE = (isRoadMode && bestE.seg.type !== 'road') ? 18.0 : 1.0;
+    const penaltyMultE = (isRoadMode && bestE.seg.type !== 'road') ? 50.0 : 1.0;
     const dEA = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.A[0], bestE.seg.A[1]);
     const dEB = getHaversineDistance(bestE.point[0], bestE.point[1], bestE.seg.B[0], bestE.seg.B[1]);
     tg[kE].push(
