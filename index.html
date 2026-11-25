@@ -596,7 +596,6 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-top: 2px;
     }
     .nav-sheet-eta-group {
       display: flex;
@@ -607,7 +606,7 @@
     .nav-sheet-eta {
       font-size: 26px;
       font-weight: 800;
-      color: #1d4ed8;
+      color: #00248a;
       letter-spacing: -0.5px;
       line-height: 1.1;
     }
@@ -637,7 +636,7 @@
       padding: 0;
     }
     .nav-mode-btn.active {
-      background: #2563eb;
+      background: #00248a;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
     }
     .nav-mode-btn:disabled {
@@ -649,10 +648,9 @@
       align-items: center;
       justify-content: space-between;
       min-height: 30px;
-      margin-top: 2px;
     }
     .nav-sheet-mode-label {
-      font-size: 14px;
+      font-size: 18px;
       font-weight: 500;
       color: #475569;
     }
@@ -665,6 +663,7 @@
       align-items: center;
       gap: 6px;
       background: #dbeafe;
+      text-decoration: none;
       color: #1e3a8a;
       border: 1px solid #bfdbfe;
       border-radius: 10px;
@@ -695,23 +694,7 @@
     .golf-cart-popover.show {
       display: flex;
     }
-    .golf-cart-call-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: #2563eb;
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 9px 12px;
-      border-radius: 10px;
-      transition: background 0.15s ease;
-    }
-    .golf-cart-call-link:hover {
-      background: #1d4ed8;
-    }
+    
 
     #installToast {
       position: absolute;
@@ -1745,7 +1728,7 @@
 
   <div class="nav-sheet-middle-row">
     <div class="nav-sheet-eta-group">
-      <span id="navSheetEta" class="nav-sheet-eta">-- Min</span>
+      <span id="navSheetEta" class="nav-sheet-eta">-- Minutes</span>
       <span id="navSheetDist" class="nav-sheet-dist">(--Km)</span>
     </div>
     <div class="nav-mode-toggles">
@@ -3555,8 +3538,8 @@
           renderer: canvasRenderer
         });
         const roadCore = L.polyline(group.coords, {
-          color: '#2563eb',
-          weight: 4.5,
+          color: '#3b82f6',
+          weight: 4,
           opacity: 1,
           lineCap: 'round',
           lineJoin: 'round',
@@ -3610,7 +3593,7 @@
       destNameEl.textContent = stripHtml(activeDestination.name || 'Destination');
     }
     if (etaEl) {
-      etaEl.textContent = `${routeData.etaMinutes} Min`;
+      etaEl.textContent = `${routeData.etaMinutes} Minutes`;
     }
     if (distEl) {
       const kmVal = (routeData.totalMeters / 1000).toFixed(1);
