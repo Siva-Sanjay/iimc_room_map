@@ -2503,7 +2503,7 @@
   }
 
   // --- 5-TAB ROUTING & STATE ENGINE ---
-  function switchTab(tabName, pushToHistory = true) {
+  function switchTab(tabName, pushToHistory = true, skipAutoFilter = false) {
     if (isTourActive) return;
 
     const tabs = ['home', 'nearme', 'tour', 'saved', 'about'];
@@ -2557,7 +2557,7 @@
     if (tabName === 'nearme') {
       if (!isNearMeLoaded) {
         showScreenLoader();
-      } else if (activeNearMeCategory) {
+      } else if (!skipAutoFilter && activeNearMeCategory) {
         filterNearMe(activeNearMeCategory, true);
       }
     } else if (!isNearMeLoaded) {
@@ -2569,8 +2569,13 @@
 
   function initTabFromUrl() {
     const path = window.location.pathname.replace('/', '').toLowerCase();
+    const hasRoomParam = new URLSearchParams(window.location.search).has('room');
     if (['nearme', 'tour', 'saved', 'about'].includes(path)) {
-      switchTab(path, false);
+      if (path === 'nearme' && hasRoomParam) {
+        switchTab('nearme', false, true);
+      } else {
+        switchTab(path, false);
+      }
     } else {
       switchTab('home', false);
     }
@@ -3041,12 +3046,19 @@
       allNearMeItems = results.data;
       isNearMeLoaded = true;
 
+      const path = window.location.pathname.replace('/', '').toLowerCase();
+      const hasRoomParam = new URLSearchParams(window.location.search).has('room');
       const nearMeBar = document.getElementById('nearMeBar');
       if (nearMeBar && nearMeBar.style.display === 'flex') {
         hideScreenLoader();
-        if (activeNearMeCategory) {
+        if (path === 'nearme' && hasRoomParam) {
+          checkUrlSearchParam();
+        } else if (activeNearMeCategory) {
           filterNearMe(activeNearMeCategory, true);
         }
+      } else if (path === 'nearme' && hasRoomParam) {
+        hideScreenLoader();
+        checkUrlSearchParam();
       }
     },
     error: function(err) {
@@ -3204,7 +3216,7 @@
     });
   }
 
-  function filterNearMe(category, isInitialAutoLoad = false) {
+  function filterNearMe(category, isInitialAutoLoad = false, skipUserFly = false) {
     activeNearMeCategory = category;
     clearMarkers();
 
@@ -3286,10 +3298,12 @@
         })
       }).addTo(map);
 
-      map.flyTo([uLat, uLng], 17, {
-        animate: true,
-        duration: 0.6
-      });
+      if (!skipUserFly) {
+        map.flyTo([uLat, uLng], 17, {
+          animate: true,
+          duration: 0.6
+        });
+      }
     }
 
     resolveStartLocation({ showLoader: false, alertOnOutside: false }).then(({ coords, usedFallback }) => {
@@ -3722,7 +3736,17 @@
     }
 
     const path = window.location.pathname.replace('/', '').toLowerCase();
-    if (['nearme', 'tour', 'saved', 'about'].includes(path)) {
+    const urlParamsPop = new URLSearchParams(window.location.search);
+    if (path === 'nearme') {
+      if (urlParamsPop.has('room')) {
+        switchTab('nearme', false, true);
+        checkUrlSearchParam();
+      } else {
+        switchTab('nearme', false);
+      }
+      return;
+    }
+    if (['tour', 'saved', 'about'].includes(path)) {
       switchTab(path, false);
       return;
     }
@@ -3883,25 +3907,82 @@
       resetUrlToHome();
       return;
     }
+
+    const path = window.location.pathname.replace('/', '').toLowerCase();
     const urlParams = new URLSearchParams(window.location.search);
     const roomParam = urlParams.get('room');
-    if (roomParam) {
-      const searchInput = document.getElementById('search');
-      if (searchInput) {
-        const cleanParam = normalizeText(roomParam);
-        
-        const matchedRoom = allRooms.find(r => 
-          normalizeText(r.Room_ID) === cleanParam || 
-          normalizeText(r.Room_Number || r['Room Number']) === cleanParam ||
-          normalizeText(r.Room_Name) === cleanParam
-        );
-        if (matchedRoom) {
-          searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || matchedRoom.Room_Name || roomParam;
-          performSearch(false, matchedRoom);
-        } else {
-          searchInput.value = roomParam;
-          performSearch();
+    if (!roomParam) return;
+
+    const cleanParam = normalizeText(roomParam);
+
+    // 1. If URL has /nearme -> search ONLY in allNearMeItems
+    if (path === 'nearme') {
+      if (!isNearMeLoaded) return;
+
+      const matchedNearMe = allNearMeItems.find(item =>
+        normalizeText(item.Loc_ID) === cleanParam ||
+        normalizeText(item.Room_Name) === cleanParam
+      );
+
+      if (!matchedNearMe) {
+        alert("No matching Near Me location found.");
+        switchTab('nearme', true);
+        return;
+      }
+
+      const rawCat = (matchedNearMe.Category || '').trim();
+      const matchedPillCat = NEAR_ME_CATEGORIES.find(
+        c => c.trim().toLowerCase() === rawCat.toLowerCase()
+      ) || rawCat;
+
+      if (matchedPillCat) {
+        activeNearMeCategory = matchedPillCat;
+      }
+
+      // Open Near Me tab, highlight relevant pill, and show all points in that category
+      switchTab('nearme', false, true);
+      filterNearMe(activeNearMeCategory, true, true);
+
+      // Fly to the specific location in the URL and open its popup
+      const lat = parseFloat(matchedNearMe.Latitude);
+      const lng = parseFloat(matchedNearMe.Longitude);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        const targetMarker = activeMarkers.find(m => {
+          const ll = m.getLatLng();
+          return Math.abs(ll.lat - lat) < 1e-6 && Math.abs(ll.lng - lng) < 1e-6;
+        });
+
+        const zoomLevel = 20;
+        const targetPoint = map.project([lat, lng], zoomLevel);
+        const offsetPoint = L.point(targetPoint.x, targetPoint.y - 100);
+        const offsetLatLng = map.unproject(offsetPoint, zoomLevel);
+
+        map.flyTo(offsetLatLng, zoomLevel, {
+          animate: true,
+          duration: 1.0
+        });
+
+        if (targetMarker) {
+          setTimeout(() => targetMarker.openPopup(), 450);
         }
+      }
+      return;
+    }
+
+    // 2. Otherwise -> search in the main Rooms/Places sheet
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+      const matchedRoom = allRooms.find(r => 
+        normalizeText(r.Room_ID) === cleanParam || 
+        normalizeText(r.Room_Number || r['Room Number']) === cleanParam ||
+        normalizeText(r.Room_Name) === cleanParam
+      );
+      if (matchedRoom) {
+        searchInput.value = matchedRoom.Room_Number || matchedRoom['Room Number'] || matchedRoom.Room_Name || roomParam;
+        performSearch(false, matchedRoom);
+      } else {
+        searchInput.value = roomParam;
+        performSearch();
       }
     }
   }
