@@ -1970,17 +1970,25 @@
   window.addEventListener('pagehide', sendSessionEndBeacon);
 
   // SAFE STRING HELPERS FOR HTML ATTRIBUTES & SAVED LIST
-  function stripHtml(html) {
-    if (!html) return '';
-    return String(html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+ // function stripHtml(html) {
+ //   if (!html) return '';
+ //   return String(html).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+ // }
+
+    function escapeJsAttr(str) {
+    if (str === null || str === undefined) return '';
+      
+    return String(str)
+      .replace(/\\/g, '\\u005c')
+      .replace(/&/g, '\\u0026')
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/"/g, '\\u0022')
+      .replace(/'/g, '\\u0027')
+      .replace(/\r/g, '\\r') 
+      .replace(/\n/g, '\\n');
   }
 
-  function escapeJsAttr(str) {
-    return stripHtml(str)
-      .replace(/\\/g, '\\\\')
-      .replace(/'/g, "\\'")
-      .replace(/"/g, '&quot;');
-  }
 
   function isPlaceCategory(row) {
     return (row && row.Category ? row.Category.trim().toLowerCase() : '') === 'place';
