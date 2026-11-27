@@ -18,6 +18,10 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
   
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;600;700&display=swap" rel="stylesheet">
   
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Leaflet Rotate Plugin for touch/compass rotation -->
@@ -39,7 +43,7 @@
   <!-- ========================================== -->
   <!-- PWA Manifest & Theme Color -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#00012e"> 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Joka Compass">
@@ -87,6 +91,87 @@
       width: auto;
       max-width: 90%;
     }
+
+    /* splash loader */
+    #startupSplash {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background-color: #00012e;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    transition: opacity 0.45s ease, visibility 0.45s ease;
+  }
+
+  #startupSplash.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .startup-title {
+    font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    margin: 0;
+  }
+
+  .j-track,
+  .j-outline,
+  .compass-ring {
+    fill: none;
+    stroke-linecap: butt;
+    stroke-linejoin: miter;
+  }
+
+  .j-track,
+  .j-outline {
+    stroke-width: 2.8;
+  }
+
+  .j-track {
+    stroke: rgba(59, 130, 246, 0.2);
+  }
+
+  .compass-ring {
+    stroke: rgba(59, 130, 246, 0.14);
+    stroke-width: 2.2;
+  }
+
+  .j-outline {
+    stroke: #ffffff;
+    stroke-dasharray: 35 65;
+    stroke-dashoffset: 100;
+    animation: loopOutline 1.6s linear infinite;
+  }
+
+  .compass-needle {
+    transform-origin: 50px 78px;
+    rotate: 30deg;
+    scale: 1.8;
+    animation: compassWobble 2.5s ease-in-out infinite;
+  }
+
+  @keyframes loopOutline {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes compassWobble {
+    0%   { transform: rotate(-45deg); }
+    18%  { transform: rotate(115deg); }
+    36%  { transform: rotate(-20deg); }
+    54%  { transform: rotate(68deg); }
+    72%  { transform: rotate(-95deg); }
+    88%  { transform: rotate(35deg); }
+    100% { transform: rotate(-45deg); }
+  }
+
+  /* splash loader done */
 
     .header-branding {
       margin-bottom: 0px;
@@ -1517,6 +1602,20 @@
 </head>
 <body>
 
+  <div id="startupSplash" role="status" aria-label="Loading Joka Compass">
+    <svg viewBox="0 0 100 125" width="120" height="150" aria-hidden="true">
+      <path class="j-track" d="M 69 14 H 86 V 78 A 36 36 0 1 1 26.86 50.42 L 37.79 63.45 A 19 19 0 1 0 69 78 Z" />
+      <path class="compass-ring" d="M 37.79 63.45 A 19 19 0 0 1 69 78" />
+      <path class="j-outline" pathLength="100" d="M 69 14 H 86 V 78 A 36 36 0 1 1 26.86 50.42 L 37.79 63.45 A 19 19 0 1 0 69 78 Z" />
+      <g class="compass-needle">
+        <polygon points="50,62.5 53.4,78 46.6,78" fill="#ef4444" />
+        <polygon points="50,93.5 53.4,78 46.6,78" fill="#3b82f6" />
+        <circle cx="50" cy="78" r="2" fill="#ffffff" />
+      </g>
+    </svg>
+    <p class="startup-title">Joka Compass</p>
+  </div>
+
 <!-- FULL SCREEN LOADER HTML -->
 <div id="routeLoader">
   <div class="lottie-loader-container">
@@ -2383,7 +2482,14 @@
     skipEmptyLines: true,
     complete: function(results) {
       allTourItems = results.data;
+      isTourLoaded = true;
       renderTourSelectionButtons();
+      checkInitialDataReady();
+    },
+    error: function(err) {
+      console.error('Error loading Tour sheet:', err);
+      isTourLoaded = true;
+      checkInitialDataReady();
     }
   });
 
@@ -3047,15 +3153,26 @@
     updatePlaceLabelsStyle();
   }
 
+ let isTourLoaded = false;
+  let splashDismissed = false;
+
+  function dismissStartupSplash() {
+    if (splashDismissed) return;
+    splashDismissed = true;
+    const splash = document.getElementById('startupSplash');
+    if (!splash) return;
+    splash.classList.add('hidden');
+    setTimeout(() => splash.remove(), 500);
+  }
+
   function checkInitialDataReady() {
-    if (isRoomsLoaded && isPathsLoaded && initialLoadToken !== null) {
-      finishCancellableLoader(initialLoadToken);
-      initialLoadToken = null;
+    if (isRoomsLoaded && isPathsLoaded && isNearMeLoaded && isTourLoaded) {
+      requestAnimationFrame(() => dismissStartupSplash());
     }
   }
 
-  // Show Lottie loader right at initial app startup until core CSV data (Rooms & Paths) finishes loading
-  initialLoadToken = startCancellableLoader(true, false);
+  // Safety fallback so slow/offline networks never trap the user on the splash screen
+  setTimeout(dismissStartupSplash, 6000);
 
   Papa.parse(sheetCsvUrl, {
     download: true,
@@ -3114,6 +3231,7 @@
     complete: function(results) {
       allNearMeItems = results.data;
       isNearMeLoaded = true;
+      checkInitialDataReady();
 
       const nearMeBar = document.getElementById('nearMeBar');
       if (nearMeBar && nearMeBar.style.display === 'flex') {
@@ -3127,6 +3245,7 @@
     error: function(err) {
       console.error('Error loading Near Me sheet:', err);
       isNearMeLoaded = true;
+      checkInitialDataReady();
       hideScreenLoader();
     }
   });
