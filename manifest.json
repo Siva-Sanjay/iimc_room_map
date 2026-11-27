@@ -1,21 +1,29 @@
 {
   "name": "Joka Compass",
-  "short_name": "JokaCompass",
+  "short_name": "Joka Compass",
   "description": "Campus Room Map & Navigation for IIM Calcutta",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f2f2f7",
-  "theme_color": "#0f172a",
+  "background_color": "#00012e",
+  "theme_color": "#00012e",
   "icons": [
     {
-      "src": "compass_icon.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "compass_icon.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/app_icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
